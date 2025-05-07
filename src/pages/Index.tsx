@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -24,8 +23,8 @@ const Index = () => {
                 Crie sua página personalizada, ofereça recompensas exclusivas e fortaleça sua conexão com os fãs.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button className="mimo-button text-lg px-8 py-6 h-auto w-full sm:w-auto">
-                  Criar minha página
+                <Button className="mimo-button text-lg px-8 py-6 h-auto w-full sm:w-auto" asChild>
+                  <Link to="/cadastro">Criar minha página</Link>
                 </Button>
                 <Button variant="outline" className="border-mimo-primary text-mimo-primary hover:bg-mimo-primary hover:text-white text-lg px-8 py-6 h-auto w-full sm:w-auto">
                   Ver exemplos
@@ -149,8 +148,8 @@ const Index = () => {
             <p className="text-xl mb-8 text-white/90">
               Crie sua página personalizada em minutos e comece a receber o apoio dos seus fãs.
             </p>
-            <Button className="bg-white text-mimo-primary hover:bg-white/90 text-lg px-8 py-6 h-auto">
-              Criar minha página
+            <Button className="bg-white text-mimo-primary hover:bg-white/90 text-lg px-8 py-6 h-auto" asChild>
+              <Link to="/cadastro">Criar minha página</Link>
             </Button>
           </div>
         </section>
