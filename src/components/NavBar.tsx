@@ -22,6 +22,9 @@ const NavBar = () => {
             <Link to="/explorar" className="text-foreground/70 hover:text-foreground transition-colors">
               Explorar
             </Link>
+            <Link to="/dashboard" className="text-foreground/70 hover:text-foreground transition-colors">
+              Dashboard
+            </Link>
             <Button variant="outline" className="border-mimo-primary text-mimo-primary hover:text-white hover:bg-mimo-primary" asChild>
               <Link to="/login"><LogIn className="h-4 w-4 mr-2" /> Entrar</Link>
             </Button>
