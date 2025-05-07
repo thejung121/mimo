@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import RewardPage from "./pages/RewardPage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import EditCreatorPage from "./pages/EditCreatorPage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/criador/:username" element={<CreatorPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/editar-pagina" element={<EditCreatorPage />} />
           <Route path="/recompensa/:rewardId" element={<RewardPage />} />
           <Route path="/cadastro" element={<Register />} />
           <Route path="/login" element={<Login />} />

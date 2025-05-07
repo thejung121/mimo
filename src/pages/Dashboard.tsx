@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import ReceivedMimo from '@/components/ReceivedMimo';
@@ -233,9 +234,11 @@ const Dashboard = () => {
                 <LinkIcon className="h-4 w-4" />
                 <span>Copiar link</span>
               </Button>
-              <Button variant="outline" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>Editar página</span>
+              <Button variant="outline" className="flex items-center gap-2" asChild>
+                <Link to="/editar-pagina">
+                  <FileText className="h-4 w-4" />
+                  <span>Editar página</span>
+                </Link>
               </Button>
             </CardContent>
           </Card>
