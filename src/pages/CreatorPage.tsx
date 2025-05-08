@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { MimoPackage, Creator } from '@/types/creator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart } from 'lucide-react';
+import { Heart, Eye } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
 import CreatorHero from '@/components/CreatorHero';
 import CreatorStickyHeader from '@/components/CreatorStickyHeader';
@@ -86,8 +85,7 @@ const CreatorPage = () => {
       price: value,
       features: ["Valor personalizado", "Mensagem exclusiva"],
       highlighted: false,
-      media: [],
-      isHidden: false
+      media: []
     };
     
     setSelectedPackage(customPackage);

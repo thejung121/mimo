@@ -42,8 +42,11 @@ import {
   CreditCard,
   LogOut,
   Settings,
-  Shield
+  Shield,
+  Eye
 } from 'lucide-react';
+import { Creator } from '@/types/creator';
+import { getCreatorData } from '@/services/creatorDataService';
 
 // Mock data
 const mockMimos = [

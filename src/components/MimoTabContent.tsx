@@ -1,4 +1,3 @@
-
 import React, { memo, useState } from 'react';
 import type { MimoPackage } from '@/types/creator';
 import { Heart, Check, Gift } from 'lucide-react';
@@ -132,7 +131,7 @@ const CustomValueMimo = ({ onSubmit }: { onSubmit: (value: number) => void }) =>
   );
 };
 
-const MimoTabContent = ({ mimoPackages, onSelectPackage }: MimoTabContentProps) => {
+const MimoTabContent = ({ mimoPackages, onSelectPackage, onCustomValue }: MimoTabContentProps) => {
   const [showCustomForm, setShowCustomForm] = useState(false);
   
   const handleCustomValue = (value: number) => {
@@ -143,8 +142,7 @@ const MimoTabContent = ({ mimoPackages, onSelectPackage }: MimoTabContentProps) 
       price: value,
       features: ["Valor personalizado", "Mensagem exclusiva"],
       highlighted: false,
-      media: [],
-      isHidden: false
+      media: []
     };
     
     onSelectPackage(customPackage);

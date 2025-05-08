@@ -1,4 +1,3 @@
-
 // Creator related types
 export interface SocialLink {
   type: 'instagram' | 'twitter' | 'youtube' | 'website' | 'privacy';
@@ -29,6 +28,7 @@ export interface MimoPackage {
   features: string[];
   highlighted: boolean;
   media: MediaItem[];
+  isHidden?: boolean; // Adding the missing property
 }
 
 // Interface for form data
