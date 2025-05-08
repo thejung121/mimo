@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Instagram, Twitter, Youtube, Globe, Plus, Settings, Heart, DollarSign, Upload, Trash2 } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Globe, Plus, Settings, Heart, DollarSign, Upload, Trash2, Image, FileImage, Eye } from 'lucide-react';
 import MimoPackageForm from '@/components/MimoPackageForm';
+import MediaUploader from '@/components/MediaUploader';
 
 // Mock data - inicialmente carregamos os dados do criador atual
 const initialCreator = {
@@ -22,6 +23,7 @@ const initialCreator = {
   socialLinks: [
     { type: 'instagram' as const, url: 'https://instagram.com/mariafernanda' },
     { type: 'twitter' as const, url: 'https://twitter.com/mariafernanda' },
+    { type: 'youtube' as const, url: 'https://youtube.com/mariafernanda' },
     { type: 'website' as const, url: 'https://mariafernanda.com' }
   ]
 };
@@ -37,7 +39,8 @@ const initialMimoPackages = [
       'Mensagem personalizada',
       'Acesso por 30 dias'
     ],
-    highlighted: false
+    highlighted: false,
+    media: []
   },
   {
     id: 2,
@@ -49,7 +52,15 @@ const initialMimoPackages = [
       'Mensagem personalizada',
       'Acesso por 30 dias'
     ],
-    highlighted: true
+    highlighted: true,
+    media: [
+      { 
+        id: 1,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158',
+        isPreview: true
+      }
+    ]
   },
   {
     id: 3,
@@ -62,9 +73,31 @@ const initialMimoPackages = [
       'Mensagem personalizada',
       'Acesso por 30 dias'
     ],
-    highlighted: false
+    highlighted: false,
+    media: [
+      { 
+        id: 2,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
+        isPreview: false
+      },
+      { 
+        id: 3,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+        isPreview: true
+      }
+    ]
   }
 ];
+
+// Interface para os media items
+interface MediaItem {
+  id: number;
+  type: 'image' | 'video';
+  url: string;
+  isPreview: boolean;
+}
 
 const EditCreatorPage = () => {
   const { toast } = useToast();
@@ -76,6 +109,7 @@ const EditCreatorPage = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState(initialCreator.cover);
   const [avatarPreview, setAvatarPreview] = useState(initialCreator.avatar);
+  const [showPreview, setShowPreview] = useState(false);
   
   // Estado para novo pacote de mimo
   const [showNewPackageForm, setShowNewPackageForm] = useState(false);
@@ -83,7 +117,8 @@ const EditCreatorPage = () => {
     title: '',
     price: 0,
     features: [''],
-    highlighted: false
+    highlighted: false,
+    media: [] as MediaItem[]
   });
 
   // Handler para atualizar o criador
@@ -172,12 +207,84 @@ const EditCreatorPage = () => {
   };
 
   // Handler para alterações nos campos do novo pacote
-  const handlePackageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handlePackageChange = (field: string, value: any) => {
     setNewPackage(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : name === 'price' ? Number(value) : value
+      [field]: value
     }));
+  };
+
+  // Handler para adicionar mídia ao pacote
+  const handleAddMedia = (packageId: number | null, media: MediaItem) => {
+    if (packageId === null) {
+      // Adicionando mídia ao novo pacote
+      setNewPackage(prev => ({
+        ...prev,
+        media: [...prev.media, media]
+      }));
+    } else {
+      // Adicionando mídia a um pacote existente
+      setMimoPackages(prev => prev.map(pkg => 
+        pkg.id === packageId ? { 
+          ...pkg, 
+          media: [...pkg.media, media] 
+        } : pkg
+      ));
+    }
+    
+    toast({
+      title: "Mídia adicionada",
+      description: "A mídia foi adicionada ao pacote com sucesso.",
+    });
+  };
+
+  // Handler para remover mídia do pacote
+  const handleRemoveMedia = (packageId: number | null, mediaId: number) => {
+    if (packageId === null) {
+      // Removendo mídia do novo pacote
+      setNewPackage(prev => ({
+        ...prev,
+        media: prev.media.filter(m => m.id !== mediaId)
+      }));
+    } else {
+      // Removendo mídia de um pacote existente
+      setMimoPackages(prev => prev.map(pkg => 
+        pkg.id === packageId ? { 
+          ...pkg, 
+          media: pkg.media.filter(m => m.id !== mediaId) 
+        } : pkg
+      ));
+    }
+    
+    toast({
+      title: "Mídia removida",
+      description: "A mídia foi removida do pacote com sucesso.",
+    });
+  };
+
+  // Handler para definir uma mídia como preview
+  const handleTogglePreview = (packageId: number | null, mediaId: number) => {
+    if (packageId === null) {
+      // Alternando preview no novo pacote
+      setNewPackage(prev => ({
+        ...prev,
+        media: prev.media.map(m => ({
+          ...m,
+          isPreview: m.id === mediaId ? !m.isPreview : m.isPreview
+        }))
+      }));
+    } else {
+      // Alternando preview em um pacote existente
+      setMimoPackages(prev => prev.map(pkg => 
+        pkg.id === packageId ? { 
+          ...pkg, 
+          media: pkg.media.map(m => ({
+            ...m,
+            isPreview: m.id === mediaId ? !m.isPreview : m.isPreview
+          }))
+        } : pkg
+      ));
+    }
   };
 
   // Handler para salvar um novo pacote
@@ -213,7 +320,7 @@ const EditCreatorPage = () => {
     }
 
     // Cria novo pacote com ID único
-    const newId = Math.max(0, ...mimoPackages.map(p => p.id)) + 1;
+    const newId = Math.max(0, ...mimoPackages.map(p => p.id || 0)) + 1;
     const packageToAdd = {
       ...newPackage,
       id: newId,
@@ -228,7 +335,8 @@ const EditCreatorPage = () => {
       title: '',
       price: 0,
       features: [''],
-      highlighted: false
+      highlighted: false,
+      media: []
     });
     
     setShowNewPackageForm(false);
@@ -283,383 +391,368 @@ const EditCreatorPage = () => {
         <div className="mimo-container max-w-5xl mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">Editar Minha Página</h1>
-            <Button 
-              className="mimo-button"
-              onClick={handleSaveAll}
-            >
-              Salvar Alterações
-            </Button>
+            
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setShowPreview(!showPreview)}
+              >
+                <Eye className="h-4 w-4" />
+                {showPreview ? 'Ocultar Preview' : 'Ver Preview'}
+              </Button>
+              
+              <Button 
+                className="mimo-button"
+                onClick={handleSaveAll}
+              >
+                Salvar Alterações
+              </Button>
+            </div>
           </div>
           
-          <Tabs defaultValue="profile" className="mb-8">
-            <TabsList className="mb-6 w-full justify-start">
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" /> Perfil
-              </TabsTrigger>
-              <TabsTrigger value="packages" className="flex items-center gap-2">
-                <Heart className="h-4 w-4" /> Pacotes de Mimo
-              </TabsTrigger>
-            </TabsList>
-            
-            {/* Tab de Perfil */}
-            <TabsContent value="profile" className="space-y-6">
+          {showPreview ? (
+            <div className="mb-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>Imagens do Perfil</CardTitle>
-                  <CardDescription>Atualize sua imagem de perfil e capa da página.</CardDescription>
+                  <CardTitle>Preview da sua página</CardTitle>
+                  <CardDescription>Veja como sua página vai aparecer para seus fãs.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Upload da imagem de capa */}
-                  <div>
-                    <h3 className="text-lg font-medium mb-3">Imagem de Capa</h3>
-                    <div className="relative mb-4">
-                      <img 
-                        src={coverPreview} 
-                        alt="Capa" 
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-lg">
-                        <label className="cursor-pointer bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-md hover:bg-white/30 transition-colors">
-                          Alterar Imagem
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleCoverChange}
-                          />
-                        </label>
-                      </div>
-                    </div>
-                    
-                    {/* Upload do avatar */}
-                    <h3 className="text-lg font-medium mb-3">Avatar</h3>
-                    <div className="flex items-center space-x-4">
-                      <div className="relative">
+                <CardContent className="p-0">
+                  <div className="border rounded-lg overflow-hidden">
+                    <iframe 
+                      src={`/criador/${creator.username}`} 
+                      className="w-full h-[600px]" 
+                      title="Preview da página"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Tabs defaultValue="profile" className="mb-8">
+              <TabsList className="mb-6 w-full justify-start">
+                <TabsTrigger value="profile" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" /> Perfil
+                </TabsTrigger>
+                <TabsTrigger value="packages" className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" /> Pacotes de Mimo
+                </TabsTrigger>
+              </TabsList>
+              
+              {/* Tab de Perfil */}
+              <TabsContent value="profile" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Imagens do Perfil</CardTitle>
+                    <CardDescription>Atualize sua imagem de perfil e capa da página.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Upload da imagem de capa */}
+                    <div>
+                      <h3 className="text-lg font-medium mb-3">Imagem de Capa</h3>
+                      <div className="relative mb-4">
                         <img 
-                          src={avatarPreview} 
-                          alt="Avatar" 
-                          className="w-24 h-24 object-cover rounded-full"
+                          src={coverPreview} 
+                          alt="Capa" 
+                          className="w-full h-48 object-cover rounded-lg"
                         />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-full">
-                          <label className="cursor-pointer bg-white/20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-white/30 transition-colors">
-                            <Upload className="h-5 w-5" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+                          <label className="cursor-pointer bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-md hover:bg-white/30 transition-colors">
+                            Alterar Imagem
                             <input
                               type="file"
                               className="hidden"
                               accept="image/*"
-                              onChange={handleAvatarChange}
+                              onChange={handleCoverChange}
                             />
                           </label>
                         </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Clique na imagem para fazer upload de uma nova foto de perfil.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Informações Básicas</CardTitle>
-                  <CardDescription>Edite as informações do seu perfil de criador.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label htmlFor="username" className="block text-sm font-medium mb-1">
-                        Nome de usuário
-                      </label>
-                      <Input
-                        id="username"
-                        name="username"
-                        value={creator.username}
-                        onChange={handleCreatorChange}
-                        className="mimo-input"
-                        placeholder="Seu nome de usuário único"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Este será o link da sua página: mimo.app/criador/<strong>{creator.username}</strong>
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-1">
-                        Nome de exibição
-                      </label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={creator.name}
-                        onChange={handleCreatorChange}
-                        className="mimo-input"
-                        placeholder="Seu nome ou apelido"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="description" className="block text-sm font-medium mb-1">
-                        Bio / Descrição
-                      </label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        value={creator.description}
-                        onChange={handleCreatorChange}
-                        className="mimo-input resize-none"
-                        placeholder="Conte um pouco sobre você para seus fãs"
-                        rows={4}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Redes Sociais</CardTitle>
-                  <CardDescription>Conecte suas redes sociais para que seus fãs possam te acompanhar.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {creator.socialLinks.map((link, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <div className="flex-shrink-0 p-2 rounded-md bg-muted">
-                        {link.type === 'instagram' && <Instagram className="h-5 w-5" />}
-                        {link.type === 'twitter' && <Twitter className="h-5 w-5" />}
-                        {link.type === 'youtube' && <Youtube className="h-5 w-5" />}
-                        {link.type === 'website' && <Globe className="h-5 w-5" />}
                       </div>
                       
-                      <Input
-                        value={link.url}
-                        onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
-                        className="mimo-input"
-                        placeholder={`Seu link do ${link.type}`}
-                      />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-              
-              <div className="flex justify-end">
-                <Button 
-                  onClick={handleSaveProfile}
-                  className="mimo-button"
-                >
-                  Salvar Informações do Perfil
-                </Button>
-              </div>
-            </TabsContent>
-            
-            {/* Tab de Pacotes de Mimo */}
-            <TabsContent value="packages" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Seus Pacotes de Mimo</CardTitle>
-                  <CardDescription>
-                    Gerencie os pacotes que seus fãs podem adquirir para te enviar mimos.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Lista de pacotes existentes */}
-                  <div className="space-y-4">
-                    {mimoPackages.length === 0 && (
-                      <p className="text-center text-muted-foreground py-8">
-                        Você ainda não tem nenhum pacote de mimo. Crie seu primeiro pacote!
-                      </p>
-                    )}
-                    
-                    {mimoPackages.map((pkg) => (
-                      <div key={pkg.id} className="border rounded-lg p-4 flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-medium">{pkg.title}</h3>
-                            {pkg.highlighted && (
-                              <span className="bg-mimo-primary/10 text-mimo-primary text-xs px-2 py-1 rounded">
-                                Destacado
-                              </span>
-                            )}
+                      {/* Upload do avatar */}
+                      <h3 className="text-lg font-medium mb-3">Avatar</h3>
+                      <div className="flex items-center space-x-4">
+                        <div className="relative">
+                          <img 
+                            src={avatarPreview} 
+                            alt="Avatar" 
+                            className="w-24 h-24 object-cover rounded-full"
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-full">
+                            <label className="cursor-pointer bg-white/20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-white/30 transition-colors">
+                              <Upload className="h-5 w-5" />
+                              <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleAvatarChange}
+                              />
+                            </label>
                           </div>
-                          
-                          <p className="font-bold text-lg mb-2">R${pkg.price}</p>
-                          
-                          <ul className="space-y-1">
-                            {pkg.features.map((feature, idx) => (
-                              <li key={idx} className="flex items-center text-sm">
-                                <span className="mr-2 text-mimo-primary">•</span>
-                                <span>{feature}</span>
-                              </li>
-                            ))}
-                          </ul>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Clique na imagem para fazer upload de uma nova foto de perfil.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Informações Básicas</CardTitle>
+                    <CardDescription>Edite as informações do seu perfil de criador.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label htmlFor="username" className="block text-sm font-medium mb-1">
+                          Nome de usuário
+                        </label>
+                        <Input
+                          id="username"
+                          name="username"
+                          value={creator.username}
+                          onChange={handleCreatorChange}
+                          className="mimo-input"
+                          placeholder="Seu nome de usuário único"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Este será o link da sua página: mimo.app/criador/<strong>{creator.username}</strong>
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="name" className="block text-sm font-medium mb-1">
+                          Nome de exibição
+                        </label>
+                        <Input
+                          id="name"
+                          name="name"
+                          value={creator.name}
+                          onChange={handleCreatorChange}
+                          className="mimo-input"
+                          placeholder="Seu nome ou apelido"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="description" className="block text-sm font-medium mb-1">
+                          Bio / Descrição
+                        </label>
+                        <Textarea
+                          id="description"
+                          name="description"
+                          value={creator.description}
+                          onChange={handleCreatorChange}
+                          className="mimo-input resize-none"
+                          placeholder="Conte um pouco sobre você para seus fãs"
+                          rows={4}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Redes Sociais</CardTitle>
+                    <CardDescription>Conecte suas redes sociais para que seus fãs possam te acompanhar.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {creator.socialLinks.map((link, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className="flex-shrink-0 p-2 rounded-md bg-muted">
+                          {link.type === 'instagram' && <Instagram className="h-5 w-5" />}
+                          {link.type === 'twitter' && <Twitter className="h-5 w-5" />}
+                          {link.type === 'youtube' && <Youtube className="h-5 w-5" />}
+                          {link.type === 'website' && <Globe className="h-5 w-5" />}
                         </div>
                         
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditPackage(pkg.id)}
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeletePackage(pkg.id)}
-                            className="text-destructive hover:text-destructive/90"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <Input
+                          value={link.url}
+                          onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
+                          className="mimo-input"
+                          placeholder={`Seu link do ${link.type}`}
+                        />
                       </div>
                     ))}
-                  </div>
-                  
-                  {/* Formulário para adicionar novo pacote */}
-                  {!showNewPackageForm ? (
-                    <div className="flex justify-center">
-                      <Button
-                        onClick={() => setShowNewPackageForm(true)}
-                        className="flex items-center gap-2"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Adicionar Novo Pacote
-                      </Button>
-                    </div>
-                  ) : (
-                    <Card className="border-dashed">
-                      <CardHeader>
-                        <CardTitle>Novo Pacote de Mimo</CardTitle>
-                        <CardDescription>
-                          Defina as características e preço do seu novo pacote.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-1">
-                              Título do pacote
-                            </label>
-                            <Input
-                              name="title"
-                              value={newPackage.title}
-                              onChange={handlePackageChange}
-                              placeholder="ex: Mimo Básico"
-                              className="mimo-input"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium mb-1">
-                              Preço (R$)
-                            </label>
-                            <div className="relative">
-                              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                              <Input
-                                type="number"
-                                name="price"
-                                value={newPackage.price}
-                                onChange={handlePackageChange}
-                                className="pl-10 mimo-input"
-                                min={1}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <label className="block text-sm font-medium">
-                              Características do pacote
-                            </label>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={handleAddFeature}
-                              className="flex items-center gap-1"
-                            >
-                              <Plus className="h-3 w-3" />
-                              Adicionar
-                            </Button>
-                          </div>
-                          
-                          {newPackage.features.map((feature, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                              <Input
-                                value={feature}
-                                onChange={(e) => handleFeatureChange(index, e.target.value)}
-                                placeholder="ex: Foto exclusiva"
-                                className="mimo-input"
-                              />
-                              
-                              {newPackage.features.length > 1 && (
-                                <Button 
-                                  type="button"
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => handleRemoveFeature(index)}
-                                  className="text-destructive hover:text-destructive/90"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id="highlighted"
-                            name="highlighted"
-                            checked={newPackage.highlighted}
-                            onChange={handlePackageChange}
-                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
-                          />
-                          <label htmlFor="highlighted" className="text-sm">
-                            Destacar este pacote na lista (recomendado)
-                          </label>
-                        </div>
-                        
-                        <div className="flex justify-end gap-2 pt-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setShowNewPackageForm(false);
-                              setNewPackage({
-                                title: '',
-                                price: 0,
-                                features: [''],
-                                highlighted: false
-                              });
-                            }}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            className="mimo-button"
-                            onClick={handleSavePackage}
-                          >
-                            Salvar Pacote
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={handleSaveProfile}
+                    className="mimo-button"
+                  >
+                    Salvar Informações do Perfil
+                  </Button>
+                </div>
+              </TabsContent>
               
-              <div className="flex justify-end">
-                <Button 
-                  className="mimo-button"
-                  onClick={handleSaveAll}
-                >
-                  Salvar Todos os Pacotes
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+              {/* Tab de Pacotes de Mimo */}
+              <TabsContent value="packages" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Seus Pacotes de Mimo</CardTitle>
+                    <CardDescription>
+                      Gerencie os pacotes que seus fãs podem adquirir para te enviar mimos.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Lista de pacotes existentes */}
+                    <div className="space-y-6">
+                      {mimoPackages.length === 0 && (
+                        <p className="text-center text-muted-foreground py-8">
+                          Você ainda não tem nenhum pacote de mimo. Crie seu primeiro pacote!
+                        </p>
+                      )}
+                      
+                      {mimoPackages.map((pkg) => (
+                        <div key={pkg.id} className="border rounded-lg overflow-hidden">
+                          <div className="p-4 flex justify-between items-start">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-lg font-medium">{pkg.title}</h3>
+                                {pkg.highlighted && (
+                                  <span className="bg-mimo-primary/10 text-mimo-primary text-xs px-2 py-1 rounded">
+                                    Destacado
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <p className="font-bold text-lg mb-2">R${pkg.price}</p>
+                              
+                              <ul className="space-y-1">
+                                {pkg.features.map((feature, idx) => (
+                                  <li key={idx} className="flex items-center text-sm">
+                                    <span className="mr-2 text-mimo-primary">•</span>
+                                    <span>{feature}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditPackage(pkg.id)}
+                              >
+                                Editar
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeletePackage(pkg.id)}
+                                className="text-destructive hover:text-destructive/90"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Seção de mídia do pacote */}
+                          <div className="border-t bg-muted/50 p-4">
+                            <div className="flex justify-between items-center mb-3">
+                              <h4 className="font-medium">Imagens e vídeos</h4>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                              {pkg.media.map((media) => (
+                                <div 
+                                  key={media.id} 
+                                  className={`relative rounded-md overflow-hidden border ${media.isPreview ? 'border-mimo-primary' : 'border-border'}`}
+                                >
+                                  <img 
+                                    src={media.url} 
+                                    alt={`Mídia ${media.id}`}
+                                    className="w-full h-24 object-cover"
+                                  />
+                                  <div className="absolute top-1 right-1 flex space-x-1">
+                                    <Button
+                                      variant="secondary"
+                                      size="icon"
+                                      className="h-6 w-6 bg-white/80 hover:bg-white border"
+                                      onClick={() => handleTogglePreview(pkg.id, media.id)}
+                                      title={media.isPreview ? "Remover do preview" : "Adicionar ao preview"}
+                                    >
+                                      <Eye className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="secondary"
+                                      size="icon"
+                                      className="h-6 w-6 bg-white/80 hover:bg-white border text-destructive"
+                                      onClick={() => handleRemoveMedia(pkg.id, media.id)}
+                                      title="Remover mídia"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                  {media.isPreview && (
+                                    <div className="absolute bottom-0 left-0 right-0 bg-mimo-primary text-white text-[10px] py-0.5 px-2 text-center">
+                                      Preview
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                              
+                              <MediaUploader onMediaAdd={(media) => handleAddMedia(pkg.id, media)} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Formulário para adicionar novo pacote */}
+                    {!showNewPackageForm ? (
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={() => setShowNewPackageForm(true)}
+                          className="flex items-center gap-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Adicionar Novo Pacote
+                        </Button>
+                      </div>
+                    ) : (
+                      <MimoPackageForm
+                        packageData={newPackage}
+                        onChange={handlePackageChange}
+                        onFeatureChange={handleFeatureChange}
+                        onAddFeature={handleAddFeature}
+                        onRemoveFeature={handleRemoveFeature}
+                        onSave={handleSavePackage}
+                        onCancel={() => {
+                          setShowNewPackageForm(false);
+                          setNewPackage({
+                            title: '',
+                            price: 0,
+                            features: [''],
+                            highlighted: false,
+                            media: []
+                          });
+                        }}
+                        onAddMedia={(media) => handleAddMedia(null, media)}
+                        onRemoveMedia={(mediaId) => handleRemoveMedia(null, mediaId)}
+                        onTogglePreview={(mediaId) => handleTogglePreview(null, mediaId)}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    className="mimo-button"
+                    onClick={handleSaveAll}
+                  >
+                    Salvar Todos os Pacotes
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </main>
       

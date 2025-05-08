@@ -1,17 +1,18 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
+import { Check, FileImage } from 'lucide-react';
 
 interface MimoPackageProps {
   title: string;
   price: number;
   features: string[];
   highlighed?: boolean;
+  previewImageUrl?: string;
   onClick: () => void;
 }
 
-const MimoPackage = ({ title, price, features, highlighed = false, onClick }: MimoPackageProps) => {
+const MimoPackage = ({ title, price, features, highlighed = false, previewImageUrl, onClick }: MimoPackageProps) => {
   return (
     <div 
       className={`mimo-card ${
@@ -20,6 +21,21 @@ const MimoPackage = ({ title, price, features, highlighed = false, onClick }: Mi
           : 'hover:border-mimo-primary/50'
       }`}
     >
+      {/* Preview image */}
+      <div className="mb-2 rounded-t-lg overflow-hidden h-40 bg-muted">
+        {previewImageUrl ? (
+          <img 
+            src={previewImageUrl} 
+            alt={title} 
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full w-full">
+            <FileImage className="h-12 w-12 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+      
       <div className="p-6">
         <h3 className="text-xl font-semibold mb-2">{title}</h3>
         <div className="mb-4">

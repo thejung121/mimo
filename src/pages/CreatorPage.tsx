@@ -12,9 +12,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Image, FileImage } from 'lucide-react';
 
 // Mock data
 const mockCreator = {
@@ -26,11 +35,30 @@ const mockCreator = {
   socialLinks: [
     { type: 'instagram' as const, url: 'https://instagram.com/mariafernanda' },
     { type: 'twitter' as const, url: 'https://twitter.com/mariafernanda' },
+    { type: 'youtube' as const, url: 'https://youtube.com/mariafernanda' },
     { type: 'website' as const, url: 'https://mariafernanda.com' }
   ]
 };
 
-const mimoPackages = [
+// Interface para os media items
+interface MediaItem {
+  id: number;
+  type: 'image' | 'video';
+  url: string;
+  isPreview: boolean;
+}
+
+interface MimoPackageType {
+  id: number;
+  title: string;
+  price: number;
+  features: string[];
+  highlighted: boolean;
+  media: MediaItem[];
+}
+
+// Mock dos pacotes de mimo
+const mimoPackages: MimoPackageType[] = [
   {
     id: 1,
     title: 'Mimo Básico',
@@ -40,7 +68,15 @@ const mimoPackages = [
       'Mensagem personalizada',
       'Acesso por 30 dias'
     ],
-    highlighted: false
+    highlighted: false,
+    media: [
+      { 
+        id: 1,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901',
+        isPreview: true
+      }
+    ]
   },
   {
     id: 2,
@@ -52,7 +88,21 @@ const mimoPackages = [
       'Mensagem personalizada',
       'Acesso por 30 dias'
     ],
-    highlighted: true
+    highlighted: true,
+    media: [
+      { 
+        id: 2,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158',
+        isPreview: true
+      },
+      { 
+        id: 3,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+        isPreview: true
+      }
+    ]
   },
   {
     id: 3,
@@ -65,7 +115,27 @@ const mimoPackages = [
       'Mensagem personalizada',
       'Acesso por 30 dias'
     ],
-    highlighted: false
+    highlighted: false,
+    media: [
+      { 
+        id: 4,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
+        isPreview: false
+      },
+      { 
+        id: 5,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+        isPreview: true
+      },
+      { 
+        id: 6,
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5',
+        isPreview: true
+      }
+    ]
   }
 ];
 
@@ -73,14 +143,16 @@ const CreatorPage = () => {
   const { username } = useParams();
   const { toast } = useToast();
   
-  const [selectedPackage, setSelectedPackage] = useState<any>(null);
+  const [selectedPackage, setSelectedPackage] = useState<MimoPackageType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [userAlias, setUserAlias] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [paymentStep, setPaymentStep] = useState<'preview' | 'payment'>('preview');
 
-  const handleSelectPackage = (pkg: any) => {
+  const handleSelectPackage = (pkg: MimoPackageType) => {
     setSelectedPackage(pkg);
     setDialogOpen(true);
+    setPaymentStep('preview');
   };
 
   const handleSendMimo = () => {
@@ -104,8 +176,11 @@ const CreatorPage = () => {
       setProcessing(false);
       setDialogOpen(false);
       setUserAlias('');
+      setPaymentStep('preview');
     }, 2000);
   };
+
+  const previewMedia = selectedPackage?.media.filter(m => m.isPreview) || [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -131,6 +206,7 @@ const CreatorPage = () => {
                   price={pkg.price}
                   features={pkg.features}
                   highlighed={pkg.highlighted}
+                  previewImageUrl={pkg.media.find(m => m.isPreview)?.url}
                   onClick={() => handleSelectPackage(pkg)}
                 />
               ))}
@@ -148,57 +224,114 @@ const CreatorPage = () => {
             </div>
           </section>
           
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent>
+          <Dialog open={dialogOpen} onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) {
+              setPaymentStep('preview');
+            }
+          }}>
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Enviar Mimo: {selectedPackage?.title}</DialogTitle>
+                <DialogTitle>{paymentStep === 'preview' ? 'Prévia do Mimo' : 'Enviar Mimo'}: {selectedPackage?.title}</DialogTitle>
                 <DialogDescription>
-                  Você está enviando um mimo de R${selectedPackage?.price} para {mockCreator.name}.
+                  {paymentStep === 'preview' ? 'Veja um preview do que você receberá neste pacote.' : `Você está enviando um mimo de R$${selectedPackage?.price} para ${mockCreator.name}.`}
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <p className="text-sm text-foreground/70">
-                    Crie um nome de usuário que será usado como sua identificação e senha para acessar as recompensas.
-                  </p>
-                  <Input
-                    placeholder="Seu nome de usuário"
-                    value={userAlias}
-                    onChange={(e) => setUserAlias(e.target.value)}
-                    className="mimo-input"
-                  />
+              {paymentStep === 'preview' ? (
+                <div className="space-y-4 py-2">
+                  {previewMedia.length > 0 ? (
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {previewMedia.map((media) => (
+                          <CarouselItem key={media.id}>
+                            {media.type === 'image' ? (
+                              <div className="flex justify-center p-1">
+                                <img 
+                                  src={media.url} 
+                                  alt="Preview" 
+                                  className="max-h-[250px] object-contain rounded-md"
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex justify-center items-center bg-muted h-[250px] rounded-md">
+                                <FileImage className="h-12 w-12 text-muted-foreground" />
+                              </div>
+                            )}
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious className="left-0" />
+                      <CarouselNext className="right-0" />
+                    </Carousel>
+                  ) : (
+                    <div className="flex items-center justify-center bg-muted h-[250px] rounded-md">
+                      <div className="text-center text-muted-foreground">
+                        <FileImage className="h-12 w-12 mx-auto mb-2" />
+                        <p>Nenhum preview disponível</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2 bg-muted p-3 rounded-lg">
+                    <h4 className="font-medium text-sm">Este pacote inclui:</h4>
+                    <ul className="space-y-1">
+                      {selectedPackage?.features.map((feature, index) => (
+                        <li key={index} className="text-sm flex items-center">
+                          <span className="mr-2 text-mimo-primary">•</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="flex justify-end gap-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setDialogOpen(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      onClick={() => setPaymentStep('payment')}
+                      className="mimo-button"
+                    >
+                      Continuar (R${selectedPackage?.price})
+                    </Button>
+                  </div>
                 </div>
-                
-                <div className="space-y-2 bg-muted p-3 rounded-lg">
-                  <h4 className="font-medium text-sm">Você receberá:</h4>
-                  <ul className="space-y-1">
-                    {selectedPackage?.features.map((feature: string, index: number) => (
-                      <li key={index} className="text-sm flex items-center">
-                        <span className="mr-2 text-mimo-primary">•</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+              ) : (
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <p className="text-sm text-foreground/70">
+                      Crie um nome de usuário que será usado como sua identificação e senha para acessar as recompensas.
+                    </p>
+                    <Input
+                      placeholder="Seu nome de usuário"
+                      value={userAlias}
+                      onChange={(e) => setUserAlias(e.target.value)}
+                      className="mimo-input"
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end gap-4 mt-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setPaymentStep('preview')}
+                      disabled={processing}
+                    >
+                      Voltar
+                    </Button>
+                    <Button 
+                      onClick={handleSendMimo}
+                      className="mimo-button"
+                      disabled={processing}
+                    >
+                      {processing ? 'Processando...' : 'Confirmar Mimo'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex justify-end gap-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setDialogOpen(false)}
-                  disabled={processing}
-                >
-                  Cancelar
-                </Button>
-                <Button 
-                  onClick={handleSendMimo}
-                  className="mimo-button"
-                  disabled={processing}
-                >
-                  {processing ? 'Processando...' : 'Confirmar Mimo'}
-                </Button>
-              </div>
+              )}
             </DialogContent>
           </Dialog>
         </div>

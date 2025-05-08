@@ -3,7 +3,15 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Plus, Trash2 } from 'lucide-react';
+import { DollarSign, Plus, Trash2, Eye } from 'lucide-react';
+import MediaUploader from './MediaUploader';
+
+interface MediaItem {
+  id: number;
+  type: 'image' | 'video';
+  url: string;
+  isPreview: boolean;
+}
 
 interface MimoPackage {
   id?: number;
@@ -11,6 +19,7 @@ interface MimoPackage {
   price: number;
   features: string[];
   highlighted: boolean;
+  media: MediaItem[];
 }
 
 interface MimoPackageFormProps {
@@ -21,6 +30,9 @@ interface MimoPackageFormProps {
   onRemoveFeature: (index: number) => void;
   onSave: () => void;
   onCancel: () => void;
+  onAddMedia: (media: MediaItem) => void;
+  onRemoveMedia: (mediaId: number) => void;
+  onTogglePreview: (mediaId: number) => void;
 }
 
 const MimoPackageForm = ({
@@ -30,7 +42,10 @@ const MimoPackageForm = ({
   onAddFeature,
   onRemoveFeature,
   onSave,
-  onCancel
+  onCancel,
+  onAddMedia,
+  onRemoveMedia,
+  onTogglePreview
 }: MimoPackageFormProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -117,6 +132,58 @@ const MimoPackageForm = ({
               )}
             </div>
           ))}
+        </div>
+        
+        {/* Nova seção para upload de mídia */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">
+            Imagens e vídeos do pacote
+          </label>
+          <p className="text-xs text-muted-foreground mb-2">
+            Adicione imagens ou vídeos que serão entregues aos seus fãs. Marque alguns como "Preview" para que apareçam na página de venda.
+          </p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {packageData.media.map((media) => (
+              <div 
+                key={media.id} 
+                className={`relative rounded-md overflow-hidden border ${media.isPreview ? 'border-mimo-primary' : 'border-border'}`}
+              >
+                <img 
+                  src={media.url} 
+                  alt={`Mídia ${media.id}`}
+                  className="w-full h-24 object-cover"
+                />
+                <div className="absolute top-1 right-1 flex space-x-1">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-6 w-6 bg-white/80 hover:bg-white border"
+                    onClick={() => onTogglePreview(media.id)}
+                    title={media.isPreview ? "Remover do preview" : "Adicionar ao preview"}
+                  >
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-6 w-6 bg-white/80 hover:bg-white border text-destructive"
+                    onClick={() => onRemoveMedia(media.id)}
+                    title="Remover mídia"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+                {media.isPreview && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-mimo-primary text-white text-[10px] py-0.5 px-2 text-center">
+                    Preview
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            <MediaUploader onMediaAdd={onAddMedia} />
+          </div>
         </div>
         
         <div className="flex items-center space-x-2">
