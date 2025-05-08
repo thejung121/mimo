@@ -28,53 +28,44 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [mediaType, setMediaType] = useState<'image' | 'video' | 'audio'>('image');
 
-  const handleUploadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      return;
-    }
-    
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    // Determine media type from file
-    let type: 'image' | 'video' | 'audio' = 'image';
+  const determineMediaType = (file: File): 'image' | 'video' | 'audio' => {
     if (file.type.startsWith('video/')) {
-      type = 'video';
+      return 'video';
     } else if (file.type.startsWith('audio/')) {
-      type = 'audio';
-    } else if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Formato não suportado",
-        description: "Por favor, faça upload apenas de imagens, vídeos ou áudios.",
-        variant: "destructive"
-      });
+      return 'audio';
+    } 
+    return 'image';
+  };
+
+  const handleUploadFile = (files: FileList) => {
+    if (!files || files.length === 0) {
       return;
     }
     
-    setMediaType(type);
     setUploading(true);
     
     // Simulate upload progress
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 10;
+      progress += 5;
       setUploadProgress(progress);
       
       if (progress >= 100) {
         clearInterval(interval);
         
-        // Create temporary URL for preview
-        const url = URL.createObjectURL(file);
-        
-        // Generate a mock ID for the media
-        const newId = Date.now();
-        
-        onMediaAdd({
-          id: newId,
-          type,
-          url,
-          caption: caption || undefined,
-          isPreview: false
+        // Process each file
+        Array.from(files).forEach((file) => {
+          const type = determineMediaType(file);
+          const url = URL.createObjectURL(file);
+          const newId = Date.now() + Math.floor(Math.random() * 1000);
+          
+          onMediaAdd({
+            id: newId,
+            type,
+            url,
+            caption: caption || undefined,
+            isPreview: false
+          });
         });
         
         setUploading(false);
@@ -83,11 +74,11 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
         setOpen(false);
         
         toast({
-          title: `${type === 'image' ? 'Imagem' : type === 'video' ? 'Vídeo' : 'Áudio'} adicionado`,
-          description: `${type === 'image' ? 'A imagem' : type === 'video' ? 'O vídeo' : 'O áudio'} foi adicionado com sucesso ao seu pacote.`,
+          title: files.length > 1 ? `${files.length} mídias adicionadas` : "Mídia adicionada",
+          description: `${files.length > 1 ? "As mídias foram adicionadas" : "A mídia foi adicionada"} com sucesso ao seu pacote.`,
         });
       }
-    }, 200);
+    }, 100);
   };
 
   const handleAddFromUrl = () => {
@@ -105,14 +96,13 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       new URL(uploadUrl);
       
       // Determine media type from URL extension
-      let type: 'image' | 'video' | 'audio' = 'image';
+      let type: 'image' | 'video' | 'audio' = mediaType;
       if (/\.(mp4|webm|ogg|mov)$/i.test(uploadUrl)) {
         type = 'video';
       } else if (/\.(mp3|wav|ogg|m4a)$/i.test(uploadUrl)) {
         type = 'audio';
-      } else if (!/\.(jpg|jpeg|png|gif|webp)$/i.test(uploadUrl)) {
-        // If not a recognized extension, use the manually selected type
-        type = mediaType;
+      } else if (/\.(jpg|jpeg|png|gif|webp)$/i.test(uploadUrl)) {
+        type = 'image';
       }
       
       // Gerar um ID único para a nova mídia
@@ -158,7 +148,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
           <DialogHeader>
             <DialogTitle>Adicionar mídia</DialogTitle>
             <DialogDescription>
-              Adicione imagens, vídeos ou áudios para o seu pacote de mimo.
+              Adicione imagens, vídeos ou áudios para o seu pacote de mimo. Você pode selecionar múltiplos arquivos.
             </DialogDescription>
           </DialogHeader>
 

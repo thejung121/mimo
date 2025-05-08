@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MimoPackage } from '@/types/creator';
-import { Check, Heart, ImageIcon, Video } from 'lucide-react';
+import { Check, Heart, Image, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MimoTabContentProps {
@@ -14,63 +14,69 @@ interface MimoTabContentProps {
 const MimoTabContent = ({ mimoPackages, onSelectPackage }: MimoTabContentProps) => {
   return (
     <>
-      <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {mimoPackages.map((pkg) => (
           <Card 
             key={pkg.id} 
             className={cn(
-              "overflow-hidden relative rounded-2xl transition-all duration-300 hover:shadow-lg",
+              "overflow-hidden relative rounded-2xl transition-all duration-300 hover:shadow-lg flex flex-col",
               pkg.highlighted ? 
                 "border-2 border-mimo-primary shadow-lg shadow-mimo-primary/20" : 
                 "border border-gray-200 hover:border-mimo-primary/50"
             )}
           >
             {pkg.highlighted && (
-              <div className="absolute top-0 right-0">
+              <div className="absolute top-0 right-0 z-10">
                 <div className="bg-gradient-to-r from-mimo-primary to-mimo-secondary text-white text-xs uppercase font-bold py-1 px-3 rounded-bl-lg">
                   Mais popular
                 </div>
               </div>
             )}
             
-            {pkg.media.find(m => m.isPreview) ? (
-              <div className="h-40 overflow-hidden relative">
-                <img 
-                  src={pkg.media.find(m => m.isPreview)?.url} 
-                  alt={pkg.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/70 to-transparent">
-                  <div className="flex items-center text-white text-sm">
-                    <ImageIcon className="h-4 w-4 mr-1" />
-                    <span>{pkg.media.filter(m => m.type === 'image').length} fotos</span>
-                    {pkg.media.some(m => m.type === 'video') && (
-                      <>
-                        <span className="mx-1">•</span>
-                        <Video className="h-4 w-4 mr-1" />
-                        <span>{pkg.media.filter(m => m.type === 'video').length} vídeos</span>
-                      </>
-                    )}
+            <div className="h-40 overflow-hidden relative">
+              {pkg.media.find(m => m.isPreview) ? (
+                <>
+                  <img 
+                    src={pkg.media.find(m => m.isPreview)?.url} 
+                    alt={pkg.title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      // Fallback for image error
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
+                  />
+                  <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/70 to-transparent">
+                    <div className="flex items-center text-white text-sm">
+                      <Image className="h-4 w-4 mr-1" />
+                      <span>{pkg.media.filter(m => m.type === 'image').length} fotos</span>
+                      {pkg.media.some(m => m.type === 'video') && (
+                        <>
+                          <span className="mx-1">•</span>
+                          <Video className="h-4 w-4 mr-1" />
+                          <span>{pkg.media.filter(m => m.type === 'video').length} vídeos</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  <div className="text-gray-400 text-center">
+                    <Image className="h-10 w-10 mx-auto mb-2" />
+                    <p className="text-sm">Prévia não disponível</p>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <div className="text-gray-400 text-center">
-                  <ImageIcon className="h-10 w-10 mx-auto mb-2" />
-                  <p className="text-sm">Prévia não disponível</p>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
             
-            <div className="p-5">
+            <div className="p-5 flex flex-col flex-grow">
               <h3 className="text-xl font-semibold mb-2">{pkg.title}</h3>
               <p className="text-2xl font-bold mb-4 text-mimo-primary">
                 R${pkg.price}
                 <span className="text-sm text-gray-500 font-normal ml-1">único</span>
               </p>
               
-              <ul className="space-y-2 mb-6">
+              <ul className="space-y-2 mb-6 flex-grow">
                 {pkg.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start">
                     <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
@@ -81,7 +87,7 @@ const MimoTabContent = ({ mimoPackages, onSelectPackage }: MimoTabContentProps) 
               
               <Button 
                 className={cn(
-                  "w-full transition-all",
+                  "w-full transition-all mt-auto",
                   pkg.highlighted ? 
                     "bg-gradient-to-r from-mimo-primary to-mimo-secondary hover:from-mimo-primary/90 hover:to-mimo-secondary/90 text-white" : 
                     "bg-white text-mimo-primary border-2 border-mimo-primary hover:bg-mimo-primary/10"

@@ -67,9 +67,9 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
             
             {mimoPackages.map((pkg) => (
               <div key={pkg.id} className="border rounded-lg overflow-hidden">
-                <div className="p-4 flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2">
+                <div className="p-4 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center flex-wrap gap-2 mb-2">
                       <h3 className="text-lg font-medium">{pkg.title}</h3>
                       {pkg.highlighted && (
                         <span className="bg-mimo-primary/10 text-mimo-primary text-xs px-2 py-1 rounded">
@@ -90,7 +90,7 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
                     </ul>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-2 md:mt-0">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -115,7 +115,7 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
                     <h4 className="font-medium">Mídias do pacote</h4>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {pkg.media.map((media) => (
                       <MediaItemDisplay
                         key={media.id}
@@ -160,7 +160,7 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
         </CardContent>
       </Card>
       
-      <div className="flex justify-end">
+      <div className="mt-6 flex justify-end">
         <Button 
           className="mimo-button"
           onClick={onSaveAll}
