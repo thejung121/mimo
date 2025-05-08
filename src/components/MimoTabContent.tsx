@@ -1,12 +1,15 @@
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import type { MimoPackage } from '@/types/creator';
-import { Heart, Check } from 'lucide-react';
+import { Heart, Check, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface MimoTabContentProps {
   mimoPackages: MimoPackage[];
   onSelectPackage: (pkg: MimoPackage) => void;
+  onCustomValue?: (value: number) => void;
 }
 
 // Clean, simplified package card component
@@ -40,10 +43,6 @@ const PackageCard = memo(({ pkg, onSelect }: { pkg: MimoPackage, onSelect: () =>
           )}
         </div>
         
-        <p className="text-lg font-semibold mb-3">
-          R${pkg.price}
-        </p>
-        
         <ul className="space-y-1 mb-4 text-sm">
           {pkg.features.slice(0, 3).map((feature, idx) => (
             <li key={idx} className="flex items-center gap-1.5">
@@ -64,7 +63,7 @@ const PackageCard = memo(({ pkg, onSelect }: { pkg: MimoPackage, onSelect: () =>
           size="sm"
         >
           <Heart className="mr-1 h-3.5 w-3.5" />
-          Enviar Mimo
+          Enviar R${pkg.price} de Mimo
         </Button>
       </div>
     </div>
@@ -73,7 +72,84 @@ const PackageCard = memo(({ pkg, onSelect }: { pkg: MimoPackage, onSelect: () =>
 
 PackageCard.displayName = 'PackageCard';
 
+// New custom value component
+const CustomValueMimo = ({ onSubmit }: { onSubmit: (value: number) => void }) => {
+  const [value, setValue] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  
+  const handleSubmit = () => {
+    const numValue = parseFloat(value);
+    if (isNaN(numValue) || numValue <= 0) {
+      setError('Por favor, digite um valor válido');
+      return;
+    }
+    
+    onSubmit(numValue);
+    setValue('');
+    setError('');
+  };
+  
+  return (
+    <div className="bg-gradient-to-r from-primary/5 to-transparent p-5 rounded-lg border border-primary/20">
+      <div className="flex items-center gap-2 mb-3">
+        <Gift className="h-5 w-5 text-primary" />
+        <h3 className="font-medium">Envie um valor personalizado</h3>
+      </div>
+      
+      <p className="text-sm text-gray-600 mb-4">Quanto maior o mimo, maior a recompensa!</p>
+      
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <Label htmlFor="custom-value">Valor do mimo (R$)</Label>
+          <div className="flex items-center">
+            <span className="bg-muted rounded-l-md border border-r-0 border-border px-3 py-2 text-muted-foreground">R$</span>
+            <Input 
+              id="custom-value"
+              type="number"
+              placeholder="Valor personalizado"
+              value={value}
+              onChange={(e) => {
+                setValue(e.target.value);
+                setError('');
+              }}
+              className="rounded-l-none"
+              min="5"
+            />
+          </div>
+          {error && <p className="text-destructive text-xs">{error}</p>}
+        </div>
+        
+        <Button 
+          onClick={handleSubmit}
+          disabled={!value || parseFloat(value) <= 0}
+          className="w-full bg-primary hover:bg-primary/90"
+        >
+          <Heart className="mr-2 h-4 w-4" />
+          Enviar Mimo Personalizado
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const MimoTabContent = ({ mimoPackages, onSelectPackage }: MimoTabContentProps) => {
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  
+  const handleCustomValue = (value: number) => {
+    // Create a temporary package with the custom value
+    const customPackage: MimoPackage = {
+      id: 0,
+      title: "Mimo Personalizado",
+      price: value,
+      features: ["Valor personalizado", "Mensagem exclusiva"],
+      highlighted: false,
+      media: [],
+      isHidden: false
+    };
+    
+    onSelectPackage(customPackage);
+  };
+  
   if (mimoPackages.length === 0) {
     return (
       <div className="text-center py-8 bg-white rounded-lg border border-gray-100">
@@ -84,14 +160,31 @@ const MimoTabContent = ({ mimoPackages, onSelectPackage }: MimoTabContentProps) 
   }
   
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {mimoPackages.map((pkg) => (
-        <PackageCard 
-          key={pkg.id} 
-          pkg={pkg} 
-          onSelect={() => onSelectPackage(pkg)} 
-        />
-      ))}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {mimoPackages.map((pkg) => (
+          <PackageCard 
+            key={pkg.id} 
+            pkg={pkg} 
+            onSelect={() => onSelectPackage(pkg)} 
+          />
+        ))}
+      </div>
+      
+      <div className="pt-6 border-t border-dashed border-gray-200">
+        {showCustomForm ? (
+          <CustomValueMimo onSubmit={handleCustomValue} />
+        ) : (
+          <Button 
+            variant="ghost" 
+            onClick={() => setShowCustomForm(true)}
+            className="flex items-center gap-2 mx-auto"
+          >
+            <Gift className="h-4 w-4 text-primary" />
+            <span>Quero enviar outro valor</span>
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

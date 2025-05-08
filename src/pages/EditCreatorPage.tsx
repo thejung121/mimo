@@ -1,10 +1,11 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from "@/components/ui/button";
 import { useCreatorEditor } from '@/hooks/useCreatorEditor';
-import { Save } from 'lucide-react';
+import { Save, Eye } from 'lucide-react';
 
 // Importing a new component that will contain all editor sections in one view
 import UnifiedEditorSection from '@/components/UnifiedEditorSection';
@@ -43,13 +44,25 @@ const EditCreatorPage = () => {
         <div className="mimo-container">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">Editar Página</h1>
-            <Button 
-              className="mimo-button" 
-              onClick={handleSaveAll}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Salvar Alterações
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                asChild
+              >
+                <Link to={`/criador/${creator.username}`} target="_blank">
+                  <Eye className="h-4 w-4" />
+                  Ver Minha Página
+                </Link>
+              </Button>
+              <Button 
+                className="mimo-button" 
+                onClick={handleSaveAll}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Salvar Alterações
+              </Button>
+            </div>
           </div>
           
           <UnifiedEditorSection 

@@ -37,10 +37,8 @@ const MimoPackage = ({ title, price, features, highlighed = false, previewImageU
       </div>
       
       <div className="p-6">
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <div className="mb-4">
-          <span className="text-3xl font-bold">R${price}</span>
-        </div>
+        <h3 className="text-xl font-semibold mb-4">{title}</h3>
+        
         <ul className="space-y-3 mb-6">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start">
@@ -49,11 +47,12 @@ const MimoPackage = ({ title, price, features, highlighed = false, previewImageU
             </li>
           ))}
         </ul>
+        
         <Button 
           onClick={onClick}
           className={highlighed ? "w-full mimo-button" : "w-full bg-card text-foreground border border-border hover:border-mimo-primary hover:text-mimo-primary"}
         >
-          Escolher
+          Enviar R${price} de Mimo
         </Button>
       </div>
     </div>

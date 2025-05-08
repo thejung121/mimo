@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
-import { MimoPackage, Creator, SocialLink } from '@/types/creator';
+import { MimoPackage, Creator } from '@/types/creator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
@@ -34,8 +34,7 @@ const CreatorPage = () => {
       setIsLoading(true);
       
       try {
-        // In a real app, fetch from API based on username
-        // For now, we'll get from localStorage
+        // Get data from localStorage via the service
         const creatorData = getCreatorData();
         const packagesData = getMimoPackages();
         
@@ -79,6 +78,22 @@ const CreatorPage = () => {
     }
   };
 
+  // Handle custom value submissions
+  const handleCustomValue = (value: number) => {
+    const customPackage: MimoPackage = {
+      id: 0,
+      title: "Mimo Personalizado",
+      price: value,
+      features: ["Valor personalizado", "Mensagem exclusiva"],
+      highlighted: false,
+      media: [],
+      isHidden: false
+    };
+    
+    setSelectedPackage(customPackage);
+    setPurchaseFlowOpen(true);
+  };
+
   // Show loading state
   if (isLoading || !creator) {
     return (
@@ -109,7 +124,7 @@ const CreatorPage = () => {
       />
       
       <main className="flex-grow">
-        {/* Hero Section - simplified */}
+        {/* Hero Section */}
         <CreatorHero 
           creator={creator} 
           onMimoClick={scrollToMimoSection} 
@@ -139,7 +154,8 @@ const CreatorPage = () => {
               <TabsContent value="mimos">
                 <MimoTabContent 
                   mimoPackages={mimoPackages} 
-                  onSelectPackage={handleSelectPackage} 
+                  onSelectPackage={handleSelectPackage}
+                  onCustomValue={handleCustomValue}
                 />
               </TabsContent>
             </Tabs>

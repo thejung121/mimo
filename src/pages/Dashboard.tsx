@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -122,6 +122,13 @@ const Dashboard = () => {
     confirmPassword: ""
   });
 
+  const [creator, setCreator] = useState<Creator | null>(null);
+  
+  useEffect(() => {
+    const creatorData = getCreatorData();
+    setCreator(creatorData);
+  }, []);
+
   const handleViewMimo = (id: string) => {
     const mimo = mockMimos.find(m => m.id === id);
     setSelectedMimo(mimo);
@@ -202,6 +209,12 @@ const Dashboard = () => {
               >
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Meu Perfil</span>
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2" asChild>
+                <Link to={`/criador/${creator?.username || ''}`} target="_blank">
+                  <Eye className="h-4 w-4" />
+                  <span className="hidden sm:inline">Ver Minha Página</span>
+                </Link>
               </Button>
               <Button className="mimo-button" asChild>
                 <Link to="/editar-pagina">
@@ -437,7 +450,7 @@ const Dashboard = () => {
                     Última atualização: {new Date().toLocaleDateString()}
                   </p>
                   <Button variant="link" className="text-mimo-primary p-0" asChild>
-                    <Link to="/criador/mariafernanda" target="_blank">
+                    <Link to={`/criador/${creator?.username || ''}`} target="_blank">
                       Ver minha página <ChevronRight className="h-4 w-4 ml-1" />
                     </Link>
                   </Button>
