@@ -2,7 +2,7 @@
 import React, { memo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MimoPackage } from '@/types/creator';
+import type { MimoPackage } from '@/types/creator';
 import { Check, Heart, Image, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
