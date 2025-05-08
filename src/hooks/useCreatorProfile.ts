@@ -1,31 +1,17 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Creator, SocialLink } from '@/types/creator';
 import { useToast } from '@/components/ui/use-toast';
-
-// Initial creator data
-const initialCreator: Creator = {
-  username: 'mariafernanda',
-  name: 'Maria Fernanda',
-  avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80',
-  cover: 'https://images.unsplash.com/photo-1579547945413-497e1b99dac0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1280&q=80',
-  description: 'Olá! Sou fotógrafa e amo capturar momentos especiais. Se você gosta do meu trabalho, ficarei feliz em receber seu mimo e criar algo especial para você!',
-  socialLinks: [
-    { type: 'instagram', url: 'https://instagram.com/mariafernanda' },
-    { type: 'twitter', url: 'https://twitter.com/mariafernanda' },
-    { type: 'website', url: 'https://onlyfans.com/mariafernanda' },
-    { type: 'privacy', url: 'https://privacy.com/mariafernanda' }
-  ]
-};
+import { getCreatorData } from '@/services/creatorDataService';
 
 export const useCreatorProfile = () => {
   const { toast } = useToast();
   
-  const [creator, setCreator] = useState<Creator>(initialCreator);
+  const [creator, setCreator] = useState<Creator>(getCreatorData());
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState(initialCreator.cover);
-  const [avatarPreview, setAvatarPreview] = useState(initialCreator.avatar);
+  const [coverPreview, setCoverPreview] = useState(creator.cover);
+  const [avatarPreview, setAvatarPreview] = useState(creator.avatar);
 
   // Handler for updating the creator
   const handleCreatorChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -46,7 +32,7 @@ export const useCreatorProfile = () => {
     } else if (field === 'type' && (value === 'instagram' || value === 'twitter' || value === 'website' || value === 'privacy')) {
       updatedSocialLinks[index] = { 
         ...updatedSocialLinks[index], 
-        type: value 
+        type: value as 'instagram' | 'twitter' | 'website' | 'privacy'
       };
     }
     
@@ -62,7 +48,9 @@ export const useCreatorProfile = () => {
       // Preview of the image
       const reader = new FileReader();
       reader.onload = () => {
-        setCoverPreview(reader.result as string);
+        const result = reader.result as string;
+        setCoverPreview(result);
+        setCreator(prev => ({ ...prev, cover: result }));
       };
       reader.readAsDataURL(file);
     }
@@ -77,7 +65,9 @@ export const useCreatorProfile = () => {
       // Preview of the image
       const reader = new FileReader();
       reader.onload = () => {
-        setAvatarPreview(reader.result as string);
+        const result = reader.result as string;
+        setAvatarPreview(result);
+        setCreator(prev => ({ ...prev, avatar: result }));
       };
       reader.readAsDataURL(file);
     }

@@ -22,31 +22,32 @@ const CreatorStickyHeader = ({
   return (
     <div 
       className={cn(
-        "fixed top-0 left-0 right-0 z-10 transition-transform duration-300",
+        "fixed top-0 left-0 right-0 z-10 transition-transform duration-200",
         visible ? "translate-y-0" : "-translate-y-full"
       )}
       style={{marginTop: '64px'}} // Adjust based on navbar height
     >
-      <div className="bg-gradient-to-b from-black/60 via-black/30 to-transparent backdrop-blur-sm text-white py-3 px-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+      <div className="bg-white/90 backdrop-blur-sm border-b border-gray-100 py-2 px-4 shadow-sm">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img 
               src={avatar} 
               alt={name} 
-              className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
+              className="w-8 h-8 rounded-full object-cover"
+              loading="eager"
             />
             <div>
-              <h2 className="font-medium">{name}</h2>
-              <p className="text-xs text-white/80">@{username}</p>
+              <h2 className="font-medium text-sm">{name}</h2>
+              <p className="text-xs text-gray-500">@{username}</p>
             </div>
           </div>
           <Button 
             size="sm"
-            className="bg-white text-black hover:bg-white/90 rounded-full flex items-center gap-1"
+            className="rounded-full bg-primary hover:bg-primary/90 text-white"
             onClick={onMimoClick}
           >
-            <Heart className="h-4 w-4 text-red-500" />
-            <span>Enviar Mimo</span>
+            <Heart className="h-3 w-3 mr-1" />
+            <span className="text-xs">Enviar Mimo</span>
           </Button>
         </div>
       </div>

@@ -1,17 +1,23 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { MimoPackage } from '@/types/creator';
-import { initialMimoPackages, emptyPackage } from './mimo-packages/packageData';
+import { emptyPackage } from './mimo-packages/packageData';
 import { usePackageFeatures } from './mimo-packages/usePackageFeatures';
 import { usePackageMedia } from './mimo-packages/usePackageMedia';
 import { usePackageCRUD } from './mimo-packages/usePackageCRUD';
 import { useToast } from '@/components/ui/use-toast';
+import { getMimoPackages } from '@/services/creatorDataService';
 
 export const useMimoPackages = () => {
   const { toast } = useToast();
-  const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>(initialMimoPackages);
+  const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>([]);
   const [showNewPackageForm, setShowNewPackageForm] = useState(false);
   const [newPackage, setNewPackage] = useState<MimoPackage>({...emptyPackage});
+  
+  // Load saved packages
+  useEffect(() => {
+    setMimoPackages(getMimoPackages());
+  }, []);
   
   // Memoize state updates to reduce re-renders
   const updateNewPackage = useCallback((changes: Partial<MimoPackage>) => {
