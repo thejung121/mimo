@@ -1,6 +1,7 @@
+
 // Creator related types
 export interface SocialLink {
-  type: 'instagram' | 'twitter' | 'youtube' | 'website';
+  type: 'instagram' | 'twitter' | 'youtube' | 'website' | 'privacy';
   url: string;
 }
 

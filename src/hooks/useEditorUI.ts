@@ -1,13 +1,10 @@
 
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 
 export const useEditorUI = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  const [showPreview, setShowPreview] = useState(false);
 
   // Handler to save all changes
   const handleSaveAll = (creator: any, mimoPackages: any) => {
@@ -24,8 +21,6 @@ export const useEditorUI = () => {
   };
 
   return {
-    showPreview,
-    setShowPreview,
     handleSaveAll
   };
 };

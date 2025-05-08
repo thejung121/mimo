@@ -40,10 +40,6 @@ export const useCreatorEditor = () => {
     handleEditPackage: packagesHook.handleEditPackage,
     setShowNewPackageForm: packagesHook.setShowNewPackageForm,
     
-    // UI states and handlers
-    showPreview: uiHook.showPreview,
-    setShowPreview: uiHook.setShowPreview,
-    
     // Combined handlers
     handleSaveAll
   };
