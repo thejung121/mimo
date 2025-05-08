@@ -1,33 +1,18 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
-import { Creator, SocialLink, MediaItem, MimoPackage } from '@/types/creator';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { 
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { Creator, MimoPackage } from '@/types/creator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Heart, Image as ImageIcon, Video, Check, Star, ChevronRight, ArrowRight, ChevronDown, Instagram, Twitter, Youtube, Globe } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { Heart, Star } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
+import CreatorHero from '@/components/CreatorHero';
+import CreatorStickyHeader from '@/components/CreatorStickyHeader';
+import MimoTabContent from '@/components/MimoTabContent';
+import SubscriptionTabContent from '@/components/SubscriptionTabContent';
+import TestimonialsSection from '@/components/TestimonialsSection';
+import SubscriptionDialog from '@/components/SubscriptionDialog';
 
 // Mock data
 const mockCreator: Creator = {
@@ -172,7 +157,6 @@ const CreatorPage = () => {
   const [activeTab, setActiveTab] = useState<'mimos' | 'subscription'>('mimos');
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
-  // Add the missing state variable
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Handle scroll effect for header
@@ -201,6 +185,13 @@ const CreatorPage = () => {
     // Commented out since we're using PurchaseFlow now
     // setDialogOpen(true);
     // setPaymentStep('preview');
+  };
+
+  const scrollToMimoSection = () => {
+    const mimoSection = document.getElementById('mimo-section');
+    if (mimoSection) {
+      mimoSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleSendMimo = () => {
@@ -257,123 +248,24 @@ const CreatorPage = () => {
     }, 2000);
   };
 
-  const previewMedia = selectedPackage?.media.filter(m => m.isPreview) || [];
-  
-  const getSocialIcon = (type: 'instagram' | 'twitter' | 'youtube' | 'website') => {
-    switch (type) {
-      case 'instagram':
-        return <Instagram className="h-5 w-5" />;
-      case 'twitter':
-        return <Twitter className="h-5 w-5" />;
-      case 'youtube':
-        return <Youtube className="h-5 w-5" />;
-      case 'website':
-        return <Globe className="h-5 w-5" />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-white relative">
       <NavBar />
       
-      <div 
-        ref={headerRef}
-        className={cn(
-          "fixed top-0 left-0 right-0 z-10 transition-transform duration-300",
-          headerVisible ? "translate-y-0" : "-translate-y-full"
-        )}
-        style={{marginTop: '64px'}} // Adjust based on your navbar height
-      >
-        <div className="bg-gradient-to-b from-black/60 via-black/30 to-transparent backdrop-blur-sm text-white py-3 px-4">
-          <div className="max-w-5xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img 
-                src={mockCreator.avatar} 
-                alt={mockCreator.name} 
-                className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
-              />
-              <div>
-                <h2 className="font-medium">{mockCreator.name}</h2>
-                <p className="text-xs text-white/80">@{mockCreator.username}</p>
-              </div>
-            </div>
-            <Button 
-              size="sm"
-              className="bg-white text-black hover:bg-white/90 rounded-full flex items-center gap-1"
-              onClick={() => {
-                const mimoSection = document.getElementById('mimo-section');
-                if (mimoSection) {
-                  mimoSection.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-            >
-              <Heart className="h-4 w-4 text-red-500" />
-              <span>Enviar Mimo</span>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <CreatorStickyHeader 
+        visible={headerVisible}
+        avatar={mockCreator.avatar}
+        name={mockCreator.name}
+        username={mockCreator.username}
+        onMimoClick={scrollToMimoSection}
+      />
       
       <main className="flex-grow pb-16 animate-fade-in">
         {/* Hero Section */}
-        <section className="relative h-[65vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <img 
-              src={mockCreator.cover} 
-              alt="Cover" 
-              className="w-full h-full object-cover animate-scale-in"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-          </div>
-          
-          <div className="relative z-10 text-center text-white mx-auto px-4 max-w-3xl">
-            <div className="flex justify-center mb-6">
-              <img 
-                src={mockCreator.avatar} 
-                alt={mockCreator.name} 
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white shadow-xl"
-              />
-            </div>
-            
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              {mockCreator.name}
-            </h1>
-            
-            <p className="text-lg sm:text-xl text-white/90 mb-6 max-w-2xl mx-auto">
-              {mockCreator.description}
-            </p>
-            
-            <div className="flex justify-center gap-3 mb-8">
-              {mockCreator.socialLinks.map((link, index) => (
-                <a 
-                  key={index}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                >
-                  {getSocialIcon(link.type)}
-                </a>
-              ))}
-            </div>
-            
-            <Button 
-              className="bg-white text-black hover:bg-white/90 rounded-full px-8 py-6 text-lg group"
-              onClick={() => {
-                const mimoSection = document.getElementById('mimo-section');
-                if (mimoSection) {
-                  mimoSection.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-            >
-              <Heart className="mr-2 h-5 w-5 text-red-500 group-hover:scale-110 transition-transform" />
-              Enviar um Mimo
-              <ChevronDown className="ml-2 h-5 w-5 animate-bounce" />
-            </Button>
-          </div>
-        </section>
+        <CreatorHero 
+          creator={mockCreator} 
+          onMimoClick={scrollToMimoSection} 
+        />
         
         {/* Options Tab Section */}
         <section id="mimo-section" className="py-16 bg-white">
@@ -404,256 +296,24 @@ const CreatorPage = () => {
               </div>
               
               <TabsContent value="mimos">
-                <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-                  {mimoPackages.map((pkg) => (
-                    <Card 
-                      key={pkg.id} 
-                      className={cn(
-                        "overflow-hidden relative rounded-2xl transition-all duration-300 hover:shadow-lg",
-                        pkg.highlighted ? 
-                          "border-2 border-mimo-primary shadow-lg shadow-mimo-primary/20" : 
-                          "border border-gray-200 hover:border-mimo-primary/50"
-                      )}
-                    >
-                      {pkg.highlighted && (
-                        <div className="absolute top-0 right-0">
-                          <div className="bg-gradient-to-r from-mimo-primary to-mimo-secondary text-white text-xs uppercase font-bold py-1 px-3 rounded-bl-lg">
-                            Mais popular
-                          </div>
-                        </div>
-                      )}
-                      
-                      {pkg.media.find(m => m.isPreview) ? (
-                        <div className="h-40 overflow-hidden relative">
-                          <img 
-                            src={pkg.media.find(m => m.isPreview)?.url} 
-                            alt={pkg.title}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/70 to-transparent">
-                            <div className="flex items-center text-white text-sm">
-                              <ImageIcon className="h-4 w-4 mr-1" />
-                              <span>{pkg.media.filter(m => m.type === 'image').length} fotos</span>
-                              {pkg.media.some(m => m.type === 'video') && (
-                                <>
-                                  <span className="mx-1">•</span>
-                                  <Video className="h-4 w-4 mr-1" />
-                                  <span>{pkg.media.filter(m => m.type === 'video').length} vídeos</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                          <div className="text-gray-400 text-center">
-                            <ImageIcon className="h-10 w-10 mx-auto mb-2" />
-                            <p className="text-sm">Prévia não disponível</p>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="p-5">
-                        <h3 className="text-xl font-semibold mb-2">{pkg.title}</h3>
-                        <p className="text-2xl font-bold mb-4 text-mimo-primary">
-                          R${pkg.price}
-                          <span className="text-sm text-gray-500 font-normal ml-1">único</span>
-                        </p>
-                        
-                        <ul className="space-y-2 mb-6">
-                          {pkg.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-start">
-                              <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-600">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        
-                        <Button 
-                          className={cn(
-                            "w-full transition-all",
-                            pkg.highlighted ? 
-                              "bg-gradient-to-r from-mimo-primary to-mimo-secondary hover:from-mimo-primary/90 hover:to-mimo-secondary/90 text-white" : 
-                              "bg-white text-mimo-primary border-2 border-mimo-primary hover:bg-mimo-primary/10"
-                          )}
-                          onClick={() => handleSelectPackage(pkg)}
-                        >
-                          <Heart className={cn("mr-1 h-4 w-4", pkg.highlighted ? "" : "text-red-500")} />
-                          Enviar Mimo
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-                
-                <div className="mt-12 bg-gray-50 border border-gray-200 rounded-xl p-6">
-                  <h3 className="font-semibold text-lg mb-4 flex items-center">
-                    <Heart className="w-5 h-5 mr-2 text-red-500" fill="#f43f5e" />
-                    Como funciona
-                  </h3>
-                  <ol className="space-y-3 ml-5 list-decimal">
-                    <li className="text-gray-700">Escolha um pacote de mimo que deseja enviar.</li>
-                    <li className="text-gray-700">Crie um nome de usuário que será sua identificação e senha de acesso.</li>
-                    <li className="text-gray-700">Após a confirmação do pagamento via PIX, você receberá um link de acesso às recompensas.</li>
-                    <li className="text-gray-700">O link ficará disponível por 30 dias.</li>
-                    <li className="text-gray-700">Use seu nome de usuário como senha para acessar as recompensas exclusivas.</li>
-                  </ol>
-                </div>
+                <MimoTabContent 
+                  mimoPackages={mimoPackages} 
+                  onSelectPackage={handleSelectPackage} 
+                />
               </TabsContent>
               
               <TabsContent value="subscription">
-                <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-                  {subscriptionOptions.map((option) => (
-                    <Card 
-                      key={option.id} 
-                      className={cn(
-                        "overflow-hidden relative rounded-2xl transition-all duration-300 hover:shadow-lg",
-                        option.popular ? 
-                          "border-2 border-mimo-primary shadow-lg shadow-mimo-primary/20" : 
-                          "border border-gray-200 hover:border-mimo-primary/50"
-                      )}
-                    >
-                      {option.popular && (
-                        <div className="absolute top-0 right-0">
-                          <div className="bg-gradient-to-r from-mimo-primary to-mimo-secondary text-white text-xs uppercase font-bold py-1 px-3 rounded-bl-lg">
-                            Recomendado
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="p-6">
-                        <h3 className="text-xl font-semibold mb-2">{option.title}</h3>
-                        <div className="mb-5">
-                          <p className="text-3xl font-bold text-mimo-primary inline-block">
-                            R${option.price.toFixed(2).replace('.', ',')}
-                          </p>
-                          <span className="text-sm text-gray-500 font-normal ml-1">/{option.period}</span>
-                        </div>
-                        
-                        <ul className="space-y-3 mb-6">
-                          {option.features.map((feature, idx) => (
-                            <li key={idx} className="flex items-start">
-                              <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                              <span className="text-sm text-gray-600">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        
-                        <Button 
-                          className={cn(
-                            "w-full transition-all",
-                            option.popular ? 
-                              "bg-gradient-to-r from-mimo-primary to-mimo-secondary hover:from-mimo-primary/90 hover:to-mimo-secondary/90 text-white" : 
-                              "bg-white text-mimo-primary border-2 border-mimo-primary hover:bg-mimo-primary/10"
-                          )}
-                          onClick={() => handleSelectSubscription(option)}
-                        >
-                          <Star className="mr-1 h-4 w-4" />
-                          Assinar agora
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-                
-                <div className="mt-12 bg-gray-50 border border-gray-200 rounded-xl p-6">
-                  <h3 className="font-semibold text-lg mb-4 flex items-center">
-                    <Star className="w-5 h-5 mr-2 text-yellow-500" fill="#eab308" />
-                    Vantagens da assinatura
-                  </h3>
-                  <ul className="space-y-3">
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Acesso exclusivo a conteúdos premium que não são disponibilizados em mimos</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Interação direta e priorizada com a criadora</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Descontos exclusivos na compra de mimos individuais</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Acesso antecipado a novos conteúdos e projetos</span>
-                    </li>
-                  </ul>
-                </div>
+                <SubscriptionTabContent 
+                  subscriptionOptions={subscriptionOptions} 
+                  onSelectSubscription={handleSelectSubscription} 
+                />
               </TabsContent>
             </Tabs>
           </div>
         </section>
         
         {/* Testimonials */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-2">O que estão dizendo</h2>
-              <p className="text-gray-600">Depoimentos de fãs que enviaram mimos</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-white p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 font-bold text-lg">
-                    M
-                  </div>
-                  <div className="ml-3">
-                    <p className="font-medium">Marcelo S.</p>
-                    <div className="flex text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">
-                  "Adorei o mimo que recebi! As fotos são incríveis e a mensagem personalizada foi super especial. Totalmente valeu a pena!"
-                </p>
-              </Card>
-              
-              <Card className="bg-white p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 font-bold text-lg">
-                    C
-                  </div>
-                  <div className="ml-3">
-                    <p className="font-medium">Carolina F.</p>
-                    <div className="flex text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">
-                  "Já sou assinante e também adoro enviar mimos especiais. A Maria sempre surpreende com conteúdo de qualidade e exclusivo."
-                </p>
-              </Card>
-              
-              <Card className="bg-white p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 font-bold text-lg">
-                    R
-                  </div>
-                  <div className="ml-3">
-                    <p className="font-medium">Rafael T.</p>
-                    <div className="flex text-yellow-400">
-                      {[...Array(4)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                      <Star className="h-4 w-4 text-gray-300" />
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">
-                  "O processo foi super fácil e rápido. Recebi o link com as recompensas em menos de uma hora após o pagamento. Recomendo!"
-                </p>
-              </Card>
-            </div>
-          </div>
-        </section>
+        <TestimonialsSection />
         
         {/* Purchase Flow Component */}
         {selectedPackage && (
@@ -670,85 +330,15 @@ const CreatorPage = () => {
         )}
         
         {/* Subscription Dialog */}
-        <Dialog open={subscriptionDialogOpen} onOpenChange={setSubscriptionDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Assinar {selectedSubscription?.title}</DialogTitle>
-              <DialogDescription>
-                Comece sua assinatura de conteúdo exclusivo agora mesmo.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 py-4">
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome de usuário*
-                </label>
-                <Input
-                  id="username"
-                  placeholder="Digite seu nome de usuário"
-                  value={userAlias}
-                  onChange={(e) => setUserAlias(e.target.value)}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Este nome será sua identificação e senha de acesso.
-                </p>
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email (opcional)
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Digite seu email"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Para receber notificações sobre novos conteúdos.
-                </p>
-              </div>
-              
-              <div>
-                <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
-                  WhatsApp (opcional)
-                </label>
-                <Input
-                  id="whatsapp"
-                  placeholder="(00) 00000-0000"
-                />
-              </div>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg mb-4">
-              <div className="flex justify-between mb-2">
-                <span className="text-sm text-gray-500">Plano</span>
-                <span className="font-medium">{selectedSubscription?.title}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-500">Valor</span>
-                <span className="font-medium">R${selectedSubscription?.price.toFixed(2).replace('.', ',')} /{selectedSubscription?.period}</span>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setSubscriptionDialogOpen(false)}
-                className="w-full sm:w-auto"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleSubscribe}
-                className="w-full sm:w-auto bg-gradient-to-r from-mimo-primary to-mimo-secondary"
-                disabled={processing}
-              >
-                {processing ? "Processando..." : "Assinar agora"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <SubscriptionDialog
+          open={subscriptionDialogOpen}
+          onOpenChange={setSubscriptionDialogOpen}
+          selectedSubscription={selectedSubscription}
+          userAlias={userAlias}
+          onUserAliasChange={(e) => setUserAlias(e.target.value)}
+          onSubscribe={handleSubscribe}
+          processing={processing}
+        />
       </main>
       
       <Footer />
