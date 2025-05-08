@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -171,6 +172,8 @@ const CreatorPage = () => {
   const [activeTab, setActiveTab] = useState<'mimos' | 'subscription'>('mimos');
   const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
+  // Add the missing state variable
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Handle scroll effect for header
   useEffect(() => {
@@ -195,7 +198,7 @@ const CreatorPage = () => {
   const handleSelectPackage = (pkg: MimoPackage) => {
     setSelectedPackage(pkg);
     setPurchaseFlowOpen(true);
-    // Remove the previous dialog opening
+    // Commented out since we're using PurchaseFlow now
     // setDialogOpen(true);
     // setPaymentStep('preview');
   };
@@ -652,7 +655,7 @@ const CreatorPage = () => {
           </div>
         </section>
         
-        {/* Replace the old dialog with PurchaseFlow */}
+        {/* Purchase Flow Component */}
         {selectedPackage && (
           <PurchaseFlow
             open={purchaseFlowOpen}
@@ -666,10 +669,86 @@ const CreatorPage = () => {
           />
         )}
         
-        {/* Keep the existing dialogs */}
-        {/* ... keep existing code (Mimo Details Dialog) */}
-        
-        {/* ... keep existing code (Subscription Dialog) */}
+        {/* Subscription Dialog */}
+        <Dialog open={subscriptionDialogOpen} onOpenChange={setSubscriptionDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Assinar {selectedSubscription?.title}</DialogTitle>
+              <DialogDescription>
+                Comece sua assinatura de conteúdo exclusivo agora mesmo.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome de usuário*
+                </label>
+                <Input
+                  id="username"
+                  placeholder="Digite seu nome de usuário"
+                  value={userAlias}
+                  onChange={(e) => setUserAlias(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Este nome será sua identificação e senha de acesso.
+                </p>
+              </div>
+              
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email (opcional)
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Digite seu email"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Para receber notificações sobre novos conteúdos.
+                </p>
+              </div>
+              
+              <div>
+                <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-1">
+                  WhatsApp (opcional)
+                </label>
+                <Input
+                  id="whatsapp"
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 p-4 rounded-lg mb-4">
+              <div className="flex justify-between mb-2">
+                <span className="text-sm text-gray-500">Plano</span>
+                <span className="font-medium">{selectedSubscription?.title}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">Valor</span>
+                <span className="font-medium">R${selectedSubscription?.price.toFixed(2).replace('.', ',')} /{selectedSubscription?.period}</span>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setSubscriptionDialogOpen(false)}
+                className="w-full sm:w-auto"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSubscribe}
+                className="w-full sm:w-auto bg-gradient-to-r from-mimo-primary to-mimo-secondary"
+                disabled={processing}
+              >
+                {processing ? "Processando..." : "Assinar agora"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
       
       <Footer />
