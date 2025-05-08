@@ -1,20 +1,18 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
-import { Creator, MimoPackage } from '@/types/creator';
+import { MimoPackage } from '@/types/creator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from '@/components/ui/use-toast';
 import { Heart } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
 import CreatorHero from '@/components/CreatorHero';
 import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import MimoTabContent from '@/components/MimoTabContent';
-import TestimonialsSection from '@/components/TestimonialsSection';
 
-// Mock data
-const mockCreator: Creator = {
+// Mock creator data - will be fetched from API in real application
+const mockCreator = {
   username: 'mariafernanda',
   name: 'Maria Fernanda',
   avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80',
@@ -28,123 +26,43 @@ const mockCreator: Creator = {
   ]
 };
 
-// Interface para os media items
-const mimoPackages: MimoPackage[] = [
-  {
-    id: 1,
-    title: 'Mimo Essencial',
-    price: 30,
-    features: [
-      'Foto exclusiva de alta qualidade',
-      'Mensagem personalizada',
-      'Acesso por 30 dias'
-    ],
-    highlighted: false,
-    media: [
-      { 
-        id: 1,
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1582562124811-c09040d0a901',
-        isPreview: true
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: 'Mimo Especial',
-    price: 70,
-    features: [
-      'Set com 5 fotos exclusivas',
-      'Vídeo de agradecimento',
-      'Escolha de tema para as fotos',
-      'Mensagem personalizada',
-      'Acesso por 30 dias'
-    ],
-    highlighted: true,
-    media: [
-      { 
-        id: 2,
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158',
-        isPreview: true
-      },
-      { 
-        id: 3,
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-        isPreview: true
-      }
-    ]
-  },
-  {
-    id: 3,
-    title: 'Mimo Premium',
-    price: 120,
-    features: [
-      'Set com 8 fotos exclusivas',
-      'Vídeo personalizado de 2 minutos',
-      'Escolha de temas e poses',
-      'Resposta a 3 perguntas',
-      'Mensagem personalizada',
-      'Acesso por 45 dias'
-    ],
-    highlighted: false,
-    media: [
-      { 
-        id: 4,
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
-        isPreview: false
-      },
-      { 
-        id: 5,
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-        isPreview: true
-      },
-      { 
-        id: 6,
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5',
-        isPreview: true
-      }
-    ]
-  }
-];
-
 const CreatorPage = () => {
   const { username } = useParams();
-  const { toast } = useToast();
-  const headerRef = useRef<HTMLDivElement>(null);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   
+  const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<MimoPackage | null>(null);
   const [purchaseFlowOpen, setPurchaseFlowOpen] = useState(false);
-  const [userAlias, setUserAlias] = useState('');
-  const [processing, setProcessing] = useState(false);
-  const [paymentStep, setPaymentStep] = useState<'preview' | 'payment'>('preview');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Carregar os pacotes recentes do usuário - simulação
-  const [loadedPackages, setLoadedPackages] = useState<MimoPackage[]>([]);
-  
-  // Efeito para buscar os pacotes cadastrados mais recentes
+  // Always scroll to top when component mounts
   useEffect(() => {
-    // Em um cenário real, aqui você buscaria os pacotes recentes da API
-    // Para esta simulação, usamos os do mock
-    setLoadedPackages(mimoPackages);
+    window.scrollTo(0, 0);
   }, []);
 
-  // Handle scroll effect for header
+  // Simulate fetching packages
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setIsLoading(true);
+      // In a real app, fetch from API based on username
+      // For now, we'll simulate a network request with setTimeout
+      setTimeout(() => {
+        // Empty array for now - packages will be added by the creator
+        setMimoPackages([]);
+        setIsLoading(false);
+      }, 500);
+    };
+    
+    fetchPackages();
+  }, [username]);
+
+  // Handle scroll effect for header - using passive event listener for better performance
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       if (currentScrollY > 100) {
-        if (currentScrollY > lastScrollY) {
-          setHeaderVisible(false);
-        } else {
-          setHeaderVisible(true);
-        }
+        setHeaderVisible(currentScrollY < lastScrollY);
       } else {
         setHeaderVisible(true);
       }
@@ -168,7 +86,7 @@ const CreatorPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white relative">
+    <div className="min-h-screen flex flex-col bg-white">
       <NavBar />
       
       <CreatorStickyHeader 
@@ -179,7 +97,7 @@ const CreatorPage = () => {
         onMimoClick={scrollToMimoSection}
       />
       
-      <main className="flex-grow pb-16 animate-fade-in">
+      <main className="flex-grow">
         {/* Hero Section */}
         <CreatorHero 
           creator={mockCreator} 
@@ -187,38 +105,55 @@ const CreatorPage = () => {
         />
         
         {/* Mimos Section */}
-        <section id="mimo-section" className="py-16 bg-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-mimo-primary to-mimo-secondary inline-block">
+        <section id="mimo-section" className="py-12 bg-white">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-semibold mb-2 text-gray-900">
                 Envie um Mimo
               </h2>
-              <p className="text-lg text-gray-600">
-                Escolha um dos pacotes para apoiar o criador
+              <p className="text-gray-600">
+                Escolha um dos pacotes abaixo para apoiar
               </p>
             </div>
             
             <Tabs defaultValue="mimos" className="mb-8">
               <div className="flex justify-center">
-                <TabsList className="w-[200px] mb-10">
-                  <TabsTrigger value="mimos" className="text-base py-3 w-full">
+                <TabsList className="w-[200px] mb-8">
+                  <TabsTrigger value="mimos" className="w-full">
                     <Heart className="mr-2 h-4 w-4" /> Mimos
                   </TabsTrigger>
                 </TabsList>
               </div>
               
               <TabsContent value="mimos">
-                <MimoTabContent 
-                  mimoPackages={loadedPackages} 
-                  onSelectPackage={handleSelectPackage} 
-                />
+                {isLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-40 bg-gray-200 rounded-t-lg"></div>
+                        <div className="p-4 border border-t-0 rounded-b-lg">
+                          <div className="h-5 bg-gray-200 rounded w-3/4 mb-3"></div>
+                          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                          <div className="space-y-2 mb-4">
+                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+                            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                          </div>
+                          <div className="h-10 bg-gray-200 rounded w-full"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <MimoTabContent 
+                    mimoPackages={mimoPackages} 
+                    onSelectPackage={handleSelectPackage} 
+                  />
+                )}
               </TabsContent>
             </Tabs>
           </div>
         </section>
-        
-        {/* Testimonials */}
-        <TestimonialsSection />
         
         {/* Purchase Flow Component */}
         {selectedPackage && (
