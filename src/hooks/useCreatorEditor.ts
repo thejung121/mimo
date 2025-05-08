@@ -1,26 +1,25 @@
-
 import { useState } from 'react';
-import { Creator, MimoPackage, MediaItem } from '@/types/creator';
+import { Creator, MimoPackage, MediaItem, SocialLink } from '@/types/creator';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 // Mock data - inicialmente carregamos os dados do criador atual
-const initialCreator = {
+const initialCreator: Creator = {
   username: 'mariafernanda',
   name: 'Maria Fernanda',
   avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80',
   cover: 'https://images.unsplash.com/photo-1579547945413-497e1b99dac0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1280&q=80',
   description: 'Olá! Sou fotógrafa e amo capturar momentos especiais. Se você gosta do meu trabalho, ficarei feliz em receber seu mimo e criar algo especial para você!',
   socialLinks: [
-    { type: 'instagram', url: 'https://instagram.com/mariafernanda' },
-    { type: 'twitter', url: 'https://twitter.com/mariafernanda' },
-    { type: 'youtube', url: 'https://youtube.com/mariafernanda' },
-    { type: 'website', url: 'https://mariafernanda.com' }
+    { type: 'instagram' as const, url: 'https://instagram.com/mariafernanda' },
+    { type: 'twitter' as const, url: 'https://twitter.com/mariafernanda' },
+    { type: 'youtube' as const, url: 'https://youtube.com/mariafernanda' },
+    { type: 'website' as const, url: 'https://mariafernanda.com' }
   ]
 };
 
 // Mock dos pacotes de mimo existentes
-const initialMimoPackages = [
+const initialMimoPackages: MimoPackage[] = [
   {
     id: 1,
     title: 'Mimo Básico',
@@ -112,11 +111,21 @@ export const useCreatorEditor = () => {
 
   // Handlers para links sociais
   const handleSocialLinkChange = (index: number, field: string, value: string) => {
-    const updatedSocialLinks = [...creator.socialLinks];
-    updatedSocialLinks[index] = { 
-      ...updatedSocialLinks[index], 
-      [field]: value 
-    };
+    const updatedSocialLinks = [...creator.socialLinks] as SocialLink[];
+    
+    // Ensure we're only updating allowed fields with correct types
+    if (field === 'url') {
+      updatedSocialLinks[index] = { 
+        ...updatedSocialLinks[index], 
+        url: value 
+      };
+    } else if (field === 'type' && (value === 'instagram' || value === 'twitter' || value === 'youtube' || value === 'website')) {
+      updatedSocialLinks[index] = { 
+        ...updatedSocialLinks[index], 
+        type: value 
+      };
+    }
+    
     setCreator(prev => ({ ...prev, socialLinks: updatedSocialLinks }));
   };
 

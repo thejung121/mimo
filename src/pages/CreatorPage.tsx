@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Image, FileImage } from 'lucide-react';
+import { Image, FileImage, Heart, ArrowRight, Check } from 'lucide-react';
 
 // Mock data
 const mockCreator = {
@@ -183,11 +183,11 @@ const CreatorPage = () => {
   const previewMedia = selectedPackage?.media.filter(m => m.isPreview) || [];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-accent/20">
       <NavBar />
       
-      <main className="flex-grow py-8">
-        <div className="mimo-container">
+      <main className="flex-grow py-8 animate-fade-in">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <CreatorProfile
             name={mockCreator.name}
             avatar={mockCreator.avatar}
@@ -197,29 +197,36 @@ const CreatorPage = () => {
           />
           
           <section className="mt-12">
-            <h2 className="text-2xl font-bold mb-6 text-center">Escolha seu Mimo</h2>
-            <div className="grid md:grid-cols-3 gap-8">
+            <h2 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-mimo-primary to-mimo-secondary">
+              Escolha seu Mimo
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
               {mimoPackages.map((pkg) => (
-                <MimoPackage
-                  key={pkg.id}
-                  title={pkg.title}
-                  price={pkg.price}
-                  features={pkg.features}
-                  highlighed={pkg.highlighted}
-                  previewImageUrl={pkg.media.find(m => m.isPreview)?.url}
-                  onClick={() => handleSelectPackage(pkg)}
-                />
+                <div key={pkg.id} className="transform hover:scale-105 transition-transform duration-300">
+                  <MimoPackage
+                    key={pkg.id}
+                    title={pkg.title}
+                    price={pkg.price}
+                    features={pkg.features}
+                    highlighed={pkg.highlighted}
+                    previewImageUrl={pkg.media.find(m => m.isPreview)?.url}
+                    onClick={() => handleSelectPackage(pkg)}
+                  />
+                </div>
               ))}
             </div>
             
-            <div className="mt-12 bg-muted rounded-xl p-6">
-              <h3 className="font-semibold text-lg mb-2">Como funciona</h3>
-              <ol className="space-y-2 ml-5 list-decimal">
-                <li>Escolha um pacote de mimo que deseja enviar.</li>
-                <li>Crie um nome de usuário que servirá como sua identificação e senha de acesso.</li>
-                <li>Após a confirmação do pagamento, você receberá um link de acesso às recompensas.</li>
-                <li>O link ficará disponível por 30 dias.</li>
-                <li>Use seu nome de usuário como senha para acessar as recompensas.</li>
+            <div className="mt-12 bg-muted rounded-xl p-6 shadow-md">
+              <h3 className="font-semibold text-lg mb-4 flex items-center">
+                <Heart className="w-5 h-5 mr-2 text-mimo-primary" fill="#9b87f5" />
+                Como funciona
+              </h3>
+              <ol className="space-y-3 ml-5 list-decimal">
+                <li className="text-foreground/90">Escolha um pacote de mimo que deseja enviar.</li>
+                <li className="text-foreground/90">Crie um nome de usuário que servirá como sua identificação e senha de acesso.</li>
+                <li className="text-foreground/90">Após a confirmação do pagamento, você receberá um link de acesso às recompensas.</li>
+                <li className="text-foreground/90">O link ficará disponível por 30 dias.</li>
+                <li className="text-foreground/90">Use seu nome de usuário como senha para acessar as recompensas.</li>
               </ol>
             </div>
           </section>
@@ -232,9 +239,13 @@ const CreatorPage = () => {
           }}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>{paymentStep === 'preview' ? 'Prévia do Mimo' : 'Enviar Mimo'}: {selectedPackage?.title}</DialogTitle>
+                <DialogTitle className="text-mimo-primary">
+                  {paymentStep === 'preview' ? 'Prévia do Mimo' : 'Enviar Mimo'}: {selectedPackage?.title}
+                </DialogTitle>
                 <DialogDescription>
-                  {paymentStep === 'preview' ? 'Veja um preview do que você receberá neste pacote.' : `Você está enviando um mimo de R$${selectedPackage?.price} para ${mockCreator.name}.`}
+                  {paymentStep === 'preview' 
+                    ? 'Veja um preview do que você receberá neste pacote.' 
+                    : `Você está enviando um mimo de R$${selectedPackage?.price} para ${mockCreator.name}.`}
                 </DialogDescription>
               </DialogHeader>
               
@@ -273,12 +284,12 @@ const CreatorPage = () => {
                     </div>
                   )}
                   
-                  <div className="space-y-2 bg-muted p-3 rounded-lg">
+                  <div className="space-y-2 bg-muted p-4 rounded-lg">
                     <h4 className="font-medium text-sm">Este pacote inclui:</h4>
-                    <ul className="space-y-1">
+                    <ul className="space-y-2">
                       {selectedPackage?.features.map((feature, index) => (
                         <li key={index} className="text-sm flex items-center">
-                          <span className="mr-2 text-mimo-primary">•</span>
+                          <Check className="h-4 w-4 mr-2 text-mimo-primary" />
                           <span>{feature}</span>
                         </li>
                       ))}
@@ -294,9 +305,11 @@ const CreatorPage = () => {
                     </Button>
                     <Button 
                       onClick={() => setPaymentStep('payment')}
-                      className="mimo-button"
+                      className="mimo-button group"
                     >
-                      Continuar (R${selectedPackage?.price})
+                      Continuar 
+                      <span className="ml-1">R${selectedPackage?.price}</span>
+                      <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
                 </div>
@@ -324,10 +337,19 @@ const CreatorPage = () => {
                     </Button>
                     <Button 
                       onClick={handleSendMimo}
-                      className="mimo-button"
+                      className="mimo-button group"
                       disabled={processing}
                     >
-                      {processing ? 'Processando...' : 'Confirmar Mimo'}
+                      {processing ? (
+                        <>
+                          <span className="animate-pulse">Processando...</span>
+                        </>
+                      ) : (
+                        <>
+                          Confirmar Mimo 
+                          <Heart className="ml-1 h-4 w-4 group-hover:scale-110 transition-transform" />
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>

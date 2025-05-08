@@ -17,8 +17,10 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
         <div className="border rounded-lg overflow-hidden">
           <iframe 
             src={`/criador/${username}`} 
-            className="w-full h-[600px]" 
+            className="w-full h-[600px]"
             title="Preview da página"
+            loading="lazy" 
+            sandbox="allow-scripts allow-same-origin"
           />
         </div>
       </CardContent>

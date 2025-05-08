@@ -29,3 +29,13 @@ export interface MimoPackage {
   highlighted: boolean;
   media: MediaItem[];
 }
+
+// Interface for form data
+export interface OnboardingFormData {
+  fullName: string;
+  workName: string;
+  email: string;
+  whatsapp: string;
+  instagram: string;
+  document: string;
+}
