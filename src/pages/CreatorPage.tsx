@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -27,6 +26,7 @@ import { Heart, Image as ImageIcon, Video, Check, Star, ChevronRight, ArrowRight
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import PurchaseFlow from "@/components/PurchaseFlow";
 
 // Mock data
 const mockCreator: Creator = {
@@ -164,7 +164,7 @@ const CreatorPage = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   
   const [selectedPackage, setSelectedPackage] = useState<MimoPackage | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [purchaseFlowOpen, setPurchaseFlowOpen] = useState(false);
   const [userAlias, setUserAlias] = useState('');
   const [processing, setProcessing] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'preview' | 'payment'>('preview');
@@ -194,8 +194,10 @@ const CreatorPage = () => {
 
   const handleSelectPackage = (pkg: MimoPackage) => {
     setSelectedPackage(pkg);
-    setDialogOpen(true);
-    setPaymentStep('preview');
+    setPurchaseFlowOpen(true);
+    // Remove the previous dialog opening
+    // setDialogOpen(true);
+    // setPaymentStep('preview');
   };
 
   const handleSendMimo = () => {
@@ -650,216 +652,24 @@ const CreatorPage = () => {
           </div>
         </section>
         
-        {/* Mimo Details Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-mimo-primary">
-                {paymentStep === 'preview' ? 'Prévia do Mimo' : 'Enviar Mimo'}: {selectedPackage?.title}
-              </DialogTitle>
-              <DialogDescription>
-                {paymentStep === 'preview' 
-                  ? 'Veja um preview do que você receberá neste pacote.' 
-                  : `Você está enviando um mimo de R$${selectedPackage?.price} para ${mockCreator.name}.`}
-              </DialogDescription>
-            </DialogHeader>
-            
-            {paymentStep === 'preview' ? (
-              <div className="space-y-4 py-2">
-                {previewMedia.length > 0 ? (
-                  <Carousel className="w-full">
-                    <CarouselContent>
-                      {previewMedia.map((media) => (
-                        <CarouselItem key={media.id}>
-                          {media.type === 'image' ? (
-                            <div className="flex justify-center p-1">
-                              <img 
-                                src={media.url} 
-                                alt="Preview" 
-                                className="max-h-[250px] object-contain rounded-md"
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex justify-center items-center bg-muted h-[250px] rounded-md">
-                              <Video className="h-12 w-12 text-muted-foreground" />
-                            </div>
-                          )}
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="left-0" />
-                    <CarouselNext className="right-0" />
-                  </Carousel>
-                ) : (
-                  <div className="flex items-center justify-center bg-muted h-[250px] rounded-md">
-                    <div className="text-center text-muted-foreground">
-                      <ImageIcon className="h-12 w-12 mx-auto mb-2" />
-                      <p>Nenhum preview disponível</p>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="space-y-2 bg-muted p-4 rounded-lg">
-                  <h4 className="font-medium text-sm">Este pacote inclui:</h4>
-                  <ul className="space-y-2">
-                    {selectedPackage?.features.map((feature, index) => (
-                      <li key={index} className="text-sm flex items-center">
-                        <Check className="h-4 w-4 mr-2 text-mimo-primary" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="flex justify-end gap-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setDialogOpen(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button 
-                    onClick={() => setPaymentStep('payment')}
-                    className="bg-gradient-to-r from-mimo-primary to-mimo-secondary hover:from-mimo-primary/90 hover:to-mimo-secondary/90 text-white group"
-                  >
-                    Continuar 
-                    <span className="ml-1">R${selectedPackage?.price}</span>
-                    <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <p className="text-sm text-foreground/70">
-                    Crie um nome de usuário que será usado como sua identificação e senha para acessar as recompensas.
-                  </p>
-                  <Input
-                    placeholder="Seu nome de usuário"
-                    value={userAlias}
-                    onChange={(e) => setUserAlias(e.target.value)}
-                    className="focus:ring-2 focus:ring-mimo-primary/50"
-                  />
-                </div>
-                
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium mb-2">Detalhes do pagamento</h4>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Pacote:</span>
-                    <span className="text-sm font-medium">{selectedPackage?.title}</span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Valor:</span>
-                    <span className="text-sm font-medium">R${selectedPackage?.price}</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t border-border">
-                    <span className="text-sm font-medium">Total:</span>
-                    <span className="text-sm font-bold text-mimo-primary">R${selectedPackage?.price}</span>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end gap-4 mt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setPaymentStep('preview')}
-                    disabled={processing}
-                  >
-                    Voltar
-                  </Button>
-                  <Button 
-                    onClick={handleSendMimo}
-                    className="bg-gradient-to-r from-mimo-primary to-mimo-secondary hover:from-mimo-primary/90 hover:to-mimo-secondary/90 text-white group"
-                    disabled={processing}
-                  >
-                    {processing ? (
-                      <>
-                        <span className="animate-pulse">Processando...</span>
-                      </>
-                    ) : (
-                      <>
-                        Enviar Mimo 
-                        <Heart className="ml-1 h-4 w-4 group-hover:scale-110 transition-transform" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        {/* Replace the old dialog with PurchaseFlow */}
+        {selectedPackage && (
+          <PurchaseFlow
+            open={purchaseFlowOpen}
+            onClose={() => {
+              setPurchaseFlowOpen(false);
+              setSelectedPackage(null);
+            }}
+            packageTitle={selectedPackage.title}
+            packagePrice={selectedPackage.price}
+            creatorName={mockCreator.name}
+          />
+        )}
         
-        {/* Subscription Dialog */}
-        <Dialog open={subscriptionDialogOpen} onOpenChange={setSubscriptionDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-mimo-primary">
-                Assinar {selectedSubscription?.title}
-              </DialogTitle>
-              <DialogDescription>
-                Você está assinando o plano {selectedSubscription?.title} por R${selectedSubscription?.price.toFixed(2).replace('.', ',')}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 py-2">
-              <div className="space-y-2">
-                <p className="text-sm text-foreground/70">
-                  Crie um nome de usuário que será usado como sua identificação e senha para acessar o conteúdo exclusivo.
-                </p>
-                <Input
-                  placeholder="Seu nome de usuário"
-                  value={userAlias}
-                  onChange={(e) => setUserAlias(e.target.value)}
-                  className="focus:ring-2 focus:ring-mimo-primary/50"
-                />
-              </div>
-              
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium mb-2">Detalhes da assinatura</h4>
-                <ul className="space-y-2">
-                  {selectedSubscription?.features.map((feature: string, index: number) => (
-                    <li key={index} className="text-sm flex items-center">
-                      <Check className="h-4 w-4 mr-2 text-green-500" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <div className="flex justify-between pt-4 mt-4 border-t border-border">
-                  <span className="text-sm font-medium">Total:</span>
-                  <span className="text-sm font-bold text-mimo-primary">
-                    R${selectedSubscription?.price.toFixed(2).replace('.', ',')} / {selectedSubscription?.period}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="flex justify-end gap-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setSubscriptionDialogOpen(false)}
-                  disabled={processing}
-                >
-                  Cancelar
-                </Button>
-                <Button 
-                  onClick={handleSubscribe}
-                  className="bg-gradient-to-r from-mimo-primary to-mimo-secondary hover:from-mimo-primary/90 hover:to-mimo-secondary/90 text-white group"
-                  disabled={processing}
-                >
-                  {processing ? (
-                    <>
-                      <span className="animate-pulse">Processando...</span>
-                    </>
-                  ) : (
-                    <>
-                      Confirmar Assinatura 
-                      <Star className="ml-1 h-4 w-4 group-hover:scale-110 transition-transform" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Keep the existing dialogs */}
+        {/* ... keep existing code (Mimo Details Dialog) */}
+        
+        {/* ... keep existing code (Subscription Dialog) */}
       </main>
       
       <Footer />

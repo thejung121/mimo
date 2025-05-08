@@ -12,6 +12,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [isLoaded, setIsLoaded] = useState(false);
+  const [loadAttempts, setLoadAttempts] = useState(0);
   
   const handleRefresh = () => {
     setRefreshing(true);
@@ -19,13 +20,26 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
     setTimeout(() => {
       setRefreshing(false);
       setLastRefresh(new Date());
-    }, 1000);
+      setLoadAttempts(0);
+    }, 800);
   };
 
   // Reset loaded state when username changes
   useEffect(() => {
     setIsLoaded(false);
+    setLoadAttempts(0);
   }, [username]);
+  
+  // Handle iframe load error
+  const handleIframeError = () => {
+    if (loadAttempts < 3) {
+      // Try again after a short delay
+      setTimeout(() => {
+        setLoadAttempts(prev => prev + 1);
+        setLastRefresh(new Date());
+      }, 1000);
+    }
+  };
   
   return (
     <Card className="shadow-lg overflow-hidden">
@@ -54,6 +68,11 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
               <div className="flex flex-col items-center gap-4">
                 <RefreshCw className="h-8 w-8 animate-spin text-mimo-primary" />
                 <p className="text-sm text-muted-foreground">Carregando preview...</p>
+                {loadAttempts > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Tentativa {loadAttempts}/3
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -64,6 +83,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
             loading="eager" 
             sandbox="allow-scripts allow-same-origin"
             onLoad={() => setIsLoaded(true)}
+            onError={handleIframeError}
             style={{ opacity: isLoaded ? 1 : 0.3, transition: 'opacity 0.3s ease' }}
           />
         </div>

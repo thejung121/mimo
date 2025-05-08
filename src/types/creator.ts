@@ -1,4 +1,3 @@
-
 // Creator related types
 export interface SocialLink {
   type: 'instagram' | 'twitter' | 'youtube' | 'website';
@@ -16,8 +15,9 @@ export interface Creator {
 
 export interface MediaItem {
   id: number;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'audio';
   url: string;
+  caption?: string;
   isPreview: boolean;
 }
 

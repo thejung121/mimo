@@ -48,6 +48,7 @@ const initialMimoPackages: MimoPackage[] = [
         id: 1,
         type: 'image' as const,
         url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158',
+        caption: 'Ensaio exclusivo',
         isPreview: true
       }
     ]
@@ -69,6 +70,7 @@ const initialMimoPackages: MimoPackage[] = [
         id: 2,
         type: 'image' as const,
         url: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
+        caption: 'Conteúdo exclusivo',
         isPreview: false
       },
       { 
@@ -226,7 +228,7 @@ export const useCreatorEditor = () => {
     
     toast({
       title: "Mídia adicionada",
-      description: "A mídia foi adicionada ao pacote com sucesso.",
+      description: `${media.type === 'image' ? 'Imagem' : media.type === 'video' ? 'Vídeo' : 'Áudio'} adicionado(a) ao pacote com sucesso.`,
     });
   };
 

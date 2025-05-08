@@ -4,85 +4,91 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { FileImage, Upload, Image, Video } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { FileImage, Upload, Image, Video, AudioLines } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 interface MediaUploaderProps {
   onMediaAdd: (media: {
     id: number,
-    type: 'image' | 'video',
+    type: 'image' | 'video' | 'audio',
     url: string,
+    caption?: string,
     isPreview: boolean
   }) => void;
 }
-
-// Mock das URLs de imagens
-const sampleImages = [
-  'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
-  'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158',
-  'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5',
-  'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-  'https://images.unsplash.com/photo-1582562124811-c09040d0a901',
-];
-
-// Mock das URLs de vídeos
-const sampleVideos = [
-  'https://example.com/sample-video1.mp4',
-  'https://example.com/sample-video2.mp4',
-];
 
 const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('upload');
   const [uploadUrl, setUploadUrl] = useState('');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [caption, setCaption] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | 'audio'>('image');
 
-  const handleAddFromLibrary = () => {
-    if (selectedImage) {
-      // Gerar um ID único para a nova mídia
-      const newId = Date.now();
-      
-      onMediaAdd({
-        id: newId,
-        type: 'image',
-        url: selectedImage,
-        isPreview: false
-      });
-      
-      setOpen(false);
-      setSelectedImage(null);
-      
+  const handleUploadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      return;
+    }
+    
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Determine media type from file
+    let type: 'image' | 'video' | 'audio' = 'image';
+    if (file.type.startsWith('video/')) {
+      type = 'video';
+    } else if (file.type.startsWith('audio/')) {
+      type = 'audio';
+    } else if (!file.type.startsWith('image/')) {
       toast({
-        title: "Imagem adicionada",
-        description: "A imagem foi adicionada com sucesso ao seu pacote.",
-      });
-    } else if (selectedVideo) {
-      // Gerar um ID único para a nova mídia
-      const newId = Date.now();
-      
-      onMediaAdd({
-        id: newId,
-        type: 'video',
-        url: selectedVideo,
-        isPreview: false
-      });
-      
-      setOpen(false);
-      setSelectedVideo(null);
-      
-      toast({
-        title: "Vídeo adicionado",
-        description: "O vídeo foi adicionado com sucesso ao seu pacote.",
-      });
-    } else {
-      toast({
-        title: "Nenhuma mídia selecionada",
-        description: "Por favor, selecione uma imagem ou vídeo primeiro.",
+        title: "Formato não suportado",
+        description: "Por favor, faça upload apenas de imagens, vídeos ou áudios.",
         variant: "destructive"
       });
+      return;
     }
+    
+    setMediaType(type);
+    setUploading(true);
+    
+    // Simulate upload progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      setUploadProgress(progress);
+      
+      if (progress >= 100) {
+        clearInterval(interval);
+        
+        // Create temporary URL for preview
+        const url = URL.createObjectURL(file);
+        
+        // Generate a mock ID for the media
+        const newId = Date.now();
+        
+        onMediaAdd({
+          id: newId,
+          type,
+          url,
+          caption: caption || undefined,
+          isPreview: false
+        });
+        
+        setUploading(false);
+        setUploadProgress(0);
+        setCaption('');
+        setOpen(false);
+        
+        toast({
+          title: `${type === 'image' ? 'Imagem' : type === 'video' ? 'Vídeo' : 'Áudio'} adicionado`,
+          description: `${type === 'image' ? 'A imagem' : type === 'video' ? 'O vídeo' : 'O áudio'} foi adicionado com sucesso ao seu pacote.`,
+        });
+      }
+    }, 200);
   };
 
   const handleAddFromUrl = () => {
@@ -99,25 +105,35 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       // Validar URL (verificação básica)
       new URL(uploadUrl);
       
-      // Determinar tipo pela extensão do arquivo
-      const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(uploadUrl);
+      // Determine media type from URL extension
+      let type: 'image' | 'video' | 'audio' = 'image';
+      if (/\.(mp4|webm|ogg|mov)$/i.test(uploadUrl)) {
+        type = 'video';
+      } else if (/\.(mp3|wav|ogg|m4a)$/i.test(uploadUrl)) {
+        type = 'audio';
+      } else if (!/\.(jpg|jpeg|png|gif|webp)$/i.test(uploadUrl)) {
+        // If not a recognized extension, use the manually selected type
+        type = mediaType;
+      }
       
       // Gerar um ID único para a nova mídia
       const newId = Date.now();
       
       onMediaAdd({
         id: newId,
-        type: isVideo ? 'video' : 'image',
+        type,
         url: uploadUrl,
+        caption: caption || undefined,
         isPreview: false
       });
       
       setOpen(false);
       setUploadUrl('');
+      setCaption('');
       
       toast({
-        title: `${isVideo ? 'Vídeo' : 'Imagem'} adicionado`,
-        description: `${isVideo ? 'O vídeo' : 'A imagem'} foi adicionado com sucesso ao seu pacote.`,
+        title: `${type === 'image' ? 'Imagem' : type === 'video' ? 'Vídeo' : 'Áudio'} adicionado`,
+        description: `${type === 'image' ? 'A imagem' : type === 'video' ? 'O vídeo' : 'O áudio'} foi adicionado com sucesso ao seu pacote.`,
       });
     } catch (e) {
       toast({
@@ -143,102 +159,112 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
           <DialogHeader>
             <DialogTitle>Adicionar mídia</DialogTitle>
             <DialogDescription>
-              Adicione imagens ou vídeos para o seu pacote de mimo.
+              Adicione imagens, vídeos ou áudios para o seu pacote de mimo.
             </DialogDescription>
           </DialogHeader>
 
           <Tabs defaultValue="upload" className="w-full" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="upload">Upload por URL</TabsTrigger>
-              <TabsTrigger value="library">Biblioteca</TabsTrigger>
+              <TabsTrigger value="upload">Upload de arquivo</TabsTrigger>
+              <TabsTrigger value="url">URL externa</TabsTrigger>
             </TabsList>
             
             <TabsContent value="upload" className="mt-4 space-y-4">
               <div className="flex flex-col space-y-2">
+                {uploading ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-center">Enviando arquivo...</p>
+                    <Progress value={uploadProgress} className="h-2" />
+                  </div>
+                ) : (
+                  <>
+                    <label className="relative flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-md cursor-pointer text-muted-foreground hover:bg-muted/50 transition-colors">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="h-10 w-10 mb-2" />
+                        <p className="mb-2 text-sm">Clique ou arraste para fazer upload</p>
+                        <p className="text-xs">Imagem, vídeo ou áudio</p>
+                      </div>
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/*,video/*,audio/*" 
+                        onChange={handleUploadFile}
+                      />
+                    </label>
+                    <div className="flex flex-col space-y-2">
+                      <label htmlFor="caption" className="text-sm font-medium">
+                        Legenda (opcional)
+                      </label>
+                      <Textarea
+                        id="caption"
+                        placeholder="Descreva esta mídia..."
+                        value={caption}
+                        onChange={(e) => setCaption(e.target.value)}
+                        className="resize-none"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="url" className="mt-4 space-y-4">
+              <div className="flex flex-col space-y-2">
+                <div className="flex gap-2">
+                  <TabsList>
+                    <TabsTrigger 
+                      value="image" 
+                      onClick={() => setMediaType('image')}
+                      className={mediaType === 'image' ? 'bg-primary text-primary-foreground' : ''}
+                    >
+                      <Image className="h-4 w-4 mr-1" /> Imagem
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="video" 
+                      onClick={() => setMediaType('video')}
+                      className={mediaType === 'video' ? 'bg-primary text-primary-foreground' : ''}
+                    >
+                      <Video className="h-4 w-4 mr-1" /> Vídeo
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="audio" 
+                      onClick={() => setMediaType('audio')}
+                      className={mediaType === 'audio' ? 'bg-primary text-primary-foreground' : ''}
+                    >
+                      <AudioLines className="h-4 w-4 mr-1" /> Áudio
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
                 <label htmlFor="url" className="text-sm font-medium">
-                  URL da imagem ou vídeo
+                  URL da mídia ({mediaType === 'image' ? 'imagem' : mediaType === 'video' ? 'vídeo' : 'áudio'})
                 </label>
                 <Input
                   id="url"
-                  placeholder="https://exemplo.com/imagem.jpg"
+                  placeholder="https://exemplo.com/arquivo"
                   value={uploadUrl}
                   onChange={(e) => setUploadUrl(e.target.value)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Cole o link direto para uma imagem ou vídeo online.
+                  Cole o link direto para uma {mediaType === 'image' ? 'imagem' : mediaType === 'video' ? 'um vídeo' : 'um áudio'} online.
                 </p>
+              </div>
+              
+              <div className="flex flex-col space-y-2">
+                <label htmlFor="caption-url" className="text-sm font-medium">
+                  Legenda (opcional)
+                </label>
+                <Textarea
+                  id="caption-url"
+                  placeholder="Descreva esta mídia..."
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  className="resize-none"
+                />
               </div>
               
               <div className="flex justify-end">
                 <Button 
                   onClick={handleAddFromUrl}
-                  className="mimo-button flex items-center gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  Adicionar
-                </Button>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="library" className="mt-4">
-              <Tabs defaultValue="images" className="w-full">
-                <TabsList className="grid grid-cols-2 w-full mb-4">
-                  <TabsTrigger value="images" className="flex items-center gap-1">
-                    <Image className="h-4 w-4" /> Imagens
-                  </TabsTrigger>
-                  <TabsTrigger value="videos" className="flex items-center gap-1">
-                    <Video className="h-4 w-4" /> Vídeos
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="images">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                    {sampleImages.map((url, index) => (
-                      <div 
-                        key={index}
-                        className={`relative border rounded-md overflow-hidden cursor-pointer ${selectedImage === url ? 'border-mimo-primary ring-2 ring-mimo-primary/30' : 'border-border'}`}
-                        onClick={() => {
-                          setSelectedImage(url);
-                          setSelectedVideo(null);
-                        }}
-                      >
-                        <img 
-                          src={url} 
-                          alt={`Imagem ${index + 1}`}
-                          className="w-full h-24 object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="videos">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                    {sampleVideos.map((url, index) => (
-                      <div 
-                        key={index}
-                        className={`relative border rounded-md overflow-hidden cursor-pointer ${selectedVideo === url ? 'border-mimo-primary ring-2 ring-mimo-primary/30' : 'border-border'}`}
-                        onClick={() => {
-                          setSelectedVideo(url);
-                          setSelectedImage(null);
-                        }}
-                      >
-                        <div className="w-full h-24 bg-muted flex items-center justify-center">
-                          <Video className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1">
-                          Vídeo {index + 1}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-              </Tabs>
-              
-              <div className="flex justify-end mt-4">
-                <Button 
-                  onClick={handleAddFromLibrary}
-                  disabled={!selectedImage && !selectedVideo}
                   className="mimo-button flex items-center gap-2"
                 >
                   <Upload className="h-4 w-4" />

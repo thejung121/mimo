@@ -2,9 +2,10 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Eye } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import MimoPackageForm from './MimoPackageForm';
 import MediaUploader from './MediaUploader';
+import MediaItemDisplay from './MediaItemDisplay';
 import { MimoPackage, MediaItem } from '@/types/creator';
 
 interface EditPackagesSectionProps {
@@ -111,46 +112,17 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
                 {/* Seção de mídia do pacote */}
                 <div className="border-t bg-muted/50 p-4">
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium">Imagens e vídeos</h4>
+                    <h4 className="font-medium">Mídias do pacote</h4>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {pkg.media.map((media) => (
-                      <div 
-                        key={media.id} 
-                        className={`relative rounded-md overflow-hidden border ${media.isPreview ? 'border-mimo-primary' : 'border-border'}`}
-                      >
-                        <img 
-                          src={media.url} 
-                          alt={`Mídia ${media.id}`}
-                          className="w-full h-24 object-cover"
-                        />
-                        <div className="absolute top-1 right-1 flex space-x-1">
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            className="h-6 w-6 bg-white/80 hover:bg-white border"
-                            onClick={() => onTogglePreview(pkg.id!, media.id)}
-                            title={media.isPreview ? "Remover do preview" : "Adicionar ao preview"}
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            className="h-6 w-6 bg-white/80 hover:bg-white border text-destructive"
-                            onClick={() => onRemoveMedia(pkg.id!, media.id)}
-                            title="Remover mídia"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        {media.isPreview && (
-                          <div className="absolute bottom-0 left-0 right-0 bg-mimo-primary text-white text-[10px] py-0.5 px-2 text-center">
-                            Preview
-                          </div>
-                        )}
-                      </div>
+                      <MediaItemDisplay
+                        key={media.id}
+                        media={media}
+                        onTogglePreview={() => onTogglePreview(pkg.id!, media.id)}
+                        onRemove={() => onRemoveMedia(pkg.id!, media.id)}
+                      />
                     ))}
                     
                     <MediaUploader onMediaAdd={(media) => onAddMedia(pkg.id!, media)} />

@@ -5,12 +5,14 @@ import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Card, 
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -20,7 +22,8 @@ import {
   DialogTitle,
   DialogFooter
 } from "@/components/ui/dialog";
-import { Lock, Image, Video, FileText } from 'lucide-react';
+import { Label } from "@/components/ui/label";
+import { Lock, Image, Video, AudioLines, FileText, Check, Copy, QrCode } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 // Mock data
@@ -31,10 +34,11 @@ const mockReward = {
   message: 'Muito obrigada pelo seu apoio! Preparei este conteúdo exclusivo com todo carinho. Espero que goste!',
   expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 dias
   files: [
-    { type: 'image', name: 'photo1.jpg', url: 'https://images.unsplash.com/photo-1611042553365-9b101441c135?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&h=600&q=80' },
-    { type: 'image', name: 'photo2.jpg', url: 'https://images.unsplash.com/photo-1607462109225-6b64ae2dd3cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&h=600&q=80' },
-    { type: 'image', name: 'photo3.jpg', url: 'https://images.unsplash.com/photo-1617419086540-518c5b847661?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&h=600&q=80' },
-    { type: 'video', name: 'video.mp4', url: 'https://example.com/video.mp4', thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&h=450&q=80' }
+    { type: 'image', name: 'photo1.jpg', url: 'https://images.unsplash.com/photo-1611042553365-9b101441c135', caption: 'Ensaio especial para você' },
+    { type: 'image', name: 'photo2.jpg', url: 'https://images.unsplash.com/photo-1607462109225-6b64ae2dd3cb', caption: 'Momento único' },
+    { type: 'image', name: 'photo3.jpg', url: 'https://images.unsplash.com/photo-1617419086540-518c5b847661', caption: 'Exclusivo para apoiadores' },
+    { type: 'video', name: 'video.mp4', url: 'https://example.com/video.mp4', caption: 'Vídeo personalizado', thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7' },
+    { type: 'audio', name: 'audio.mp3', url: 'https://example.com/audio.mp3', caption: 'Mensagem de voz especial' }
   ]
 };
 
@@ -73,6 +77,14 @@ const RewardPage = () => {
     setFileViewerOpen(true);
   };
 
+  const copyLinkToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Link copiado!",
+      description: "Link copiado para a área de transferência.",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -80,7 +92,7 @@ const RewardPage = () => {
       <main className="flex-grow py-8">
         <div className="mimo-container">
           {!unlocked ? (
-            <Card className="max-w-md mx-auto">
+            <Card className="max-w-md mx-auto animate-fade-in">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Lock className="h-5 w-5 text-mimo-primary" />
@@ -101,16 +113,32 @@ const RewardPage = () => {
                   Desbloquear conteúdo
                 </Button>
               </CardContent>
+              <CardFooter className="flex justify-center border-t pt-4 text-xs text-muted-foreground">
+                <p>Use o nome de usuário que você criou ao enviar o Mimo</p>
+              </CardFooter>
             </Card>
           ) : (
             <>
-              <div className="max-w-3xl mx-auto mb-8">
+              <div className="max-w-3xl mx-auto mb-8 animate-fade-in">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Seu Mimo de {mockReward.creatorName}</CardTitle>
-                    <CardDescription>
-                      Pacote {mockReward.packageName} • Disponível por mais {daysLeft} dias
-                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>Seu Mimo de {mockReward.creatorName}</CardTitle>
+                        <CardDescription>
+                          Pacote {mockReward.packageName} • Disponível por mais {daysLeft} dias
+                        </CardDescription>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                        onClick={copyLinkToClipboard}
+                      >
+                        <Copy className="h-4 w-4" />
+                        <span className="hidden sm:inline">Copiar link</span>
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="bg-accent/30 border border-border rounded-lg p-4 mb-6">
@@ -119,17 +147,17 @@ const RewardPage = () => {
                     
                     <h3 className="font-medium mb-4">Conteúdo exclusivo para você</h3>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {mockReward.files.map((file, index) => (
                         <div 
                           key={index}
-                          className="aspect-square rounded-lg overflow-hidden relative cursor-pointer group"
+                          className="aspect-square rounded-lg overflow-hidden relative cursor-pointer group border border-border"
                           onClick={() => viewFile(file)}
                         >
                           {file.type === 'image' && (
                             <img 
                               src={file.url} 
-                              alt={file.name} 
+                              alt={file.caption || file.name} 
                               className="w-full h-full object-cover"
                             />
                           )}
@@ -137,7 +165,7 @@ const RewardPage = () => {
                             <div className="relative w-full h-full">
                               <img 
                                 src={file.thumbnail} 
-                                alt={file.name} 
+                                alt={file.caption || file.name} 
                                 className="w-full h-full object-cover"
                               />
                               <div className="absolute inset-0 flex items-center justify-center">
@@ -147,10 +175,25 @@ const RewardPage = () => {
                               </div>
                             </div>
                           )}
+                          {file.type === 'audio' && (
+                            <div className="relative w-full h-full bg-gradient-to-br from-mimo-primary/10 to-mimo-secondary/10 flex items-center justify-center">
+                              <div className="bg-black/20 rounded-full p-3">
+                                <AudioLines className="h-10 w-10 text-mimo-primary" />
+                              </div>
+                            </div>
+                          )}
+                          
+                          {file.caption && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2 text-sm transform translate-y-full group-hover:translate-y-0 transition-transform">
+                              {file.caption}
+                            </div>
+                          )}
+                          
                           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                               {file.type === 'image' && <Image className="h-8 w-8 text-white drop-shadow-lg" />}
                               {file.type === 'video' && <Video className="h-8 w-8 text-white drop-shadow-lg" />}
+                              {file.type === 'audio' && <AudioLines className="h-8 w-8 text-white drop-shadow-lg" />}
                               {file.type === 'document' && <FileText className="h-8 w-8 text-white drop-shadow-lg" />}
                             </div>
                           </div>
@@ -205,20 +248,38 @@ const RewardPage = () => {
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             {selectedFile && (
               <div className="py-4">
-                {selectedFile.type === 'image' && (
-                  <img 
-                    src={selectedFile.url} 
-                    alt={selectedFile.name} 
-                    className="max-w-full h-auto rounded-lg mx-auto"
-                  />
-                )}
-                {selectedFile.type === 'video' && (
-                  <video 
-                    src={selectedFile.url} 
-                    controls 
-                    className="max-w-full rounded-lg mx-auto"
-                  />
-                )}
+                <DialogHeader>
+                  <DialogTitle>{selectedFile.caption || selectedFile.name}</DialogTitle>
+                </DialogHeader>
+                
+                <div className="mt-4">
+                  {selectedFile.type === 'image' && (
+                    <img 
+                      src={selectedFile.url} 
+                      alt={selectedFile.caption || selectedFile.name} 
+                      className="max-w-full h-auto rounded-lg mx-auto"
+                    />
+                  )}
+                  {selectedFile.type === 'video' && (
+                    <video 
+                      src={selectedFile.url} 
+                      controls 
+                      className="max-w-full rounded-lg mx-auto"
+                    />
+                  )}
+                  {selectedFile.type === 'audio' && (
+                    <div className="bg-muted p-4 rounded-lg">
+                      <p className="text-center mb-4 text-muted-foreground">
+                        {selectedFile.caption || "Áudio exclusivo"}
+                      </p>
+                      <audio 
+                        src={selectedFile.url} 
+                        controls 
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </DialogContent>
