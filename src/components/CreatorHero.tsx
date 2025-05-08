@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Creator, SocialLink } from '@/types/creator';
-import { Heart, ChevronDown, Instagram, Twitter, Youtube, Globe } from 'lucide-react';
+import { Heart, ChevronDown, Instagram, Twitter, Youtube, Globe, Lock } from 'lucide-react';
 
 interface CreatorHeroProps {
   creator: Creator;
@@ -10,7 +10,7 @@ interface CreatorHeroProps {
 }
 
 const CreatorHero = ({ creator, onMimoClick }: CreatorHeroProps) => {
-  const getSocialIcon = (type: 'instagram' | 'twitter' | 'youtube' | 'website') => {
+  const getSocialIcon = (type: 'instagram' | 'twitter' | 'youtube' | 'website' | 'privacy') => {
     switch (type) {
       case 'instagram':
         return <Instagram className="h-5 w-5" />;
@@ -20,6 +20,8 @@ const CreatorHero = ({ creator, onMimoClick }: CreatorHeroProps) => {
         return <Youtube className="h-5 w-5" />;
       case 'website':
         return <Globe className="h-5 w-5" />;
+      case 'privacy':
+        return <Lock className="h-5 w-5" />;
       default:
         return null;
     }
