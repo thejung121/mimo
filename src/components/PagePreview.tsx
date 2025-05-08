@@ -11,14 +11,21 @@ interface PagePreviewProps {
 const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [isLoaded, setIsLoaded] = useState(false);
   
   const handleRefresh = () => {
     setRefreshing(true);
+    setIsLoaded(false);
     setTimeout(() => {
       setRefreshing(false);
       setLastRefresh(new Date());
-    }, 1500);
+    }, 1000);
   };
+
+  // Reset loaded state when username changes
+  useEffect(() => {
+    setIsLoaded(false);
+  }, [username]);
   
   return (
     <Card className="shadow-lg overflow-hidden">
@@ -41,13 +48,23 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-lg overflow-hidden relative">
+          {!isLoaded && (
+            <div className="absolute inset-0 bg-background flex items-center justify-center z-10">
+              <div className="flex flex-col items-center gap-4">
+                <RefreshCw className="h-8 w-8 animate-spin text-mimo-primary" />
+                <p className="text-sm text-muted-foreground">Carregando preview...</p>
+              </div>
+            </div>
+          )}
           <iframe 
             src={`/criador/${username}?t=${lastRefresh.getTime()}`} 
             className="w-full h-[600px]"
             title="Preview da página"
-            loading="lazy" 
+            loading="eager" 
             sandbox="allow-scripts allow-same-origin"
+            onLoad={() => setIsLoaded(true)}
+            style={{ opacity: isLoaded ? 1 : 0.3, transition: 'opacity 0.3s ease' }}
           />
         </div>
         <div className="p-3 text-xs text-muted-foreground bg-gray-50 border-t">

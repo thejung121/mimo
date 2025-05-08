@@ -24,6 +24,7 @@ interface EditPackagesSectionProps {
   onAddMedia: (packageId: number | null, media: MediaItem) => void;
   onRemoveMedia: (packageId: number | null, mediaId: number) => void;
   onTogglePreview: (packageId: number | null, mediaId: number) => void;
+  setShowNewPackageForm: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
@@ -42,7 +43,8 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
   onSavePackage,
   onAddMedia,
   onRemoveMedia,
-  onTogglePreview
+  onTogglePreview,
+  setShowNewPackageForm
 }) => {
   return (
     <>

@@ -88,11 +88,11 @@ const EditCreatorPage = () => {
                     creator={creator}
                     coverPreview={coverPreview}
                     avatarPreview={avatarPreview}
-                    handleCreatorChange={handleCreatorChange}
-                    handleSocialLinkChange={handleSocialLinkChange}
-                    handleCoverChange={handleCoverChange}
-                    handleAvatarChange={handleAvatarChange}
-                    handleSaveProfile={handleSaveProfile}
+                    onCreatorChange={handleCreatorChange}
+                    onSocialLinkChange={handleSocialLinkChange}
+                    onCoverChange={handleCoverChange}
+                    onAvatarChange={handleAvatarChange}
+                    onSaveProfile={handleSaveProfile}
                   />
                 </TabsContent>
                 
@@ -101,17 +101,20 @@ const EditCreatorPage = () => {
                     mimoPackages={mimoPackages}
                     showNewPackageForm={showNewPackageForm}
                     newPackage={newPackage}
-                    handleAddFeature={handleAddFeature}
-                    handleFeatureChange={handleFeatureChange}
-                    handleRemoveFeature={handleRemoveFeature}
-                    handlePackageChange={handlePackageChange}
-                    handleAddMedia={handleAddMedia}
-                    handleRemoveMedia={handleRemoveMedia}
-                    handleTogglePreview={handleTogglePreview}
-                    handleSavePackage={handleSavePackage}
-                    handleDeletePackage={handleDeletePackage}
-                    handleEditPackage={handleEditPackage}
+                    onAddFeature={handleAddFeature}
+                    onFeatureChange={handleFeatureChange}
+                    onRemoveFeature={handleRemoveFeature}
+                    onPackageChange={handlePackageChange}
+                    onAddMedia={handleAddMedia}
+                    onRemoveMedia={handleRemoveMedia}
+                    onTogglePreview={handleTogglePreview}
+                    onSavePackage={handleSavePackage}
+                    onDeletePackage={handleDeletePackage}
+                    onEditPackage={handleEditPackage}
                     setShowNewPackageForm={setShowNewPackageForm}
+                    onAddPackage={() => setShowNewPackageForm(true)}
+                    onCancelAddPackage={() => setShowNewPackageForm(false)}
+                    onSaveAll={handleSaveAll}
                   />
                 </TabsContent>
               </Tabs>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -36,7 +35,7 @@ import {
   Link as LinkIcon,
   User,
   ArrowRight,
-  Bank,
+  Building,
   Clock,
   Wallet,
   ChevronRight,
@@ -398,7 +397,7 @@ const Dashboard = () => {
               ) : (
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Bank className="h-16 w-16 text-muted-foreground mb-4" />
+                    <Building className="h-16 w-16 text-muted-foreground mb-4" />
                     <p className="text-center text-muted-foreground">
                       Nenhum saque solicitado ainda.
                     </p>
