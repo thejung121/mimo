@@ -39,6 +39,8 @@ const PackagesSection = ({
   onEditPackage,
   setShowNewPackageForm
 }: PackagesSectionProps) => {
+  const hasNoPackages = mimoPackages.length === 0;
+
   return (
     <Card>
       <CardHeader>
@@ -46,19 +48,24 @@ const PackagesSection = ({
         <CardDescription>Gerencie os pacotes que seus fãs podem adquirir para te enviar mimos.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Lista de pacotes existentes */}
-        <PackagesList
-          mimoPackages={mimoPackages}
-          onEditPackage={onEditPackage}
-          onDeletePackage={onDeletePackage}
-          onAddMedia={onAddMedia}
-          onRemoveMedia={onRemoveMedia}
-          onTogglePreview={onTogglePreview}
-        />
+        {/* Lista de pacotes existentes quando houver pacotes */}
+        {!hasNoPackages && (
+          <PackagesList
+            mimoPackages={mimoPackages}
+            onEditPackage={onEditPackage}
+            onDeletePackage={onDeletePackage}
+            onAddMedia={onAddMedia}
+            onRemoveMedia={onRemoveMedia}
+            onTogglePreview={onTogglePreview}
+          />
+        )}
         
         {/* Formulário para adicionar novo pacote ou botão para mostrá-lo */}
         {!showNewPackageForm ? (
-          <NewPackageButton onClick={() => setShowNewPackageForm(true)} />
+          <NewPackageButton 
+            onClick={() => setShowNewPackageForm(true)} 
+            isFirstPackage={hasNoPackages}
+          />
         ) : (
           <MimoPackageForm
             packageData={newPackage}

@@ -1,14 +1,14 @@
 
 import { MimoPackage } from '@/types/creator';
 
-// Empty array for packages - no pre-defined packages
+// Array vazio para pacotes iniciais - o usuário vai cadastrar sem exemplos
 export const initialMimoPackages: MimoPackage[] = [];
 
-// Empty package template for creating new packages
+// Modelo de pacote vazio
 export const emptyPackage: MimoPackage = {
-  title: "",
+  title: '',
   price: 0,
-  features: [""],
+  features: [''],
   highlighted: false,
   media: []
 };

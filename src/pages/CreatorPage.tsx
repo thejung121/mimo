@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -5,14 +6,12 @@ import Footer from '@/components/Footer';
 import { Creator, MimoPackage } from '@/types/creator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/components/ui/use-toast';
-import { Heart, Star } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
 import CreatorHero from '@/components/CreatorHero';
 import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import MimoTabContent from '@/components/MimoTabContent';
-import SubscriptionTabContent from '@/components/SubscriptionTabContent';
 import TestimonialsSection from '@/components/TestimonialsSection';
-import SubscriptionDialog from '@/components/SubscriptionDialog';
 
 // Mock data
 const mockCreator: Creator = {
@@ -113,35 +112,6 @@ const mimoPackages: MimoPackage[] = [
   }
 ];
 
-const subscriptionOptions = [
-  {
-    id: 's1',
-    title: 'Assinatura Mensal',
-    price: 49.90,
-    period: 'mês',
-    features: [
-      'Acesso a conteúdo exclusivo',
-      'Novo material toda semana',
-      'Desconto de 15% em mimos',
-      'Acesso ao chat privado'
-    ],
-    popular: false
-  },
-  {
-    id: 's2',
-    title: 'Assinatura Trimestral',
-    price: 129.90,
-    period: '3 meses',
-    features: [
-      'Tudo da mensal',
-      'Economia de R$20',
-      'Consulta por vídeo mensal',
-      'Acesso a conteúdo do arquivo'
-    ],
-    popular: true
-  }
-];
-
 const CreatorPage = () => {
   const { username } = useParams();
   const { toast } = useToast();
@@ -154,10 +124,16 @@ const CreatorPage = () => {
   const [userAlias, setUserAlias] = useState('');
   const [processing, setProcessing] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'preview' | 'payment'>('preview');
-  const [activeTab, setActiveTab] = useState<'mimos' | 'subscription'>('mimos');
-  const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false);
-  const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Carregar os pacotes recentes do usuário - simulação
+  const [loadedPackages, setLoadedPackages] = useState<MimoPackage[]>([]);
+  
+  // Efeito para buscar os pacotes cadastrados mais recentes
+  useEffect(() => {
+    // Em um cenário real, aqui você buscaria os pacotes recentes da API
+    // Para esta simulação, usamos os do mock
+    setLoadedPackages(mimoPackages);
+  }, []);
 
   // Handle scroll effect for header
   useEffect(() => {
@@ -182,9 +158,6 @@ const CreatorPage = () => {
   const handleSelectPackage = (pkg: MimoPackage) => {
     setSelectedPackage(pkg);
     setPurchaseFlowOpen(true);
-    // Commented out since we're using PurchaseFlow now
-    // setDialogOpen(true);
-    // setPaymentStep('preview');
   };
 
   const scrollToMimoSection = () => {
@@ -192,60 +165,6 @@ const CreatorPage = () => {
     if (mimoSection) {
       mimoSection.scrollIntoView({ behavior: 'smooth' });
     }
-  };
-
-  const handleSendMimo = () => {
-    if (!userAlias.trim()) {
-      toast({
-        title: "Nome de usuário obrigatório",
-        description: "Por favor, insira um nome de usuário para continuar.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setProcessing(true);
-    
-    // Simulando o processamento do pagamento
-    setTimeout(() => {
-      toast({
-        title: "Mimo enviado com sucesso!",
-        description: `Obrigado pelo seu apoio. Você receberá um link de acesso às recompensas em breve.`,
-      });
-      setProcessing(false);
-      setDialogOpen(false);
-      setUserAlias('');
-      setPaymentStep('preview');
-    }, 2000);
-  };
-  
-  const handleSelectSubscription = (sub: any) => {
-    setSelectedSubscription(sub);
-    setSubscriptionDialogOpen(true);
-  };
-  
-  const handleSubscribe = () => {
-    if (!userAlias.trim()) {
-      toast({
-        title: "Nome de usuário obrigatório",
-        description: "Por favor, insira um nome de usuário para continuar.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setProcessing(true);
-    
-    // Simulando o processamento do pagamento
-    setTimeout(() => {
-      toast({
-        title: "Assinatura realizada com sucesso!",
-        description: `Obrigado pelo seu apoio contínuo. Sua assinatura está ativa.`,
-      });
-      setProcessing(false);
-      setSubscriptionDialogOpen(false);
-      setUserAlias('');
-    }, 2000);
   };
 
   return (
@@ -267,45 +186,31 @@ const CreatorPage = () => {
           onMimoClick={scrollToMimoSection} 
         />
         
-        {/* Options Tab Section */}
+        {/* Mimos Section */}
         <section id="mimo-section" className="py-16 bg-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-mimo-primary to-mimo-secondary inline-block">
-                Escolha como apoiar
+                Envie um Mimo
               </h2>
               <p className="text-lg text-gray-600">
-                Escolha entre enviar um mimo ou assinar conteúdo exclusivo
+                Escolha um dos pacotes para apoiar o criador
               </p>
             </div>
             
-            <Tabs 
-              value={activeTab} 
-              onValueChange={(value) => setActiveTab(value as 'mimos' | 'subscription')} 
-              className="mb-8"
-            >
+            <Tabs defaultValue="mimos" className="mb-8">
               <div className="flex justify-center">
-                <TabsList className="grid grid-cols-2 w-[400px] mb-10">
-                  <TabsTrigger value="mimos" className="text-base py-3">
+                <TabsList className="w-[200px] mb-10">
+                  <TabsTrigger value="mimos" className="text-base py-3 w-full">
                     <Heart className="mr-2 h-4 w-4" /> Mimos
-                  </TabsTrigger>
-                  <TabsTrigger value="subscription" className="text-base py-3">
-                    <Star className="mr-2 h-4 w-4" /> Assinatura
                   </TabsTrigger>
                 </TabsList>
               </div>
               
               <TabsContent value="mimos">
                 <MimoTabContent 
-                  mimoPackages={mimoPackages} 
+                  mimoPackages={loadedPackages} 
                   onSelectPackage={handleSelectPackage} 
-                />
-              </TabsContent>
-              
-              <TabsContent value="subscription">
-                <SubscriptionTabContent 
-                  subscriptionOptions={subscriptionOptions} 
-                  onSelectSubscription={handleSelectSubscription} 
                 />
               </TabsContent>
             </Tabs>
@@ -328,17 +233,6 @@ const CreatorPage = () => {
             creatorName={mockCreator.name}
           />
         )}
-        
-        {/* Subscription Dialog */}
-        <SubscriptionDialog
-          open={subscriptionDialogOpen}
-          onOpenChange={setSubscriptionDialogOpen}
-          selectedSubscription={selectedSubscription}
-          userAlias={userAlias}
-          onUserAliasChange={(e) => setUserAlias(e.target.value)}
-          onSubscribe={handleSubscribe}
-          processing={processing}
-        />
       </main>
       
       <Footer />
