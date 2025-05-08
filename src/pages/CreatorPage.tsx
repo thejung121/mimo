@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
-import { MimoPackage } from '@/types/creator';
+import { MimoPackage, Creator, SocialLink } from '@/types/creator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
@@ -12,7 +11,7 @@ import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import MimoTabContent from '@/components/MimoTabContent';
 
 // Mock creator data - will be fetched from API in real application
-const mockCreator = {
+const mockCreator: Creator = {
   username: 'mariafernanda',
   name: 'Maria Fernanda',
   avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80',
