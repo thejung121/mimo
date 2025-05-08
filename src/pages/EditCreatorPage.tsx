@@ -1,18 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { Settings, Heart, Eye } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { useCreatorEditor } from '@/hooks/useCreatorEditor';
 import EditProfileSection from '@/components/EditProfileSection';
 import EditPackagesSection from '@/components/EditPackagesSection';
 import PagePreview from '@/components/PagePreview';
-import { useCreatorEditor } from '@/hooks/useCreatorEditor';
+import { Eye, EyeOff, Save } from 'lucide-react';
 
 const EditCreatorPage = () => {
-  const { toast } = useToast();
   const {
     creator,
     mimoPackages,
@@ -46,90 +44,85 @@ const EditCreatorPage = () => {
       <NavBar />
       
       <main className="flex-grow py-8">
-        <div className="mimo-container max-w-5xl mx-auto px-4">
+        <div className="mimo-container">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Editar Minha Página</h1>
-            
-            <div className="flex space-x-3">
-              <Button
-                variant="outline"
+            <h1 className="text-3xl font-bold">Editar Página</h1>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
                 className="flex items-center gap-2"
                 onClick={() => setShowPreview(!showPreview)}
               >
-                <Eye className="h-4 w-4" />
-                {showPreview ? 'Ocultar Preview' : 'Ver Preview'}
+                {showPreview ? (
+                  <>
+                    <EyeOff className="h-4 w-4" />
+                    <span>Esconder Preview</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    <span>Mostrar Preview</span>
+                  </>
+                )}
               </Button>
-              
               <Button 
-                className="mimo-button"
+                className="mimo-button" 
                 onClick={handleSaveAll}
               >
+                <Save className="h-4 w-4 mr-2" />
                 Salvar Alterações
               </Button>
             </div>
           </div>
           
-          {showPreview ? (
-            <div className="mb-8">
-              <PagePreview username={creator.username} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Tabs defaultValue="profile" className="w-full">
+                <TabsList className="w-full mb-8">
+                  <TabsTrigger value="profile" className="flex-1">Perfil</TabsTrigger>
+                  <TabsTrigger value="packages" className="flex-1">Pacotes de Mimo</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="profile">
+                  <EditProfileSection 
+                    creator={creator}
+                    coverPreview={coverPreview}
+                    avatarPreview={avatarPreview}
+                    handleCreatorChange={handleCreatorChange}
+                    handleSocialLinkChange={handleSocialLinkChange}
+                    handleCoverChange={handleCoverChange}
+                    handleAvatarChange={handleAvatarChange}
+                    handleSaveProfile={handleSaveProfile}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="packages">
+                  <EditPackagesSection
+                    mimoPackages={mimoPackages}
+                    showNewPackageForm={showNewPackageForm}
+                    newPackage={newPackage}
+                    handleAddFeature={handleAddFeature}
+                    handleFeatureChange={handleFeatureChange}
+                    handleRemoveFeature={handleRemoveFeature}
+                    handlePackageChange={handlePackageChange}
+                    handleAddMedia={handleAddMedia}
+                    handleRemoveMedia={handleRemoveMedia}
+                    handleTogglePreview={handleTogglePreview}
+                    handleSavePackage={handleSavePackage}
+                    handleDeletePackage={handleDeletePackage}
+                    handleEditPackage={handleEditPackage}
+                    setShowNewPackageForm={setShowNewPackageForm}
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
-          ) : (
-            <Tabs defaultValue="profile" className="mb-8">
-              <TabsList className="mb-6 w-full justify-start">
-                <TabsTrigger value="profile" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" /> Perfil
-                </TabsTrigger>
-                <TabsTrigger value="packages" className="flex items-center gap-2">
-                  <Heart className="h-4 w-4" /> Pacotes de Mimo
-                </TabsTrigger>
-              </TabsList>
-              
-              {/* Tab de Perfil */}
-              <TabsContent value="profile" className="space-y-6">
-                <EditProfileSection 
-                  creator={creator}
-                  coverPreview={coverPreview}
-                  avatarPreview={avatarPreview}
-                  onCreatorChange={handleCreatorChange}
-                  onSocialLinkChange={handleSocialLinkChange}
-                  onCoverChange={handleCoverChange}
-                  onAvatarChange={handleAvatarChange}
-                  onSaveProfile={handleSaveProfile}
-                />
-              </TabsContent>
-              
-              {/* Tab de Pacotes de Mimo */}
-              <TabsContent value="packages" className="space-y-6">
-                <EditPackagesSection 
-                  mimoPackages={mimoPackages}
-                  showNewPackageForm={showNewPackageForm}
-                  newPackage={newPackage}
-                  onAddPackage={() => setShowNewPackageForm(true)}
-                  onCancelAddPackage={() => {
-                    setShowNewPackageForm(false);
-                    setNewPackage({
-                      title: '',
-                      price: 0,
-                      features: [''],
-                      highlighted: false,
-                      media: []
-                    });
-                  }}
-                  onDeletePackage={handleDeletePackage}
-                  onEditPackage={handleEditPackage}
-                  onSaveAll={handleSaveAll}
-                  onPackageChange={handlePackageChange}
-                  onFeatureChange={handleFeatureChange}
-                  onAddFeature={handleAddFeature}
-                  onRemoveFeature={handleRemoveFeature}
-                  onSavePackage={handleSavePackage}
-                  onAddMedia={handleAddMedia}
-                  onRemoveMedia={handleRemoveMedia}
-                  onTogglePreview={handleTogglePreview}
-                />
-              </TabsContent>
-            </Tabs>
-          )}
+            
+            {showPreview && (
+              <div className="lg:col-span-1">
+                <PagePreview username={creator.username} />
+              </div>
+            )}
+          </div>
         </div>
       </main>
       
