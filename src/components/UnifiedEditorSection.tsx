@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +34,8 @@ interface UnifiedEditorSectionProps {
   setShowNewPackageForm: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const UnifiedEditorSection: React.FC<UnifiedEditorSectionProps> = ({
+// Using React.memo to prevent unnecessary re-renders
+const UnifiedEditorSection = memo(({
   creator,
   mimoPackages,
   coverPreview,
@@ -56,7 +57,7 @@ const UnifiedEditorSection: React.FC<UnifiedEditorSectionProps> = ({
   onDeletePackage,
   onEditPackage,
   setShowNewPackageForm,
-}) => {
+}: UnifiedEditorSectionProps) => {
 
   return (
     <div className="space-y-8">
@@ -328,27 +329,11 @@ const UnifiedEditorSection: React.FC<UnifiedEditorSectionProps> = ({
           )}
         </CardContent>
       </Card>
-      
-      {/* How it works section */}
-      <Card className="bg-gray-50 border border-gray-200">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <span className="text-red-500 mr-2">❤</span>
-            Como funciona
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ol className="space-y-3 ml-5 list-decimal">
-            <li className="text-gray-700">Escolha um pacote de mimo que deseja enviar.</li>
-            <li className="text-gray-700">Crie um nome de usuário que será sua identificação e senha de acesso.</li>
-            <li className="text-gray-700">Após a confirmação do pagamento via PIX, você receberá um link de acesso às recompensas.</li>
-            <li className="text-gray-700">O link ficará disponível por 30 dias.</li>
-            <li className="text-gray-700">Use seu nome de usuário como senha para acessar as recompensas exclusivas.</li>
-          </ol>
-        </CardContent>
-      </Card>
     </div>
   );
-};
+});
+
+// Use displayName for better debugging
+UnifiedEditorSection.displayName = 'UnifiedEditorSection';
 
 export default UnifiedEditorSection;

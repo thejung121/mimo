@@ -13,8 +13,19 @@ import RewardPage from "./pages/RewardPage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import EditCreatorPage from "./pages/EditCreatorPage";
+import AboutUs from "./pages/AboutUs";
+import ExploreCreators from "./pages/ExploreCreators";
+import Contact from "./pages/Contact";
+import Terms from "./pages/Terms";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false
+    }
+  }
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -30,6 +41,10 @@ const App = () => (
           <Route path="/recompensa/:rewardId" element={<RewardPage />} />
           <Route path="/cadastro" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/sobre" element={<AboutUs />} />
+          <Route path="/explorar" element={<ExploreCreators />} />
+          <Route path="/contato" element={<Contact />} />
+          <Route path="/termos" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
