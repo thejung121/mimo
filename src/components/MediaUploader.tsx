@@ -3,11 +3,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { FileImage, Upload, Image, Video, AudioLines } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { Progress } from '@/components/ui/progress';
+import { FileImage } from 'lucide-react';
+import FileUploadTab from './media/FileUploadTab';
+import UrlTab from './media/UrlTab';
 
 interface MediaUploaderProps {
   onMediaAdd: (media: {
@@ -170,107 +169,25 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
             </TabsList>
             
             <TabsContent value="upload" className="mt-4 space-y-4">
-              <div className="flex flex-col space-y-2">
-                {uploading ? (
-                  <div className="space-y-2">
-                    <p className="text-sm text-center">Enviando arquivo...</p>
-                    <Progress value={uploadProgress} className="h-2" />
-                  </div>
-                ) : (
-                  <>
-                    <label className="relative flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-md cursor-pointer text-muted-foreground hover:bg-muted/50 transition-colors">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="h-10 w-10 mb-2" />
-                        <p className="mb-2 text-sm">Clique ou arraste para fazer upload</p>
-                        <p className="text-xs">Imagem, vídeo ou áudio</p>
-                      </div>
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        accept="image/*,video/*,audio/*" 
-                        onChange={handleUploadFile}
-                      />
-                    </label>
-                    <div className="flex flex-col space-y-2">
-                      <label htmlFor="caption" className="text-sm font-medium">
-                        Legenda (opcional)
-                      </label>
-                      <Textarea
-                        id="caption"
-                        placeholder="Descreva esta mídia..."
-                        value={caption}
-                        onChange={(e) => setCaption(e.target.value)}
-                        className="resize-none"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
+              <FileUploadTab
+                caption={caption}
+                setCaption={setCaption}
+                handleUploadFile={handleUploadFile}
+                uploading={uploading}
+                uploadProgress={uploadProgress}
+              />
             </TabsContent>
             
             <TabsContent value="url" className="mt-4 space-y-4">
-              <div className="flex flex-col space-y-2">
-                <div className="flex gap-2">
-                  <TabsList>
-                    <TabsTrigger 
-                      value="image" 
-                      onClick={() => setMediaType('image')}
-                      className={mediaType === 'image' ? 'bg-primary text-primary-foreground' : ''}
-                    >
-                      <Image className="h-4 w-4 mr-1" /> Imagem
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="video" 
-                      onClick={() => setMediaType('video')}
-                      className={mediaType === 'video' ? 'bg-primary text-primary-foreground' : ''}
-                    >
-                      <Video className="h-4 w-4 mr-1" /> Vídeo
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="audio" 
-                      onClick={() => setMediaType('audio')}
-                      className={mediaType === 'audio' ? 'bg-primary text-primary-foreground' : ''}
-                    >
-                      <AudioLines className="h-4 w-4 mr-1" /> Áudio
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-                <label htmlFor="url" className="text-sm font-medium">
-                  URL da mídia ({mediaType === 'image' ? 'imagem' : mediaType === 'video' ? 'vídeo' : 'áudio'})
-                </label>
-                <Input
-                  id="url"
-                  placeholder="https://exemplo.com/arquivo"
-                  value={uploadUrl}
-                  onChange={(e) => setUploadUrl(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Cole o link direto para uma {mediaType === 'image' ? 'imagem' : mediaType === 'video' ? 'um vídeo' : 'um áudio'} online.
-                </p>
-              </div>
-              
-              <div className="flex flex-col space-y-2">
-                <label htmlFor="caption-url" className="text-sm font-medium">
-                  Legenda (opcional)
-                </label>
-                <Textarea
-                  id="caption-url"
-                  placeholder="Descreva esta mídia..."
-                  value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  className="resize-none"
-                />
-              </div>
-              
-              <div className="flex justify-end">
-                <Button 
-                  onClick={handleAddFromUrl}
-                  className="mimo-button flex items-center gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  Adicionar
-                </Button>
-              </div>
+              <UrlTab
+                mediaType={mediaType}
+                setMediaType={setMediaType}
+                uploadUrl={uploadUrl}
+                setUploadUrl={setUploadUrl}
+                caption={caption}
+                setCaption={setCaption}
+                handleAddFromUrl={handleAddFromUrl}
+              />
             </TabsContent>
           </Tabs>
         </DialogContent>
