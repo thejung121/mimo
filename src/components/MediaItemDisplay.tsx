@@ -1,16 +1,9 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2, Eye, Image, Video, AudioLines } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface MediaItem {
-  id: number;
-  type: 'image' | 'video' | 'audio';
-  url: string;
-  caption?: string;
-  isPreview: boolean;
-}
+import { MediaItem } from '@/types/creator';
 
 interface MediaItemDisplayProps {
   media: MediaItem;
@@ -18,7 +11,20 @@ interface MediaItemDisplayProps {
   onRemove: () => void;
 }
 
-const MediaItemDisplay = ({ media, onTogglePreview, onRemove }: MediaItemDisplayProps) => {
+// Using React.memo to prevent unnecessary re-renders
+const MediaItemDisplay = memo(({ media, onTogglePreview, onRemove }: MediaItemDisplayProps) => {
+  // Get the placeholder component based on media type
+  const renderPlaceholder = () => {
+    switch (media.type) {
+      case 'video':
+        return <Video className="h-8 w-8 text-muted-foreground" />;
+      case 'audio':
+        return <AudioLines className="h-8 w-8 text-muted-foreground" />;
+      default:
+        return <Image className="h-8 w-8 text-muted-foreground" />;
+    }
+  };
+
   return (
     <div 
       className={cn(
@@ -26,29 +32,22 @@ const MediaItemDisplay = ({ media, onTogglePreview, onRemove }: MediaItemDisplay
         media.isPreview ? "border-mimo-primary" : "border-border"
       )}
     >
-      {media.type === 'image' && (
+      {media.type === 'image' ? (
         <div className="w-full h-24 bg-muted">
           <img 
             src={media.url} 
             alt={media.caption || `Imagem ${media.id}`}
             className="w-full h-24 object-cover"
+            loading="lazy" // Add lazy loading for images
             onError={(e) => {
               // On image load error, show a placeholder
               e.currentTarget.src = '/placeholder.svg';
             }}
           />
         </div>
-      )}
-      
-      {media.type === 'video' && (
+      ) : (
         <div className="w-full h-24 bg-muted flex items-center justify-center">
-          <Video className="h-8 w-8 text-muted-foreground" />
-        </div>
-      )}
-      
-      {media.type === 'audio' && (
-        <div className="w-full h-24 bg-muted flex items-center justify-center">
-          <AudioLines className="h-8 w-8 text-muted-foreground" />
+          {renderPlaceholder()}
         </div>
       )}
       
@@ -86,6 +85,9 @@ const MediaItemDisplay = ({ media, onTogglePreview, onRemove }: MediaItemDisplay
       )}
     </div>
   );
-};
+});
+
+// Add display name for debugging purposes
+MediaItemDisplay.displayName = 'MediaItemDisplay';
 
 export default MediaItemDisplay;

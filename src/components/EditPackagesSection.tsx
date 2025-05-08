@@ -1,12 +1,13 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import MimoPackageForm from './MimoPackageForm';
 import MediaUploader from './MediaUploader';
 import MediaItemDisplay from './MediaItemDisplay';
 import { MimoPackage, MediaItem } from '@/types/creator';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink } from '@/components/ui/pagination';
 
 interface EditPackagesSectionProps {
   mimoPackages: MimoPackage[];
@@ -28,6 +29,8 @@ interface EditPackagesSectionProps {
   setShowNewPackageForm: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const PACKAGES_PER_PAGE = 3;
+
 const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
   mimoPackages,
   showNewPackageForm,
@@ -47,6 +50,34 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
   onTogglePreview,
   setShowNewPackageForm
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(mimoPackages.length / PACKAGES_PER_PAGE);
+  
+  // Calculate which packages to show on the current page
+  const currentPackages = useMemo(() => {
+    const start = (currentPage - 1) * PACKAGES_PER_PAGE;
+    return mimoPackages.slice(start, start + PACKAGES_PER_PAGE);
+  }, [mimoPackages, currentPage]);
+  
+  // Go to previous page
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  // Go to next page
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
+  // Go to specific page
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <>
       <Card>
@@ -65,7 +96,7 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
               </p>
             )}
             
-            {mimoPackages.map((pkg) => (
+            {currentPackages.map((pkg) => (
               <div key={pkg.id} className="border rounded-lg overflow-hidden">
                 <div className="p-4 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div className="flex-1">
@@ -81,12 +112,17 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
                     <p className="font-bold text-lg mb-2">R${pkg.price}</p>
                     
                     <ul className="space-y-1">
-                      {pkg.features.map((feature, idx) => (
+                      {pkg.features.slice(0, 5).map((feature, idx) => (
                         <li key={idx} className="flex items-center text-sm">
                           <span className="mr-2 text-mimo-primary">•</span>
                           <span>{feature}</span>
                         </li>
                       ))}
+                      {pkg.features.length > 5 && (
+                        <li className="text-xs text-muted-foreground">
+                          +{pkg.features.length - 5} mais características
+                        </li>
+                      )}
                     </ul>
                   </div>
                   
@@ -109,27 +145,74 @@ const EditPackagesSection: React.FC<EditPackagesSectionProps> = ({
                   </div>
                 </div>
                 
-                {/* Seção de mídia do pacote */}
+                {/* Seção de mídia do pacote - optimized with horizontal scroll on small screens */}
                 <div className="border-t bg-muted/50 p-4">
                   <div className="flex justify-between items-center mb-3">
                     <h4 className="font-medium">Mídias do pacote</h4>
                   </div>
                   
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-4">
                     {pkg.media.map((media) => (
-                      <MediaItemDisplay
-                        key={media.id}
-                        media={media}
-                        onTogglePreview={() => onTogglePreview(pkg.id!, media.id)}
-                        onRemove={() => onRemoveMedia(pkg.id!, media.id)}
-                      />
+                      <div key={media.id} className="w-24 md:w-auto flex-shrink-0">
+                        <MediaItemDisplay
+                          media={media}
+                          onTogglePreview={() => onTogglePreview(pkg.id!, media.id)}
+                          onRemove={() => onRemoveMedia(pkg.id!, media.id)}
+                        />
+                      </div>
                     ))}
                     
-                    <MediaUploader onMediaAdd={(media) => onAddMedia(pkg.id!, media)} />
+                    <div className="w-24 md:w-auto flex-shrink-0">
+                      <MediaUploader onMediaAdd={(media) => onAddMedia(pkg.id!, media)} />
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
+            
+            {/* Pagination */}
+            {mimoPackages.length > PACKAGES_PER_PAGE && (
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={prevPage} 
+                      disabled={currentPage === 1}
+                      className="h-8 w-8"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <Button
+                        variant={page === currentPage ? "default" : "outline"}
+                        size="icon"
+                        onClick={() => goToPage(page)}
+                        className="h-8 w-8"
+                      >
+                        {page}
+                      </Button>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={nextPage} 
+                      disabled={currentPage === totalPages}
+                      className="h-8 w-8"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
           
           {/* Formulário para adicionar novo pacote */}

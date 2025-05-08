@@ -1,10 +1,23 @@
 
 import { useState } from 'react';
 import { MimoPackage } from '@/types/creator';
+import { useToast } from '@/components/ui/use-toast';
 
 export const usePackageFeatures = (packageData: MimoPackage, setPackageData: React.Dispatch<React.SetStateAction<MimoPackage>>) => {
+  const { toast } = useToast();
+
   // Handler to add a feature to a package
   const handleAddFeature = () => {
+    // Limit the number of features to prevent performance issues
+    if (packageData.features.length >= 10) {
+      toast({
+        title: "Limite atingido",
+        description: "Você atingiu o limite máximo de características para este pacote.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setPackageData(prev => ({
       ...prev,
       features: [...prev.features, '']

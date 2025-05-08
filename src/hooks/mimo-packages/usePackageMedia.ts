@@ -1,13 +1,13 @@
 
 import { useToast } from '@/components/ui/use-toast';
-import { MediaItem } from '@/types/creator';
+import { MediaItem, MimoPackage } from '@/types/creator';
 import { useState } from 'react';
 
 export const usePackageMedia = (
-  mimoPackages: any[], 
-  setMimoPackages: React.Dispatch<React.SetStateAction<any[]>>,
-  newPackage: any,
-  setNewPackage: React.Dispatch<React.SetStateAction<any>>
+  mimoPackages: MimoPackage[], 
+  setMimoPackages: React.Dispatch<React.SetStateAction<MimoPackage[]>>,
+  newPackage: MimoPackage,
+  setNewPackage: React.Dispatch<React.SetStateAction<MimoPackage>>
 ) => {
   const { toast } = useToast();
 
@@ -59,25 +59,25 @@ export const usePackageMedia = (
     });
   };
 
-  // Handler to set media as preview
+  // Handler to set media as preview - fixed to toggle only one preview at a time
   const handleTogglePreview = (packageId: number | null, mediaId: number) => {
     if (packageId === null) {
-      // Toggling preview in the new package
+      // Toggling preview in the new package - ensure only one preview at a time
       setNewPackage(prev => ({
         ...prev,
         media: prev.media.map(m => ({
           ...m,
-          isPreview: m.id === mediaId ? !m.isPreview : m.isPreview
+          isPreview: m.id === mediaId ? true : false
         }))
       }));
     } else {
-      // Toggling preview in an existing package
+      // Toggling preview in an existing package - ensure only one preview at a time
       setMimoPackages(prev => prev.map(pkg => 
         pkg.id === packageId ? { 
           ...pkg, 
           media: pkg.media.map(m => ({
             ...m,
-            isPreview: m.id === mediaId ? !m.isPreview : m.isPreview
+            isPreview: m.id === mediaId ? true : false
           }))
         } : pkg
       ));

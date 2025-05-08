@@ -24,8 +24,9 @@ const NavBar = () => {
             </Link>
           </div>
           
+          {/* Adjusted mobile menu to prevent overflow */}
           {isMobile ? (
-            <>
+            <div className="relative">
               <button 
                 onClick={toggleMobileMenu}
                 className="inline-flex items-center justify-center p-2 rounded-md text-foreground"
@@ -38,7 +39,7 @@ const NavBar = () => {
               </button>
               
               {mobileMenuOpen && (
-                <div className="absolute top-16 right-0 left-0 bg-background border-b border-border/50 shadow-lg p-4 z-10 animate-fade-in">
+                <div className="absolute top-12 right-0 w-60 bg-background border border-border/50 shadow-lg rounded-md p-4 z-10">
                   <div className="flex flex-col space-y-4">
                     <Link 
                       to="/sobre" 
@@ -69,7 +70,7 @@ const NavBar = () => {
                   </div>
                 </div>
               )}
-            </>
+            </div>
           ) : (
             <div className="flex items-center space-x-4">
               <Link to="/sobre" className="text-foreground/70 hover:text-foreground transition-colors">

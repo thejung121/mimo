@@ -1,17 +1,41 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { MimoPackage } from '@/types/creator';
 import { initialMimoPackages, emptyPackage } from './mimo-packages/packageData';
 import { usePackageFeatures } from './mimo-packages/usePackageFeatures';
 import { usePackageMedia } from './mimo-packages/usePackageMedia';
 import { usePackageCRUD } from './mimo-packages/usePackageCRUD';
+import { useToast } from '@/components/ui/use-toast';
 
 export const useMimoPackages = () => {
+  const { toast } = useToast();
   const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>(initialMimoPackages);
   const [showNewPackageForm, setShowNewPackageForm] = useState(false);
   const [newPackage, setNewPackage] = useState<MimoPackage>({...emptyPackage});
   
-  // Import feature management functionality
+  // Memoize state updates to reduce re-renders
+  const updateNewPackage = useCallback((changes: Partial<MimoPackage>) => {
+    setNewPackage(prev => ({
+      ...prev,
+      ...changes
+    }));
+  }, []);
+
+  const updateMimoPackages = useCallback((updater: (prev: MimoPackage[]) => MimoPackage[]) => {
+    // Add error handling to prevent state corruption
+    try {
+      setMimoPackages(updater);
+    } catch (error) {
+      console.error("Error updating packages:", error);
+      toast({
+        title: "Erro ao atualizar pacotes",
+        description: "Ocorreu um erro ao atualizar os pacotes. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
+  
+  // Import feature management functionality with memoization
   const { 
     handleAddFeature, 
     handleFeatureChange, 
@@ -23,7 +47,7 @@ export const useMimoPackages = () => {
     handleAddMedia, 
     handleRemoveMedia, 
     handleTogglePreview 
-  } = usePackageMedia(mimoPackages, setMimoPackages, newPackage, setNewPackage);
+  } = usePackageMedia(mimoPackages, updateMimoPackages, newPackage, setNewPackage);
 
   // Import package CRUD operations
   const { 
@@ -33,7 +57,7 @@ export const useMimoPackages = () => {
     handleEditPackage 
   } = usePackageCRUD(
     mimoPackages, 
-    setMimoPackages, 
+    updateMimoPackages, 
     newPackage, 
     setNewPackage,
     emptyPackage,
