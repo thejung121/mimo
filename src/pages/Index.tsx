@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -665,4 +666,20 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <div className="h-
+                    <div className="h-4 w-full bg-gray-200 rounded"></div>
+                    <div className="h-4 w-4/5 bg-gray-200 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default Index;
