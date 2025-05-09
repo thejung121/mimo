@@ -12,27 +12,16 @@ import MimoTabContent from '@/components/MimoTabContent';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { getCreatorByUsername, getCreatorPackages } from '@/services/supabaseService';
+import { adaptCreator, adaptMimoPackage, getUserMetadata } from '@/utils/typeAdapters';
+import { Creator, MimoPackage } from '@/types/creator';
 
-interface MimoPackage {
+interface SupabasePackage {
   id: string;
   title: string;
   price: number;
-  features: { id: string; feature: string }[];
+  package_features: { id: string; feature: string }[];
   highlighted: boolean;
   package_media: { id: string; url: string; type: string; is_preview: boolean }[];
-}
-
-interface Creator {
-  id: string;
-  username: string;
-  name: string;
-  avatar: string;
-  cover: string;
-  description: string;
-  coverTitle?: string;
-  coverSubtitle?: string;
-  about?: string;
-  social_links: { id: string; type: string; url: string }[];
 }
 
 const CreatorPage = () => {
@@ -48,7 +37,7 @@ const CreatorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Check if this is the user's own page
-  const isOwnPage = user?.user_metadata?.username === username;
+  const isOwnPage = user ? getUserMetadata(user)?.username === username : false;
 
   // Always scroll to top when component mounts
   useEffect(() => {
@@ -67,11 +56,16 @@ const CreatorPage = () => {
         const creatorData = await getCreatorByUsername(username);
         
         if (creatorData) {
-          setCreator(creatorData);
+          // Use adapter to convert to our app's Creator type
+          const adaptedCreator = adaptCreator(creatorData);
+          setCreator(adaptedCreator);
           
           // Get creator packages
           const packagesData = await getCreatorPackages(creatorData.id);
-          setMimoPackages(packagesData);
+          
+          // Use adapter to convert each package to our app's MimoPackage type
+          const adaptedPackages = packagesData.map(pkg => adaptMimoPackage(pkg));
+          setMimoPackages(adaptedPackages);
         }
       } catch (error) {
         console.error("Error fetching creator data:", error);
@@ -202,14 +196,7 @@ const CreatorPage = () => {
               
               <TabsContent value="mimos">
                 <MimoTabContent 
-                  mimoPackages={mimoPackages.map(pkg => ({
-                    id: pkg.id,
-                    title: pkg.title,
-                    price: pkg.price,
-                    features: pkg.package_features.map(f => f.feature),
-                    highlighted: pkg.highlighted,
-                    media: pkg.package_media
-                  }))} 
+                  mimoPackages={mimoPackages} 
                   onSelectPackage={handleSelectPackage}
                 />
               </TabsContent>
@@ -225,10 +212,10 @@ const CreatorPage = () => {
               setPurchaseFlowOpen(false);
               setSelectedPackage(null);
             }}
-            packageId={selectedPackage.id}
+            packageId={selectedPackage.id?.toString() || ''}
             packageTitle={selectedPackage.title}
             packagePrice={selectedPackage.price}
-            creatorId={creator.id}
+            creatorId={creator.id || ''}
             creatorName={creator.name}
           />
         )}

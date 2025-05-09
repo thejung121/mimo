@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { CheckCircle, Copy, Loader2, ArrowRight } from 'lucide-react';
+import { CheckCircle, Copy, Loader2, ArrowRight, ExternalLink } from 'lucide-react';
 import { verifyPayment } from '@/services/stripeService';
 
 const PaymentSuccess = () => {
