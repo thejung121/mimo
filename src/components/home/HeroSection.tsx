@@ -21,23 +21,23 @@ const HeroSection = ({ heroRef }: HeroSectionProps) => {
       <div ref={heroRef} className="mimo-container relative z-10 opacity-0">
         <div className="max-w-3xl mx-auto text-center">
           <Badge className="mb-6 px-4 py-1.5 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
-            Para criadoras de conteúdo
+            Para quem cria sem amarras
           </Badge>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Monetize com <span className="text-mimo-primary">mimos</span>{" "}
+            Receba <span className="text-mimo-primary">mimos</span>{" "}
             {!isMobile && <br />}
-            seus melhores conteúdos exclusivos
+            pelo que seu trabalho realmente vale
           </h1>
           
           <p className="text-lg md:text-xl text-gray-600 mb-8 md:mb-10 max-w-2xl mx-auto px-4 sm:px-0">
-            Mimo é uma contribuição que um fã faz para apoiar uma criadora, e em troca recebe uma recompensa personalizada. É uma forma mais natural, espontânea e significativa de monetização.
+            Chega de entregar seu melhor por migalhas. Com Mimo, seus fãs te recompensam de verdade pelo conteúdo especial que você cria, sem regras ou obrigações mensais.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 sm:px-0">
             <Button className="w-full sm:w-auto bg-gradient-to-r from-mimo-primary to-mimo-secondary hover:from-mimo-primary/90 hover:to-mimo-secondary/90 text-white text-lg px-6 py-5 h-auto rounded-full group" asChild>
               <Link to="/cadastro">
-                Criar minha página
+                Liberte seu conteúdo
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
@@ -49,15 +49,15 @@ const HeroSection = ({ heroRef }: HeroSectionProps) => {
           <div className="mt-12 md:mt-16 grid grid-cols-3 gap-2 md:gap-6 max-w-xl mx-auto text-center">
             <div>
               <div className="text-xl md:text-2xl font-bold text-mimo-primary">10%</div>
-              <p className="text-xs md:text-sm text-gray-500">Taxa única</p>
+              <p className="text-xs md:text-sm text-gray-500">Taxa única. Só isso.</p>
             </div>
             <div>
               <div className="text-xl md:text-2xl font-bold text-mimo-primary">PIX</div>
-              <p className="text-xs md:text-sm text-gray-500">Pagamento imediato</p>
+              <p className="text-xs md:text-sm text-gray-500">Dinheiro na hora</p>
             </div>
             <div>
               <div className="text-xl md:text-2xl font-bold text-mimo-primary">R$100+</div>
-              <p className="text-xs md:text-sm text-gray-500">Ticket médio alto</p>
+              <p className="text-xs md:text-sm text-gray-500">Valor que você merece</p>
             </div>
           </div>
         </div>

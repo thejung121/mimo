@@ -15,10 +15,10 @@ const IntegrationSection = ({ integrationRef }: IntegrationSectionProps) => {
         <div ref={integrationRef} className="max-w-3xl mx-auto mb-12 md:mb-16 px-4 sm:px-0 opacity-0">
           <div className="text-center">
             <Badge className="mb-4 px-3 py-1 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
-              Universo expandido
+              Sem exclusividade
             </Badge>
             <h2 className="text-2xl md:text-4xl font-bold mb-6">
-              Potencialize seu ecossistema digital
+              Use junto com o que já funciona pra você
             </h2>
           </div>
           
@@ -26,42 +26,40 @@ const IntegrationSection = ({ integrationRef }: IntegrationSectionProps) => {
             <CardContent className="p-0">
               <div className="prose max-w-none text-gray-700">
                 <p className="text-lg mb-6">
-                  Seu público já está em diversas plataformas — e o Mimo não veio para substituí-las,
-                  mas para completar seu arsenal de monetização com uma ferramenta poderosa.
+                  Continua com seu Instagram, seu Onlyfans, seu Patreon. O Mimo não é substituto — 
+                  é a cereja do bolo quando você quer entregar algo especial que merece mais.
                 </p>
                 
                 <div className="grid md:grid-cols-2 gap-6 mb-6">
                   <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <h4 className="font-medium text-lg mb-3 text-mimo-primary flex items-center">
                       <Check className="h-5 w-5 mr-2" />
-                      Coexistência harmoniosa
+                      Integra com o que já existe
                     </h4>
-                    <p>Use as assinaturas para a rotina, e o Mimo para os momentos em que seu trabalho 
-                    merece uma valorização especial.</p>
+                    <p>Seu conteúdo rotineiro continua onde está. Mimo é para quando você quer criar
+                    algo extraordinário, que merece mais que um preço mensal fixo.</p>
                   </div>
                   
                   <div className="bg-white rounded-lg border border-gray-200 p-4">
                     <h4 className="font-medium text-lg mb-3 text-mimo-primary flex items-center">
                       <Check className="h-5 w-5 mr-2" />
-                      Conexões significativas
+                      Momentos que valem mais
                     </h4>
-                    <p>Crie experiências que transcendem o transacional, onde seu conteúdo especial encontra
-                    o reconhecimento merecido.</p>
+                    <p>Aquele e-book especial, aquela mentoria poderosa, aquele projeto único — 
+                    tudo isso merece um mimo, não uma assinatura genérica.</p>
                   </div>
                 </div>
                 
                 <div className="bg-mimo-primary/5 border border-mimo-primary/20 rounded-lg p-4 mb-6">
                   <p className="italic">
-                    "Não é sobre escolher um ou outro — é sobre criar uma estratégia completa
-                    onde cada plataforma cumpre seu papel. Quando seu projeto exige aquele algo a mais,
-                    é aí que o Mimo entra."
+                    "Não tô aqui pra acabar com suas assinaturas mensais — tô aqui pra quando você 
+                    criar algo tão bom que seria um desperdício jogar no meio do seu conteúdo comum."
                   </p>
                 </div>
                 
                 <p>
-                  Cada interação tem seu lugar. Ofereça o conteúdo regular onde já está 
-                  funcionando, e utilize o Mimo como seu canal premium para momentos especiais 
-                  e oportunidades extraordinárias.
+                  Mimo é a plataforma para momentos especiais, não pra rotina. É pra quando você quer que
+                  seu conteúdo seja valorizado pelo que realmente vale — sem intermediários abocanhando a maior parte.
                 </p>
               </div>
             </CardContent>

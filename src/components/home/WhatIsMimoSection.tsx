@@ -17,15 +17,14 @@ const WhatIsMimoSection = ({ featuresRef }: WhatIsMimoSectionProps) => {
       <div className="mimo-container">
         <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16 px-4 sm:px-0">
           <Badge className="mb-4 px-3 py-1 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
-            Desperte o valor do seu conteúdo
+            Chega de migalhas
           </Badge>
           <h2 className="text-2xl md:text-4xl font-bold mb-6">
-            Uma jornada além das assinaturas{isMobile ? " " : <br/>}regulares
+            Seu talento vale mais que{isMobile ? " " : <br/>}uma assinatura de R$19,90
           </h2>
           <p className="text-base md:text-lg text-gray-600">
-            Aquele conteúdo especial merece mais do que uma simples assinatura mensal.
-            Com o Mimo, você oferece experiências exclusivas enquanto seus fãs expressam
-            seu apoio de forma mais significativa.
+            Enquanto plataformas tradicionais te forçam a produzir sem parar para manter migalhas mensais, 
+            o Mimo te liberta para criar quando quiser e receber o que seu trabalho realmente merece.
           </p>
         </div>
         
@@ -36,23 +35,23 @@ const WhatIsMimoSection = ({ featuresRef }: WhatIsMimoSectionProps) => {
               <div className="bg-green-100 text-green-600 rounded-full w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                 <Gift className="h-6 w-6" />
               </div>
-              <h3 className="font-semibold text-xl mb-3">Além do ordinário</h3>
+              <h3 className="font-semibold text-xl mb-3">Sem rotina forçada</h3>
               <p className="text-gray-600 mb-6">
-                Liberte seu melhor conteúdo das limitações das assinaturas mensais.
-                Crie experiências premium que refletem seu verdadeiro valor.
+                Adeus pressão mensal por conteúdo. Crie quando quiser, 
+                venda pelo que vale, e receba mimos que realmente valorizam seu trabalho.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Valorização justa do seu trabalho</span>
+                  <span>Sem obrigação de cronograma</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Liberdade criativa sem pressão</span>
+                  <span>Venda pelo valor justo</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Produtos de alto valor percebido</span>
+                  <span>Crie apenas o que te inspira</span>
                 </li>
               </ul>
             </CardContent>
@@ -64,23 +63,23 @@ const WhatIsMimoSection = ({ featuresRef }: WhatIsMimoSectionProps) => {
               <div className="bg-mimo-primary/20 text-mimo-primary rounded-full w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                 <Heart className="h-6 w-6" />
               </div>
-              <h3 className="font-semibold text-xl mb-3">Caminho para liberdade</h3>
+              <h3 className="font-semibold text-xl mb-3">Dinheiro de verdade</h3>
               <p className="text-gray-600 mb-6">
-                Transforme seus objetivos financeiros em realidade com uma receita 
-                adicional que respeita seus limites e valoriza sua autonomia.
+                Receba R$100, R$300, R$500 por vez. Esqueça os trocados mensais 
+                que mal pagam um café depois que a plataforma abocanha sua parte.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>PIX instantâneo, sem esperas</span>
+                  <span>PIX na hora, sem esperar o mês fechar</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Taxa que respeita seu trabalho</span>
+                  <span>Só 10% de taxa (não os 30% de sempre)</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Potencialize metas importantes</span>
+                  <span>Realize projetos que importam pra você</span>
                 </li>
               </ul>
             </CardContent>
@@ -92,23 +91,23 @@ const WhatIsMimoSection = ({ featuresRef }: WhatIsMimoSectionProps) => {
               <div className="bg-purple-100 text-purple-600 rounded-full w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                 <Sparkles className="h-6 w-6" />
               </div>
-              <h3 className="font-semibold text-xl mb-3">Conexões autênticas</h3>
+              <h3 className="font-semibold text-xl mb-3">Conexão real</h3>
               <p className="text-gray-600 mb-6">
-                Construa relações genuínas baseadas na troca de valor real, sem
-                as barreiras artificiais que distanciam você de quem realmente aprecia seu trabalho.
+                Saia do relacionamento superficial com seu público. Um mimo é uma troca genuína 
+                entre quem realmente valoriza seu trabalho e você.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Experiências memoráveis</span>
+                  <span>Recompensas que fazem sentido</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Engajamento mais profundo</span>
+                  <span>Menos fãs, mais valor por fã</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Fidelização natural</span>
+                  <span>Construa uma comunidade de verdade</span>
                 </li>
               </ul>
             </CardContent>
