@@ -2,12 +2,30 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Heart, LogIn, Menu, X } from 'lucide-react';
+import { 
+  Heart, 
+  LogIn, 
+  Menu, 
+  X, 
+  User, 
+  LogOut,
+  Settings
+} from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -55,18 +73,40 @@ const NavBar = () => {
                     >
                       Explorar
                     </Link>
-                    <Link 
-                      to="/dashboard" 
-                      className="text-foreground/70 hover:text-foreground transition-colors px-3 py-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <Button variant="outline" className="border-mimo-primary text-mimo-primary hover:text-white hover:bg-mimo-primary w-full justify-center" asChild>
-                      <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                        <LogIn className="h-4 w-4 mr-2" /> Entrar
-                      </Link>
-                    </Button>
+                    
+                    {isAuthenticated ? (
+                      <>
+                        <Link 
+                          to="/dashboard" 
+                          className="text-foreground/70 hover:text-foreground transition-colors px-3 py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Dashboard
+                        </Link>
+                        <Link 
+                          to={`/criador/${user?.username}`} 
+                          className="text-foreground/70 hover:text-foreground transition-colors px-3 py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Minha Página
+                        </Link>
+                        <button 
+                          className="text-rose-500 hover:text-rose-600 transition-colors px-3 py-2 text-left flex items-center"
+                          onClick={() => {
+                            logout();
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          <LogOut className="h-4 w-4 mr-2" /> Sair
+                        </button>
+                      </>
+                    ) : (
+                      <Button variant="outline" className="border-mimo-primary text-mimo-primary hover:text-white hover:bg-mimo-primary w-full justify-center" asChild>
+                        <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                          <LogIn className="h-4 w-4 mr-2" /> Entrar
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
@@ -79,12 +119,44 @@ const NavBar = () => {
               <Link to="/explorar" className="text-foreground/70 hover:text-foreground transition-colors">
                 Explorar
               </Link>
-              <Link to="/dashboard" className="text-foreground/70 hover:text-foreground transition-colors">
-                Dashboard
-              </Link>
-              <Button variant="outline" className="border-mimo-primary text-mimo-primary hover:text-white hover:bg-mimo-primary" asChild>
-                <Link to="/login"><LogIn className="h-4 w-4 mr-2" /> Entrar</Link>
-              </Button>
+              
+              {isAuthenticated ? (
+                <>
+                  <Link to="/dashboard" className="text-foreground/70 hover:text-foreground transition-colors">
+                    Dashboard
+                  </Link>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="rounded-full h-8 w-8 p-0">
+                        <User className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to={`/criador/${user?.username}`} className="cursor-pointer">
+                          <Heart className="h-4 w-4 mr-2" /> Ver Minha Página
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/editar-pagina" className="cursor-pointer">
+                          <Settings className="h-4 w-4 mr-2" /> Editar Página
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={logout} className="text-rose-500 focus:text-rose-500 cursor-pointer">
+                        <LogOut className="h-4 w-4 mr-2" /> Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                <Button variant="outline" className="border-mimo-primary text-mimo-primary hover:text-white hover:bg-mimo-primary" asChild>
+                  <Link to="/login"><LogIn className="h-4 w-4 mr-2" /> Entrar</Link>
+                </Button>
+              )}
             </div>
           )}
         </div>

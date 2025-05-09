@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { AuthProvider } from "@/contexts/AuthContext";
+import PrivateRoute from "@/components/PrivateRoute";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -45,21 +47,37 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/criador/:username" element={<CreatorPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/editar-pagina" element={<EditCreatorPage />} />
-          <Route path="/recompensa/:rewardId" element={<RewardPage />} />
-          <Route path="/cadastro" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/sobre" element={<AboutUs />} />
-          <Route path="/explorar" element={<ExploreCreators />} />
-          <Route path="/contato" element={<Contact />} />
-          <Route path="/termos" element={<Terms />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/criador/:username" element={<CreatorPage />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/editar-pagina" 
+              element={
+                <PrivateRoute>
+                  <EditCreatorPage />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/recompensa/:rewardId" element={<RewardPage />} />
+            <Route path="/cadastro" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/sobre" element={<AboutUs />} />
+            <Route path="/explorar" element={<ExploreCreators />} />
+            <Route path="/contato" element={<Contact />} />
+            <Route path="/termos" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

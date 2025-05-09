@@ -6,11 +6,14 @@ import Footer from '@/components/Footer';
 import { Button } from "@/components/ui/button";
 import { useCreatorEditor } from '@/hooks/useCreatorEditor';
 import { Save, Eye } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Importing a new component that will contain all editor sections in one view
 import UnifiedEditorSection from '@/components/UnifiedEditorSection';
 
 const EditCreatorPage = () => {
+  const { user } = useAuth();
+  
   const {
     creator,
     mimoPackages,
@@ -50,7 +53,7 @@ const EditCreatorPage = () => {
                 className="flex items-center gap-2"
                 asChild
               >
-                <Link to={`/criador/${creator.username}`} target="_blank">
+                <Link to={`/criador/${user?.username || creator.username}`} target="_blank">
                   <Eye className="h-4 w-4" />
                   Ver Minha Página
                 </Link>

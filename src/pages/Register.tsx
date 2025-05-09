@@ -1,14 +1,99 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import SellerOnboarding from '@/components/SellerOnboarding';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Register = () => {
   const [startRegistration, setStartRegistration] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  
+  // Form state
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { register } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleStartRegistration = () => {
+    setStartRegistration(true);
+    setTimeout(() => setShowForm(true), 500); // Add a delay for smoother transition
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form
+    if (!name.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, informe seu nome completo",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!email.trim()) {
+      toast({
+        title: "Email obrigatório",
+        description: "Por favor, informe um email válido",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!username.trim()) {
+      toast({
+        title: "Nome de usuário obrigatório",
+        description: "Por favor, escolha um nome de usuário",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!password) {
+      toast({
+        title: "Senha obrigatória",
+        description: "Por favor, escolha uma senha segura",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Senhas não conferem",
+        description: "A senha e a confirmação de senha devem ser iguais",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const success = await register(name, email, password, username);
+      
+      if (success) {
+        navigate('/dashboard');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-accent/20">
@@ -50,7 +135,7 @@ const Register = () => {
               </div>
               
               <Button 
-                onClick={() => setStartRegistration(true)} 
+                onClick={handleStartRegistration}
                 className="w-full mimo-button py-6 text-lg group"
               >
                 Começar agora <Heart className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -59,6 +144,109 @@ const Register = () => {
               <p className="mt-6 text-sm text-muted-foreground">
                 Já tem uma conta? <Link to="/login" className="text-mimo-primary hover:underline">Entre aqui</Link>
               </p>
+            </div>
+          ) : showForm ? (
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center mb-4">
+                  <Heart className="h-8 w-8 text-mimo-primary" fill="#9b87f5" />
+                </div>
+                <h1 className="text-3xl font-bold">Criar sua conta</h1>
+                <p className="text-foreground/70 mt-2">
+                  Preencha os dados abaixo para criar sua página
+                </p>
+              </div>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Cadastro</CardTitle>
+                  <CardDescription>
+                    Informe seus dados para criar sua página
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleRegister}>
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="name">Nome completo</Label>
+                        <Input 
+                          id="name" 
+                          type="text" 
+                          placeholder="Seu nome completo" 
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          disabled={isLoading}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          placeholder="seu@email.com" 
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          disabled={isLoading}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="username">Nome de usuário</Label>
+                        <Input 
+                          id="username" 
+                          type="text" 
+                          placeholder="seunome" 
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
+                          disabled={isLoading}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Este será o endereço da sua página: mimo.com/criador/{username || 'seunome'}
+                        </p>
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="password">Senha</Label>
+                        <Input 
+                          id="password" 
+                          type="password" 
+                          placeholder="Escolha uma senha" 
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          disabled={isLoading}
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="confirm-password">Confirme a senha</Label>
+                        <Input 
+                          id="confirm-password" 
+                          type="password" 
+                          placeholder="Confirme sua senha" 
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </div>
+                  </form>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className="w-full mimo-button" 
+                    onClick={handleRegister}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Criando conta..." : "Criar conta"}
+                  </Button>
+                </CardFooter>
+                <div className="px-6 pb-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Já tem uma conta? <Link to="/login" className="text-mimo-primary hover:underline">Entre aqui</Link>
+                  </p>
+                </div>
+              </Card>
             </div>
           ) : (
             <div className="animate-fade-in">

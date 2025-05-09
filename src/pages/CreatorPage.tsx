@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import NavBar from '@/components/NavBar';
-import Footer from '@/components/Footer';
+import { useParams, Link } from 'react-router-dom';
+import CreatorNavBar from '@/components/CreatorNavBar';
+import CreatorFooter from '@/components/CreatorFooter';
 import { MimoPackage, Creator } from '@/types/creator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, Eye } from 'lucide-react';
@@ -10,17 +11,23 @@ import CreatorHero from '@/components/CreatorHero';
 import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import MimoTabContent from '@/components/MimoTabContent';
 import { getCreatorData, getMimoPackages } from '@/services/creatorDataService';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 const CreatorPage = () => {
   const { username } = useParams();
   const [headerVisible, setHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const { user } = useAuth();
   
   const [creator, setCreator] = useState<Creator | null>(null);
   const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<MimoPackage | null>(null);
   const [purchaseFlowOpen, setPurchaseFlowOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check if this is the user's own page
+  const isOwnPage = user?.username === username;
 
   // Always scroll to top when component mounts
   useEffect(() => {
@@ -96,7 +103,7 @@ const CreatorPage = () => {
   if (isLoading || !creator) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
-        <NavBar />
+        <CreatorNavBar />
         <div className="flex-grow flex items-center justify-center">
           <div className="animate-pulse flex flex-col items-center">
             <div className="rounded-full bg-gray-200 h-24 w-24 mb-4"></div>
@@ -104,14 +111,14 @@ const CreatorPage = () => {
             <div className="h-4 bg-gray-200 rounded w-64"></div>
           </div>
         </div>
-        <Footer />
+        <CreatorFooter />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <NavBar />
+      <CreatorNavBar />
       
       <CreatorStickyHeader 
         visible={headerVisible}
@@ -122,6 +129,20 @@ const CreatorPage = () => {
       />
       
       <main className="flex-grow">
+        {/* Admin banner if this is the user's own page */}
+        {isOwnPage && (
+          <div className="bg-mimo-primary/10 text-mimo-primary p-2 text-center">
+            <div className="flex justify-center items-center gap-3">
+              <p>Esta é a visualização pública da sua página</p>
+              <Button variant="outline" size="sm" className="border-mimo-primary text-mimo-primary hover:bg-mimo-primary hover:text-white" asChild>
+                <Link to="/editar-pagina">
+                  Editar página
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
+        
         {/* Hero Section */}
         <CreatorHero 
           creator={creator} 
@@ -175,7 +196,7 @@ const CreatorPage = () => {
         )}
       </main>
       
-      <Footer />
+      <CreatorFooter />
     </div>
   );
 };

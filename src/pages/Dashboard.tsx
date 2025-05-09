@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { Creator } from '@/types/creator';
 import { getCreatorData } from '@/services/creatorDataService';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Mock data
 const mockMimos = [
@@ -127,10 +128,15 @@ const Dashboard = () => {
 
   const [creator, setCreator] = useState<Creator | null>(null);
   
+  const { user } = useAuth();
+  
   useEffect(() => {
-    const creatorData = getCreatorData();
-    setCreator(creatorData);
-  }, []);
+    // Use the authenticated user's information to load their creator profile
+    if (user) {
+      const creatorData = getCreatorData();
+      setCreator(creatorData);
+    }
+  }, [user]);
 
   const handleViewMimo = (id: string) => {
     const mimo = mockMimos.find(m => m.id === id);
@@ -201,7 +207,7 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold mb-2">Painel da Criadora</h1>
-              <p className="text-foreground/70">Gerencie seus mimos, saldos e pagamentos</p>
+              <p className="text-foreground/70">Olá, {user?.name}! Gerencie seus mimos, saldos e pagamentos</p>
             </div>
             
             <div className="flex gap-4 mt-4 md:mt-0">
@@ -214,7 +220,7 @@ const Dashboard = () => {
                 <span className="hidden sm:inline">Meu Perfil</span>
               </Button>
               <Button variant="outline" className="flex items-center gap-2" asChild>
-                <Link to={`/criador/${creator?.username || ''}`} target="_blank">
+                <Link to={`/criador/${user?.username || ''}`} target="_blank">
                   <Eye className="h-4 w-4" />
                   <span className="hidden sm:inline">Ver Minha Página</span>
                 </Link>
@@ -453,7 +459,7 @@ const Dashboard = () => {
                     Última atualização: {new Date().toLocaleDateString()}
                   </p>
                   <Button variant="link" className="text-mimo-primary p-0" asChild>
-                    <Link to={`/criador/${creator?.username || ''}`} target="_blank">
+                    <Link to={`/criador/${user?.username || ''}`} target="_blank">
                       Ver minha página <ChevronRight className="h-4 w-4 ml-1" />
                     </Link>
                   </Button>

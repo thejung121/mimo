@@ -1,15 +1,61 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Heart, LogIn } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const from = location.state?.from?.pathname || '/dashboard';
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      toast({
+        title: "Email obrigatório",
+        description: "Por favor, informe seu email",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!password) {
+      toast({
+        title: "Senha obrigatória",
+        description: "Por favor, informe sua senha",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const success = await login(email, password);
+      if (success) {
+        navigate(from, { replace: true });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -34,16 +80,30 @@ const Login = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form>
+              <form onSubmit={handleLogin}>
                 <div className="grid gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="seu@email.com" />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="seu@email.com" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={isLoading}
+                    />
                   </div>
                   
                   <div className="grid gap-2">
                     <Label htmlFor="password">Senha</Label>
-                    <Input id="password" type="password" placeholder="Sua senha" />
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="Sua senha" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                    />
                     <Link to="/esqueci-senha" className="text-xs text-right text-mimo-primary hover:underline">
                       Esqueceu sua senha?
                     </Link>
@@ -52,8 +112,18 @@ const Login = () => {
               </form>
             </CardContent>
             <CardFooter>
-              <Button className="w-full mimo-button">
-                <LogIn className="mr-2 h-4 w-4" /> Entrar
+              <Button 
+                className="w-full mimo-button" 
+                onClick={handleLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  "Entrando..."
+                ) : (
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" /> Entrar
+                  </>
+                )}
               </Button>
             </CardFooter>
             <div className="px-6 pb-6 text-center">
