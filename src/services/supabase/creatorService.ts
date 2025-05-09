@@ -66,7 +66,7 @@ export const getCreatorPackages = async (creatorId: string): Promise<MimoPackage
   
   // Convert to MimoPackage type
   return data.map(pkg => ({
-    id: parseInt(pkg.id), // Convert UUID to number for compatibility
+    id: pkg.id, // Keep UUID instead of converting to number
     title: pkg.title,
     price: pkg.price,
     features: pkg.description ? [pkg.description] : [],
@@ -78,26 +78,34 @@ export const getCreatorPackages = async (creatorId: string): Promise<MimoPackage
 
 // Update creator profile
 export const updateCreatorProfile = async (creator: Creator): Promise<boolean> => {
-  const { data, error } = await supabase
-    .from('creators')
-    .update({
-      name: creator.name,
-      username: creator.username,
-      profile_image: creator.avatar,
-      cover_image: creator.cover,
-      bio: creator.about,
-      thank_you_message: creator.coverTitle,
-      social_links: prepareSocialLinksForDb(creator.socialLinks)
-    })
-    .eq('id', creator.id)
-    .select();
-  
-  if (error) {
-    console.error('Error updating creator profile:', error);
+  try {
+    console.log('Updating creator profile with data:', creator);
+    
+    const { data, error } = await supabase
+      .from('creators')
+      .update({
+        name: creator.name,
+        username: creator.username,
+        profile_image: creator.avatar,
+        cover_image: creator.cover,
+        bio: creator.description || creator.about,
+        thank_you_message: creator.coverTitle,
+        social_links: prepareSocialLinksForDb(creator.socialLinks)
+      })
+      .eq('id', creator.id)
+      .select();
+    
+    if (error) {
+      console.error('Error updating creator profile:', error);
+      return false;
+    }
+    
+    console.log('Creator profile updated successfully:', data);
+    return true;
+  } catch (error) {
+    console.error('Exception in updateCreatorProfile:', error);
     return false;
   }
-  
-  return true;
 };
 
 // Get current user's creator profile

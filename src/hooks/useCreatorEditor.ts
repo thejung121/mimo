@@ -1,17 +1,10 @@
 
 import { useCreatorProfile } from './useCreatorProfile';
 import { useMimoPackages } from './useMimoPackages';
-import { useEditorUI } from './useEditorUI';
 
 export const useCreatorEditor = () => {
   const profileHook = useCreatorProfile();
   const packagesHook = useMimoPackages();
-  const uiHook = useEditorUI();
-
-  // Handler to save all changes
-  const handleSaveAll = () => {
-    uiHook.handleSaveAll(profileHook.creator, packagesHook.mimoPackages);
-  };
 
   return {
     // Creator profile states and handlers
@@ -39,8 +32,5 @@ export const useCreatorEditor = () => {
     handleDeletePackage: packagesHook.handleDeletePackage,
     handleEditPackage: packagesHook.handleEditPackage,
     setShowNewPackageForm: packagesHook.setShowNewPackageForm,
-    
-    // Combined handlers
-    handleSaveAll
   };
 };

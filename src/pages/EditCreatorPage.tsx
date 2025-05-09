@@ -1,18 +1,21 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from "@/components/ui/button";
 import { useCreatorEditor } from '@/hooks/useCreatorEditor';
 import { Save, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-
+import { useToast } from '@/components/ui/use-toast';
+import { updateCreatorProfile } from '@/services/supabase/creatorService';
 // Importing a new component that will contain all editor sections in one view
 import UnifiedEditorSection from '@/components/UnifiedEditorSection';
 
 const EditCreatorPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   const {
     creator,
@@ -35,9 +38,36 @@ const EditCreatorPage = () => {
     handleSavePackage,
     handleDeletePackage,
     handleEditPackage,
-    handleSaveAll,
+    handleSaveProfile,
     setShowNewPackageForm,
   } = useCreatorEditor();
+
+  // Enhanced save function that explicitly updates the profile and then redirects
+  const handleSaveAll = async () => {
+    try {
+      // First save the profile
+      await handleSaveProfile();
+      
+      toast({
+        title: "Alterações salvas com sucesso!",
+        description: "Todas as suas alterações foram salvas.",
+      });
+      
+      // Navigate to the creator page to see the changes
+      if (user?.username || creator.username) {
+        navigate(`/criador/${user?.username || creator.username}`);
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      toast({
+        title: "Erro ao salvar alterações",
+        description: "Ocorreu um erro ao salvar suas alterações. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -124,7 +124,6 @@ export const useCreatorProfile = () => {
       reader.onload = () => {
         const result = reader.result as string;
         setCoverPreview(result);
-        setCreator(prev => ({ ...prev, cover: result }));
       };
       reader.readAsDataURL(file);
     }
@@ -141,7 +140,6 @@ export const useCreatorProfile = () => {
       reader.onload = () => {
         const result = reader.result as string;
         setAvatarPreview(result);
-        setCreator(prev => ({ ...prev, avatar: result }));
       };
       reader.readAsDataURL(file);
     }
@@ -167,7 +165,7 @@ export const useCreatorProfile = () => {
         }
       }
       
-      // Set the creator state with updated URLs
+      // Update local state with the updated URLs
       setCreator(updatedCreator);
       
       // Save to Supabase

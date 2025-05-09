@@ -162,30 +162,28 @@ const MimoTabContent = ({ mimoPackages, onSelectPackage, onCustomValue }: MimoTa
     onSelectPackage(customPackage);
   };
   
-  if (mimoPackages.length === 0) {
-    return (
-      <div className="text-center py-8 bg-white rounded-lg border border-gray-100">
-        <Heart className="mx-auto h-10 w-10 text-gray-200 mb-3" />
-        <p className="text-gray-500 text-sm">Nenhum pacote disponível no momento</p>
-      </div>
-    );
-  }
-  
   return (
     <div className="space-y-6">
       {/* Custom value mimo - now always visible at the top */}
       <CustomValueMimo onSubmit={handleCustomValue} />
       
       {/* Standard packages */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mimoPackages.map((pkg) => (
-          <PackageCard 
-            key={pkg.id} 
-            pkg={pkg} 
-            onSelect={() => onSelectPackage(pkg)} 
-          />
-        ))}
-      </div>
+      {mimoPackages.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {mimoPackages.map((pkg) => (
+            <PackageCard 
+              key={pkg.id} 
+              pkg={pkg} 
+              onSelect={() => onSelectPackage(pkg)} 
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 bg-white rounded-lg border border-gray-100">
+          <Heart className="mx-auto h-10 w-10 text-gray-200 mb-3" />
+          <p className="text-gray-500 text-sm">Nenhum pacote disponível no momento</p>
+        </div>
+      )}
     </div>
   );
 };

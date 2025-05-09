@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -169,6 +168,7 @@ const SellerOnboarding = () => {
   };
 
   return (
+    
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <div className="flex items-center justify-center mb-2">

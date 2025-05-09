@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import CreatorNavBar from '@/components/CreatorNavBar';
@@ -63,7 +64,7 @@ const CreatorPage = () => {
     fetchData();
   }, [username]);
 
-  // Handle scroll effect for header - using passive event listener for better performance
+  // Handle scroll effect for header
   const handleScroll = () => {
     const currentScrollY = window.scrollY;
     if (currentScrollY > 100) {
