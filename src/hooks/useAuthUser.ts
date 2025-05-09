@@ -1,44 +1,49 @@
 
 import { useState, useEffect } from 'react';
 import { AuthUser } from '@/types/auth';
-import { LOCAL_STORAGE_KEY, getItemFromStorage } from '@/utils/storage';
-import { getCurrentUser } from '@/services/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import { convertSupabaseUser } from '@/services/supabase/authService';
 
 export const useAuthUser = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const loadUser = async () => {
-      setIsLoading(true);
-      
-      // First try to get user from Supabase
-      const supabaseUser = await getCurrentUser();
-      
-      if (supabaseUser) {
-        // If we have a Supabase user, use that
-        const authUser: AuthUser = {
-          id: supabaseUser.id,
-          name: supabaseUser.user_metadata?.name || 'User',
-          email: supabaseUser.email || '',
-          username: supabaseUser.user_metadata?.username || '',
-          avatar: supabaseUser.user_metadata?.avatar || ''
-        };
-        setUser(authUser);
+    // First set up the auth state listener to react to changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log('Auth state changed:', event);
+        setSession(currentSession);
+        
+        // Update user state based on session
+        if (currentSession?.user) {
+          const authUser = convertSupabaseUser(currentSession.user);
+          setUser(authUser);
+        } else {
+          setUser(null);
+        }
+        
         setIsLoading(false);
-        return;
       }
+    );
+    
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
       
-      // Fallback to localStorage
-      const storedUser = getItemFromStorage<AuthUser>(LOCAL_STORAGE_KEY);
-      if (storedUser) {
-        setUser(storedUser);
+      if (currentSession?.user) {
+        const authUser = convertSupabaseUser(currentSession.user);
+        setUser(authUser);
       }
       
       setIsLoading(false);
-    };
+    });
     
-    loadUser();
+    // Clean up subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
   
   return {

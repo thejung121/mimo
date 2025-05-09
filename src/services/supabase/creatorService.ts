@@ -1,39 +1,115 @@
 
-import { supabase, useDemo } from './supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
+import { Creator, MimoPackage } from '@/types/creator';
+import { convertSupabaseUser } from './authService';
 
-export const getCreatorByUsername = async (username: string) => {
-  if (useDemo) return null;
-  
+// Get creator by username
+export const getCreatorByUsername = async (username: string): Promise<Creator | null> => {
   const { data, error } = await supabase
     .from('creators')
-    .select('*, social_links(*)')
+    .select('*')
     .eq('username', username)
     .single();
   
   if (error) {
-    console.error('Error getting creator:', error);
+    console.error('Error getting creator by username:', error);
     return null;
   }
   
-  return data;
+  // Convert to Creator type
+  return {
+    id: data.id,
+    name: data.name,
+    username: data.username,
+    avatar: data.profile_image || '/placeholder.svg',
+    cover: data.cover_image || '/placeholder.svg',
+    description: data.bio || '',
+    coverTitle: data.thank_you_message || `Página de ${data.name}`,
+    coverSubtitle: "Envie-me um mimo e ajude meu trabalho!",
+    socialLinks: data.social_links || [],
+    about: data.bio || `Olá! Eu sou ${data.name} e esta é minha página de mimos.`
+  };
 };
 
-export const getCreatorPackages = async (creatorId: string) => {
-  if (useDemo) {
-    // Use local storage data in demo mode
-    return [];
-  }
-  
+// Get creator packages
+export const getCreatorPackages = async (creatorId: string): Promise<MimoPackage[]> => {
   const { data, error } = await supabase
-    .from('mimo_packages')
-    .select('*, package_features(*), package_media(*)')
+    .from('packages')
+    .select('*')
     .eq('creator_id', creatorId)
-    .eq('is_hidden', false);
+    .eq('active', true);
   
   if (error) {
     console.error('Error getting creator packages:', error);
     return [];
   }
   
-  return data;
+  // Convert to MimoPackage type
+  return data.map(pkg => ({
+    id: parseInt(pkg.id), // Convert UUID to number for compatibility
+    title: pkg.title,
+    price: pkg.price,
+    features: pkg.description ? [pkg.description] : [],
+    highlighted: false,
+    media: [],
+    isHidden: !pkg.active
+  }));
+};
+
+// Update creator profile
+export const updateCreatorProfile = async (creator: Creator): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('creators')
+    .update({
+      name: creator.name,
+      username: creator.username,
+      profile_image: creator.avatar,
+      cover_image: creator.cover,
+      bio: creator.about,
+      thank_you_message: creator.coverTitle,
+      social_links: creator.socialLinks
+    })
+    .eq('id', creator.id)
+    .select();
+  
+  if (error) {
+    console.error('Error updating creator profile:', error);
+    return false;
+  }
+  
+  return true;
+};
+
+// Get current user's creator profile
+export const getCurrentCreator = async (): Promise<Creator | null> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    return null;
+  }
+  
+  const { data, error } = await supabase
+    .from('creators')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+  
+  if (error) {
+    console.error('Error getting current creator:', error);
+    return null;
+  }
+  
+  // Convert to Creator type
+  return {
+    id: data.id,
+    name: data.name,
+    username: data.username,
+    avatar: data.profile_image || '/placeholder.svg',
+    cover: data.cover_image || '/placeholder.svg',
+    description: data.bio || '',
+    coverTitle: data.thank_you_message || `Página de ${data.name}`,
+    coverSubtitle: "Envie-me um mimo e ajude meu trabalho!",
+    socialLinks: data.social_links || [],
+    about: data.bio || `Olá! Eu sou ${data.name} e esta é minha página de mimos.`
+  };
 };

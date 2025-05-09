@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import CreatorNavBar from '@/components/CreatorNavBar';
@@ -11,8 +10,7 @@ import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import MimoTabContent from '@/components/MimoTabContent';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase';
-import { adaptCreator, adaptMimoPackage } from '@/utils/typeAdapters';
+import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase/creatorService';
 import { Creator, MimoPackage } from '@/types/creator';
 
 const CreatorPage = () => {
@@ -43,20 +41,17 @@ const CreatorPage = () => {
       setIsLoading(true);
       
       try {
-        // Get creator data
+        // Get creator data from Supabase
         const creatorData = await getCreatorByUsername(username);
         
         if (creatorData) {
-          // Use adapter to convert to our app's Creator type
-          const adaptedCreator = adaptCreator(creatorData);
-          setCreator(adaptedCreator);
+          setCreator(creatorData);
           
           // Get creator packages
-          const packagesData = await getCreatorPackages(creatorData.id);
-          
-          // Use adapter to convert each package to our app's MimoPackage type
-          const adaptedPackages = packagesData.map(pkg => adaptMimoPackage(pkg));
-          setMimoPackages(adaptedPackages);
+          if (creatorData.id) {
+            const packagesData = await getCreatorPackages(creatorData.id);
+            setMimoPackages(packagesData);
+          }
         }
       } catch (error) {
         console.error("Error fetching creator data:", error);
@@ -69,17 +64,17 @@ const CreatorPage = () => {
   }, [username]);
 
   // Handle scroll effect for header - using passive event listener for better performance
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > 100) {
-        setHeaderVisible(currentScrollY < lastScrollY);
-      } else {
-        setHeaderVisible(true);
-      }
-      setLastScrollY(currentScrollY);
-    };
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
+    if (currentScrollY > 100) {
+      setHeaderVisible(currentScrollY < lastScrollY);
+    } else {
+      setHeaderVisible(true);
+    }
+    setLastScrollY(currentScrollY);
+  };
 
+  useEffect(() => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
@@ -164,7 +159,7 @@ const CreatorPage = () => {
           onMimoClick={scrollToMimoSection} 
         />
         
-        {/* Mimos Section - simplified */}
+        {/* Mimos Section */}
         <section id="mimo-section" className="py-8 bg-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-6">

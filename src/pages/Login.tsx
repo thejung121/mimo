@@ -59,9 +59,27 @@ const Login = () => {
   const handleForgotPassword = (e: React.MouseEvent) => {
     e.preventDefault();
     toast({
-      title: "Recurso não disponível",
-      description: "A recuperação de senha ainda não está implementada nesta versão.",
+      title: "Recuperação de senha",
+      description: "Um email com instruções será enviado para você.",
       variant: "default"
+    });
+    
+    // Call Supabase password reset here
+    supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password',
+    }).then(({ error }) => {
+      if (error) {
+        toast({
+          title: "Erro",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Email enviado",
+          description: "Verifique sua caixa de entrada para redefinir sua senha.",
+        });
+      }
     });
   };
 

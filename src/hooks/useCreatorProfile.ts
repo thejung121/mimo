@@ -1,16 +1,48 @@
+
 import { useState, useEffect } from 'react';
 import { Creator, SocialLink } from '@/types/creator';
 import { useToast } from '@/components/ui/use-toast';
-import { getCreatorData } from '@/services/creator';
+import { getCurrentCreator, updateCreatorProfile } from '@/services/supabase/creatorService';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useCreatorProfile = () => {
   const { toast } = useToast();
   
-  const [creator, setCreator] = useState<Creator>(getCreatorData());
+  const [creator, setCreator] = useState<Creator>({
+    name: '',
+    username: '',
+    coverTitle: '',
+    coverSubtitle: '',
+    about: '',
+    avatar: '/placeholder.svg',
+    cover: '/placeholder.svg',
+    description: '',
+    socialLinks: []
+  });
+
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState(creator.cover);
-  const [avatarPreview, setAvatarPreview] = useState(creator.avatar);
+  const [coverPreview, setCoverPreview] = useState('/placeholder.svg');
+  const [avatarPreview, setAvatarPreview] = useState('/placeholder.svg');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load creator data
+  useEffect(() => {
+    const loadCreator = async () => {
+      setIsLoading(true);
+      const creatorData = await getCurrentCreator();
+      
+      if (creatorData) {
+        setCreator(creatorData);
+        setCoverPreview(creatorData.cover);
+        setAvatarPreview(creatorData.avatar);
+      }
+      
+      setIsLoading(false);
+    };
+    
+    loadCreator();
+  }, []);
 
   // Handler for updating the creator
   const handleCreatorChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -22,7 +54,6 @@ export const useCreatorProfile = () => {
   const handleSocialLinkChange = (index: number, field: string, value: string) => {
     const updatedSocialLinks = [...creator.socialLinks] as SocialLink[];
     
-    // Ensure we're only updating allowed fields with correct types
     if (field === 'url') {
       updatedSocialLinks[index] = { 
         ...updatedSocialLinks[index], 
@@ -36,6 +67,33 @@ export const useCreatorProfile = () => {
     }
     
     setCreator(prev => ({ ...prev, socialLinks: updatedSocialLinks }));
+  };
+
+  // Upload file to Supabase Storage
+  const uploadFile = async (file: File, bucket: string, folder: string): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${folder}/${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file);
+
+    if (error) {
+      console.error(`Error uploading ${folder}:`, error);
+      toast({
+        title: `Error uploading ${folder}`,
+        description: error.message,
+        variant: "destructive"
+      });
+      return null;
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(data.path);
+
+    return urlData.publicUrl;
   };
 
   // Handler for the upload of cover image
@@ -73,21 +131,53 @@ export const useCreatorProfile = () => {
   };
 
   // Handler to save the creator's profile
-  const handleSaveProfile = () => {
-    // Here you would implement logic to save to the backend
-    console.log("Saving profile:", creator);
-    console.log("Files to upload:", { cover: coverFile, avatar: avatarFile });
-    
-    toast({
-      title: "Perfil salvo com sucesso!",
-      description: "As alterações no seu perfil foram salvas.",
-    });
+  const handleSaveProfile = async () => {
+    try {
+      // Upload files if they exist
+      if (coverFile) {
+        const coverUrl = await uploadFile(coverFile, 'user_uploads', 'covers');
+        if (coverUrl) {
+          setCreator(prev => ({ ...prev, cover: coverUrl }));
+        }
+      }
+      
+      if (avatarFile) {
+        const avatarUrl = await uploadFile(avatarFile, 'user_uploads', 'avatars');
+        if (avatarUrl) {
+          setCreator(prev => ({ ...prev, avatar: avatarUrl }));
+        }
+      }
+      
+      // Save to Supabase
+      const success = await updateCreatorProfile(creator);
+      
+      if (success) {
+        toast({
+          title: "Perfil salvo com sucesso!",
+          description: "As alterações no seu perfil foram salvas.",
+        });
+      } else {
+        toast({
+          title: "Erro ao salvar perfil",
+          description: "Ocorreu um erro ao salvar seu perfil.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      toast({
+        title: "Erro ao salvar perfil",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   return {
     creator,
     coverPreview,
     avatarPreview,
+    isLoading,
     handleCreatorChange,
     handleSocialLinkChange,
     handleCoverChange,
