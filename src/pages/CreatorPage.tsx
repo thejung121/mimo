@@ -3,16 +3,37 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import CreatorNavBar from '@/components/CreatorNavBar';
 import CreatorFooter from '@/components/CreatorFooter';
-import { MimoPackage, Creator } from '@/types/creator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Eye } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
 import CreatorHero from '@/components/CreatorHero';
 import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import MimoTabContent from '@/components/MimoTabContent';
-import { getCreatorData, getMimoPackages } from '@/services/creatorDataService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { getCreatorByUsername, getCreatorPackages } from '@/services/supabaseService';
+
+interface MimoPackage {
+  id: string;
+  title: string;
+  price: number;
+  features: { id: string; feature: string }[];
+  highlighted: boolean;
+  package_media: { id: string; url: string; type: string; is_preview: boolean }[];
+}
+
+interface Creator {
+  id: string;
+  username: string;
+  name: string;
+  avatar: string;
+  cover: string;
+  description: string;
+  coverTitle?: string;
+  coverSubtitle?: string;
+  about?: string;
+  social_links: { id: string; type: string; url: string }[];
+}
 
 const CreatorPage = () => {
   const { username } = useParams();
@@ -27,7 +48,7 @@ const CreatorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Check if this is the user's own page
-  const isOwnPage = user?.username === username;
+  const isOwnPage = user?.user_metadata?.username === username;
 
   // Always scroll to top when component mounts
   useEffect(() => {
@@ -37,15 +58,21 @@ const CreatorPage = () => {
   // Load creator and package data
   useEffect(() => {
     const fetchData = async () => {
+      if (!username) return;
+      
       setIsLoading(true);
       
       try {
-        // Get data from localStorage via the service
-        const creatorData = getCreatorData();
-        const packagesData = getMimoPackages();
+        // Get creator data
+        const creatorData = await getCreatorByUsername(username);
         
-        setCreator(creatorData);
-        setMimoPackages(packagesData);
+        if (creatorData) {
+          setCreator(creatorData);
+          
+          // Get creator packages
+          const packagesData = await getCreatorPackages(creatorData.id);
+          setMimoPackages(packagesData);
+        }
       } catch (error) {
         console.error("Error fetching creator data:", error);
       } finally {
@@ -84,31 +111,34 @@ const CreatorPage = () => {
     }
   };
 
-  // Handle custom value submissions
-  const handleCustomValue = (value: number) => {
-    const customPackage: MimoPackage = {
-      id: 0,
-      title: "Mimo Personalizado",
-      price: value,
-      features: ["Valor personalizado", "Mensagem exclusiva"],
-      highlighted: false,
-      media: []
-    };
-    
-    setSelectedPackage(customPackage);
-    setPurchaseFlowOpen(true);
-  };
-
   // Show loading state
-  if (isLoading || !creator) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
         <CreatorNavBar />
         <div className="flex-grow flex items-center justify-center">
-          <div className="animate-pulse flex flex-col items-center">
-            <div className="rounded-full bg-gray-200 h-24 w-24 mb-4"></div>
-            <div className="h-6 bg-gray-200 rounded w-48 mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-64"></div>
+          <div className="flex flex-col items-center">
+            <Loader2 className="h-10 w-10 text-mimo-primary animate-spin mb-4" />
+            <p className="text-muted-foreground">Carregando perfil do criador...</p>
+          </div>
+        </div>
+        <CreatorFooter />
+      </div>
+    );
+  }
+  
+  // Show not found state
+  if (!creator) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white">
+        <CreatorNavBar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="flex flex-col items-center text-center px-4">
+            <h2 className="text-2xl font-bold mb-2">Criador não encontrado</h2>
+            <p className="text-muted-foreground mb-6">O criador que você está procurando não existe ou não está disponível.</p>
+            <Button onClick={() => window.history.back()}>
+              Voltar
+            </Button>
           </div>
         </div>
         <CreatorFooter />
@@ -172,9 +202,15 @@ const CreatorPage = () => {
               
               <TabsContent value="mimos">
                 <MimoTabContent 
-                  mimoPackages={mimoPackages} 
+                  mimoPackages={mimoPackages.map(pkg => ({
+                    id: pkg.id,
+                    title: pkg.title,
+                    price: pkg.price,
+                    features: pkg.package_features.map(f => f.feature),
+                    highlighted: pkg.highlighted,
+                    media: pkg.package_media
+                  }))} 
                   onSelectPackage={handleSelectPackage}
-                  onCustomValue={handleCustomValue}
                 />
               </TabsContent>
             </Tabs>
@@ -182,15 +218,17 @@ const CreatorPage = () => {
         </section>
         
         {/* Purchase Flow Component */}
-        {selectedPackage && (
+        {selectedPackage && creator && (
           <PurchaseFlow
             open={purchaseFlowOpen}
             onClose={() => {
               setPurchaseFlowOpen(false);
               setSelectedPackage(null);
             }}
+            packageId={selectedPackage.id}
             packageTitle={selectedPackage.title}
             packagePrice={selectedPackage.price}
+            creatorId={creator.id}
             creatorName={creator.name}
           />
         )}

@@ -20,6 +20,8 @@ import AboutUs from "./pages/AboutUs";
 import ExploreCreators from "./pages/ExploreCreators";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCanceled from "./pages/PaymentCanceled";
 
 // Componente para fazer scroll para o topo da página quando a rota muda
 const ScrollToTop = () => {
@@ -69,6 +71,8 @@ const App = () => (
               }
             />
             <Route path="/recompensa/:rewardId" element={<RewardPage />} />
+            <Route path="/pagamento-sucesso" element={<PaymentSuccess />} />
+            <Route path="/pagamento-cancelado" element={<PaymentCanceled />} />
             <Route path="/cadastro" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/sobre" element={<AboutUs />} />
