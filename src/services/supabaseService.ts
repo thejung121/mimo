@@ -1,6 +1,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
+import { getTransactions, getWithdrawals, getAvailableBalance } from './creatorDataService';
 
 // Get environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -57,6 +58,11 @@ export const getCreatorByUsername = async (username: string) => {
 };
 
 export const getCreatorPackages = async (creatorId: string) => {
+  if (useDemo) {
+    // Use local storage data in demo mode
+    return [];
+  }
+  
   const { data, error } = await supabase
     .from('mimo_packages')
     .select('*, package_features(*), package_media(*)')
@@ -73,6 +79,11 @@ export const getCreatorPackages = async (creatorId: string) => {
 
 // Transaction-related functions
 export const getCreatorTransactions = async (creatorId: string) => {
+  if (useDemo) {
+    // Use local storage data in demo mode
+    return getTransactions();
+  }
+  
   const { data, error } = await supabase
     .from('transactions')
     .select('*, rewards(*)')
@@ -89,6 +100,8 @@ export const getCreatorTransactions = async (creatorId: string) => {
 
 // Reward-related functions
 export const getRewardByToken = async (token: string) => {
+  if (useDemo) return null;
+  
   const { data, error } = await supabase
     .from('rewards')
     .select('*, transactions!inner(*, creators(*)), reward_content(*)')
@@ -104,6 +117,8 @@ export const getRewardByToken = async (token: string) => {
 };
 
 export const createRewardContent = async (rewardId: string, contents: Array<{ type: string; url: string; caption?: string; }>) => {
+  if (useDemo) return;
+  
   const { error } = await supabase
     .from('reward_content')
     .insert(
@@ -123,6 +138,33 @@ export const createRewardContent = async (rewardId: string, contents: Array<{ ty
 
 // Withdrawal-related functions
 export const createWithdrawalRequest = async (creatorId: string, amount: number, pixKey: string) => {
+  if (useDemo) {
+    // Simulated withdrawal in demo mode
+    const withdrawal = {
+      id: Date.now().toString(),
+      creator_id: creatorId,
+      amount,
+      status: 'pending',
+      pix_key: pixKey,
+      request_date: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    // Add to local storage
+    const withdrawals = getWithdrawals();
+    withdrawals.push(withdrawal);
+    
+    const user = localStorage.getItem('mimo:auth');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      const withdrawalsKey = `mimo:withdrawals:${parsedUser.id}`;
+      localStorage.setItem(withdrawalsKey, JSON.stringify(withdrawals));
+    }
+    
+    return withdrawal;
+  }
+  
   const { data, error } = await supabase
     .from('withdrawals')
     .insert({
@@ -143,6 +185,11 @@ export const createWithdrawalRequest = async (creatorId: string, amount: number,
 };
 
 export const getCreatorWithdrawals = async (creatorId: string) => {
+  if (useDemo) {
+    // Use local storage data in demo mode
+    return getWithdrawals();
+  }
+  
   const { data, error } = await supabase
     .from('withdrawals')
     .select('*')
@@ -158,6 +205,11 @@ export const getCreatorWithdrawals = async (creatorId: string) => {
 };
 
 export const getAvailableBalance = async (creatorId: string) => {
+  if (useDemo) {
+    // Use local storage data in demo mode
+    return getAvailableBalance();
+  }
+  
   // Get total amount from completed transactions
   const { data: transactions, error: transactionsError } = await supabase
     .from('transactions')

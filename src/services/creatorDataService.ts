@@ -94,27 +94,17 @@ export const getCreatorData = (): Creator => {
     } catch (e) {
       console.error("Failed to parse creator data", e);
       // If parsing fails, return a new creator for this user with minimal data
-      return {
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        coverTitle: `Página de ${user.name}`,
-        coverSubtitle: "Envie-me um mimo e ajude meu trabalho!",
-        about: `Olá! Eu sou ${user.name} e esta é minha página de mimos. Aqui você pode me apoiar e receber conteúdo exclusivo.`,
-        avatar: "/placeholder.svg", 
-        cover: "/placeholder.svg",
-        description: `Criador de conteúdo`,
-        socialLinks: [
-          { type: "instagram", url: "" },
-          { type: "twitter", url: "" },
-          { type: "website", url: "" }
-        ]
-      };
+      return createDefaultCreator(user);
     }
   }
   
   // If no stored creator data, create a default profile with minimal data
-  return {
+  return createDefaultCreator(user);
+};
+
+// Create default creator profile
+const createDefaultCreator = (user: any): Creator => {
+  const defaultCreator: Creator = {
     id: user.id,
     name: user.name,
     username: user.username,
@@ -130,6 +120,11 @@ export const getCreatorData = (): Creator => {
       { type: "website", url: "" }
     ]
   };
+  
+  // Save this default creator to localStorage
+  saveCreatorData(defaultCreator);
+  
+  return defaultCreator;
 };
 
 // Get mimo packages with proper user association
@@ -150,13 +145,82 @@ export const getMimoPackages = (): MimoPackage[] => {
       return JSON.parse(storedPackages);
     } catch (e) {
       console.error("Failed to parse packages data", e);
-      // Return empty array instead of demo packages
+      // Return empty array instead of demo packages for authenticated users
       return [];
     }
   }
   
   // If no stored packages, return empty array for new users
   return [];
+};
+
+// Get transactions for the current user
+export const getTransactions = () => {
+  const user = getCurrentUser();
+  
+  if (!user) {
+    return []; // No transactions for unauthenticated users
+  }
+  
+  const transactionsKey = `mimo:transactions:${user.id}`;
+  const storedTransactions = localStorage.getItem(transactionsKey);
+  
+  if (storedTransactions) {
+    try {
+      return JSON.parse(storedTransactions);
+    } catch (e) {
+      console.error("Failed to parse transactions data", e);
+      return [];
+    }
+  }
+  
+  return []; // New users have no transactions
+};
+
+// Get withdrawals for the current user
+export const getWithdrawals = () => {
+  const user = getCurrentUser();
+  
+  if (!user) {
+    return []; // No withdrawals for unauthenticated users
+  }
+  
+  const withdrawalsKey = `mimo:withdrawals:${user.id}`;
+  const storedWithdrawals = localStorage.getItem(withdrawalsKey);
+  
+  if (storedWithdrawals) {
+    try {
+      return JSON.parse(storedWithdrawals);
+    } catch (e) {
+      console.error("Failed to parse withdrawals data", e);
+      return [];
+    }
+  }
+  
+  return []; // New users have no withdrawals
+};
+
+// Get available balance for the current user
+export const getAvailableBalance = () => {
+  const user = getCurrentUser();
+  
+  if (!user) {
+    return 0; // No balance for unauthenticated users
+  }
+  
+  const balanceKey = `mimo:balance:${user.id}`;
+  const storedBalance = localStorage.getItem(balanceKey);
+  
+  if (storedBalance) {
+    try {
+      return parseFloat(storedBalance);
+    } catch (e) {
+      console.error("Failed to parse balance data", e);
+      return 0;
+    }
+  }
+  
+  return 0; // New users have no balance
 };
 
 // Save creator data with user ID association
@@ -191,4 +255,43 @@ export const saveMimoPackages = (packages: MimoPackage[]): void => {
 export const saveAllData = (creator: Creator, packages: MimoPackage[]): void => {
   saveCreatorData(creator);
   saveMimoPackages(packages);
+};
+
+// Save transactions data
+export const saveTransactions = (transactions: any[]): void => {
+  const user = getCurrentUser();
+  
+  if (!user) {
+    console.warn("Attempting to save transactions data without being logged in");
+    return;
+  }
+  
+  const transactionsKey = `mimo:transactions:${user.id}`;
+  localStorage.setItem(transactionsKey, JSON.stringify(transactions));
+};
+
+// Save withdrawals data
+export const saveWithdrawals = (withdrawals: any[]): void => {
+  const user = getCurrentUser();
+  
+  if (!user) {
+    console.warn("Attempting to save withdrawals data without being logged in");
+    return;
+  }
+  
+  const withdrawalsKey = `mimo:withdrawals:${user.id}`;
+  localStorage.setItem(withdrawalsKey, JSON.stringify(withdrawals));
+};
+
+// Save balance data
+export const saveBalance = (balance: number): void => {
+  const user = getCurrentUser();
+  
+  if (!user) {
+    console.warn("Attempting to save balance data without being logged in");
+    return;
+  }
+  
+  const balanceKey = `mimo:balance:${user.id}`;
+  localStorage.setItem(balanceKey, balance.toString());
 };

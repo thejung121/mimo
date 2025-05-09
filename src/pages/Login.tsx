@@ -56,6 +56,15 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Recurso não disponível",
+      description: "A recuperação de senha ainda não está implementada nesta versão.",
+      variant: "default"
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -104,9 +113,13 @@ const Login = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={isLoading}
                     />
-                    <Link to="/esqueci-senha" className="text-xs text-right text-mimo-primary hover:underline">
+                    <a 
+                      href="#" 
+                      onClick={handleForgotPassword}
+                      className="text-xs text-right text-mimo-primary hover:underline"
+                    >
                       Esqueceu sua senha?
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </form>

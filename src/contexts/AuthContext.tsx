@@ -1,8 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { Creator } from '@/types/creator';
 import { getCreatorData, saveCreatorData } from '@/services/creatorDataService';
+import { supabase } from '@/services/supabaseService';
 
 // Define auth user type
 export interface AuthUser {
@@ -25,6 +27,7 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'mimo:auth';
+const USERS_STORAGE_KEY = 'mimo:users';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -57,11 +60,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       
-      // In a real app, this would be an API call
-      // For now we'll use localStorage to simulate stored users
-      const storedUsers = localStorage.getItem('mimo:users');
+      // Get users from localStorage
+      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
       const users = storedUsers ? JSON.parse(storedUsers) : [];
       
+      // Find user with matching email
       const foundUser = users.find((u: any) => u.email === email);
       
       if (!foundUser || foundUser.password !== password) {
@@ -111,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       
       // Check if users exist in localStorage
-      const storedUsers = localStorage.getItem('mimo:users');
+      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
       const users = storedUsers ? JSON.parse(storedUsers) : [];
       
       // Check if email already exists
@@ -146,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Add to users array and save
       users.push(newUser);
-      localStorage.setItem('mimo:users', JSON.stringify(users));
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
       
       // Create auth user
       const authUser: AuthUser = {
