@@ -1,7 +1,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
-import { getTransactions, getWithdrawals, getAvailableBalance } from './creatorDataService';
+import { getTransactions, getWithdrawals, getAvailableBalanceFromLocal } from './creatorDataService';
 
 // Get environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -207,7 +207,7 @@ export const getCreatorWithdrawals = async (creatorId: string) => {
 export const getAvailableBalance = async (creatorId: string) => {
   if (useDemo) {
     // Use local storage data in demo mode
-    return getAvailableBalance();
+    return getAvailableBalanceFromLocal();
   }
   
   // Get total amount from completed transactions

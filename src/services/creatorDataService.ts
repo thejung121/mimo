@@ -201,7 +201,7 @@ export const getWithdrawals = () => {
 };
 
 // Get available balance for the current user
-export const getAvailableBalance = () => {
+export const getAvailableBalanceFromLocal = () => {
   const user = getCurrentUser();
   
   if (!user) {
