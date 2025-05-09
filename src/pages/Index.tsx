@@ -4,7 +4,6 @@ import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import HeroSection from '@/components/home/HeroSection';
 import WhatIsMimoSection from '@/components/home/WhatIsMimoSection';
-import IntegrationSection from '@/components/home/IntegrationSection';
 import ComparisonSection from '@/components/home/ComparisonSection';
 import HowItWorksSection from '@/components/home/HowItWorksSection';
 
@@ -13,7 +12,6 @@ const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
-  const integrationRef = useRef<HTMLDivElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
   
   // Set up intersection observer for scroll animations
@@ -35,7 +33,6 @@ const Index = () => {
       heroRef.current,
       featuresRef.current,
       howItWorksRef.current,
-      integrationRef.current,
       comparisonRef.current,
     ];
     
@@ -57,7 +54,6 @@ const Index = () => {
       <main className="flex-grow">
         <HeroSection heroRef={heroRef} />
         <WhatIsMimoSection featuresRef={featuresRef} />
-        <IntegrationSection integrationRef={integrationRef} />
         <ComparisonSection comparisonRef={comparisonRef} />
         <HowItWorksSection howItWorksRef={howItWorksRef} />
       </main>
