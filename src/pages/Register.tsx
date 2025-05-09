@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
@@ -23,9 +24,16 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleStartRegistration = () => {
     setStartRegistration(true);
@@ -88,8 +96,16 @@ const Register = () => {
       const success = await register(name, email, password, username);
       
       if (success) {
+        // Directly navigate to dashboard after registration
         navigate('/dashboard');
       }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Erro no cadastro",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
