@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -167,6 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cover: "/placeholder.svg",
         avatar: "/placeholder.svg",
         about: `Olá! Eu sou ${newUser.name} e esta é minha página de mimos. Aqui você pode me apoiar e receber conteúdo exclusivo.`,
+        description: `Criador de conteúdo`,
         socialLinks: [
           { type: "instagram", url: `https://instagram.com/${newUser.username}` },
           { type: "twitter", url: `https://twitter.com/${newUser.username}` },

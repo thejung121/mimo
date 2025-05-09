@@ -1,8 +1,8 @@
+
 import { Creator, MimoPackage } from '@/types/creator';
 
 // Mock creator data for initial setup
 const initialCreator: Creator = {
-  id: '1',
   name: 'Maria Fernanda',
   username: 'mariafernanda',
   coverTitle: 'Maria Fernanda | Modelo e Criadora de Conteúdo',
@@ -10,6 +10,7 @@ const initialCreator: Creator = {
   about: 'Olá! Sou Maria, modelo e criadora de conteúdo há 5 anos. Compartilho minha vida, experiências e dicas de moda, beleza e lifestyle. Adoro interagir com meus seguidores e criar conteúdos especiais.',
   avatar: 'https://i.imgur.com/6QbCNLa.jpg',
   cover: 'https://i.imgur.com/HPFGjlh.jpg',
+  description: 'Modelo e Criadora de Conteúdo',
   socialLinks: [
     {
       type: 'instagram',
@@ -102,6 +103,7 @@ export const getCreatorData = (): Creator => {
         about: `Olá! Eu sou ${user.name} e esta é minha página de mimos. Aqui você pode me apoiar e receber conteúdo exclusivo.`,
         avatar: "/placeholder.svg", 
         cover: "/placeholder.svg",
+        description: `Criador de conteúdo`,
         socialLinks: [
           { type: "instagram", url: `https://instagram.com/${user.username}` },
           { type: "twitter", url: `https://twitter.com/${user.username}` },
@@ -121,6 +123,7 @@ export const getCreatorData = (): Creator => {
     about: `Olá! Eu sou ${user.name} e esta é minha página de mimos. Aqui você pode me apoiar e receber conteúdo exclusivo.`,
     avatar: "/placeholder.svg", 
     cover: "/placeholder.svg",
+    description: `Criador de conteúdo`,
     socialLinks: [
       { type: "instagram", url: `https://instagram.com/${user.username}` },
       { type: "twitter", url: `https://twitter.com/${user.username}` },

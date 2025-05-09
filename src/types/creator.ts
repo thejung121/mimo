@@ -1,3 +1,4 @@
+
 // Creator related types
 export interface SocialLink {
   type: 'instagram' | 'twitter' | 'youtube' | 'website' | 'privacy';
@@ -5,11 +6,15 @@ export interface SocialLink {
 }
 
 export interface Creator {
+  id?: string;
   username: string;
   name: string;
   avatar: string;
   cover: string;
   description: string;
+  coverTitle?: string;
+  coverSubtitle?: string;
+  about?: string;
   socialLinks: SocialLink[];
 }
 
