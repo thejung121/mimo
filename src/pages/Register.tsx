@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -92,11 +91,10 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // Now using Supabase Auth via the register function in AuthContext
       const success = await register(name, email, password, username);
       
       if (success) {
-        // Directly navigate to dashboard after registration
+        // Directly navigate to dashboard after registration without needing email confirmation
         navigate('/dashboard');
       }
     } catch (error) {

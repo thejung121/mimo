@@ -54,17 +54,14 @@ export const useAuthService = () => {
 
   const register = async (name: string, email: string, password: string, username: string): Promise<boolean> => {
     try {
-      // Use signUp with autoConfirm to bypass email verification entirely
-      const { data, error } = await supabase.auth.signUp({
+      // Using admin auth API directly to create user and auto-confirm
+      const { data, error } = await supabase.auth.admin.createUser({
         email,
         password,
-        options: {
-          data: {
-            name,
-            username
-          },
-          // Disable email confirmation by not providing emailRedirectTo
-          emailRedirectTo: null
+        email_confirm: true, // This forces email confirmation to be true
+        user_metadata: {
+          name,
+          username
         }
       });
       
@@ -77,12 +74,23 @@ export const useAuthService = () => {
         return false;
       }
       
-      // Check if the user was created successfully
+      // If user was created successfully, sign them in automatically
       if (data.user) {
         toast({
           title: "Conta criada com sucesso!",
           description: "Bem-vindo(a) ao Mimo!",
         });
+        
+        // Auto sign-in after registration
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (signInError) {
+          console.error("Auto-login failed:", signInError);
+          // Even if auto-login fails, we consider the registration successful
+        }
         
         return true;
       } else {
