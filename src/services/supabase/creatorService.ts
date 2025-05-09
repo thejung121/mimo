@@ -64,9 +64,9 @@ export const getCreatorPackages = async (creatorId: string): Promise<MimoPackage
     return [];
   }
   
-  // Convert to MimoPackage type
+  // Convert to MimoPackage type with proper id conversion
   return data.map(pkg => ({
-    id: pkg.id, // Keep UUID instead of converting to number
+    id: pkg.id ? parseInt(pkg.id, 10) || 0 : undefined, // Convert string to number or use 0 as fallback if parse fails
     title: pkg.title,
     price: pkg.price,
     features: pkg.description ? [pkg.description] : [],
