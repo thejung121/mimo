@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { MimoPackage } from '@/types/creator';
 import { emptyPackage } from './mimo-packages/packageData';
@@ -6,7 +5,7 @@ import { usePackageFeatures } from './mimo-packages/usePackageFeatures';
 import { usePackageMedia } from './mimo-packages/usePackageMedia';
 import { usePackageCRUD } from './mimo-packages/usePackageCRUD';
 import { useToast } from '@/components/ui/use-toast';
-import { getMimoPackages } from '@/services/creatorDataService';
+import { getMimoPackages } from '@/services/creator';
 
 export const useMimoPackages = () => {
   const { toast } = useToast();

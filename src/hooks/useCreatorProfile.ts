@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { Creator, SocialLink } from '@/types/creator';
 import { useToast } from '@/components/ui/use-toast';
-import { getCreatorData } from '@/services/creatorDataService';
+import { getCreatorData } from '@/services/creator';
 
 export const useCreatorProfile = () => {
   const { toast } = useToast();

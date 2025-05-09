@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { useCallback } from 'react';
-import { saveAllData } from '@/services/creatorDataService';
+import { saveAllData } from '@/services/creator';
 import { Creator, MimoPackage } from '@/types/creator';
 
 export const useEditorUI = () => {
