@@ -54,8 +54,7 @@ export const useAuthService = () => {
 
   const register = async (name: string, email: string, password: string, username: string): Promise<boolean> => {
     try {
-      // Remove email verification by using signUp with emailRedirectTo set to null
-      // and setting data.user directly
+      // Use signUp with autoConfirm to bypass email verification entirely
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -64,6 +63,7 @@ export const useAuthService = () => {
             name,
             username
           },
+          // Disable email confirmation by not providing emailRedirectTo
           emailRedirectTo: null
         }
       });
@@ -77,13 +77,22 @@ export const useAuthService = () => {
         return false;
       }
       
-      // Since email verification is disabled, the user should be signed in automatically
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Bem-vindo(a) ao Mimo!",
-      });
-      
-      return true;
+      // Check if the user was created successfully
+      if (data.user) {
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Bem-vindo(a) ao Mimo!",
+        });
+        
+        return true;
+      } else {
+        toast({
+          title: "Erro ao criar conta",
+          description: "Não foi possível criar sua conta. Por favor, tente novamente.",
+          variant: "destructive",
+        });
+        return false;
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       toast({
