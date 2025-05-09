@@ -12,17 +12,8 @@ import MimoTabContent from '@/components/MimoTabContent';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase';
-import { adaptCreator, adaptMimoPackage, getUserMetadata } from '@/utils/typeAdapters';
+import { adaptCreator, adaptMimoPackage } from '@/utils/typeAdapters';
 import { Creator, MimoPackage } from '@/types/creator';
-
-interface SupabasePackage {
-  id: string;
-  title: string;
-  price: number;
-  package_features: { id: string; feature: string }[];
-  highlighted: boolean;
-  package_media: { id: string; url: string; type: string; is_preview: boolean }[];
-}
 
 const CreatorPage = () => {
   const { username } = useParams();
@@ -37,7 +28,7 @@ const CreatorPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Check if this is the user's own page
-  const isOwnPage = user ? getUserMetadata(user)?.username === username : false;
+  const isOwnPage = user ? user.username === username : false;
 
   // Always scroll to top when component mounts
   useEffect(() => {

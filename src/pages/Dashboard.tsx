@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -34,7 +35,6 @@ import {
   FileText,
   Link as LinkIcon,
   User,
-  ArrowRight,
   Building,
   Clock,
   Wallet,
@@ -48,60 +48,8 @@ import {
 import { Creator } from '@/types/creator';
 import { getCreatorData } from '@/services/creatorDataService';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Mock data
-const mockMimos = [
-  {
-    id: '1',
-    username: 'joaosilva',
-    amount: 20,
-    packageName: 'Mimo Básico',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    rewardDelivered: true
-  },
-  {
-    id: '2',
-    username: 'mariaeduarda',
-    amount: 50,
-    packageName: 'Mimo Especial',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    rewardDelivered: false
-  },
-  {
-    id: '3',
-    username: 'pedrohenrique',
-    amount: 100,
-    packageName: 'Mimo Premium',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    rewardDelivered: false
-  },
-  {
-    id: '4',
-    username: 'anajulia',
-    amount: 50,
-    packageName: 'Mimo Especial',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72),
-    rewardDelivered: true
-  }
-];
-
-// Mock withdrawal data
-const mockWithdrawals = [
-  {
-    id: 'w1',
-    amount: 120,
-    requestDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-    status: 'completed',
-    completedDate: new Date(Date.now() - 1000 * 60 * 60 * 24)
-  },
-  {
-    id: 'w2',
-    amount: 200,
-    requestDate: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    status: 'pending',
-    completedDate: null
-  }
-];
+import { getCreatorTransactions, getAvailableBalance, getCreatorWithdrawals } from '@/services/supabase';
+import PagePreview from '@/components/PagePreview';
 
 const Dashboard = () => {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -117,29 +65,69 @@ const Dashboard = () => {
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   
   const [userProfile, setUserProfile] = useState({
-    name: "Maria Fernanda",
-    email: "maria@example.com",
-    phone: "11999998888",
-    document: "123.456.789-00",
+    name: "",
+    email: "",
+    phone: "",
+    document: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
 
   const [creator, setCreator] = useState<Creator | null>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [availableBalance, setAvailableBalance] = useState(0);
   
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   useEffect(() => {
     // Use the authenticated user's information to load their creator profile
     if (user) {
       const creatorData = getCreatorData();
       setCreator(creatorData);
+      
+      // Set user profile data
+      setUserProfile(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || '',
+        phone: "",
+        document: "***.***.***-**"
+      }));
+      
+      // Load real transaction data
+      const fetchTransactions = async () => {
+        if (creatorData.id) {
+          const txData = await getCreatorTransactions(creatorData.id);
+          setTransactions(txData);
+        }
+      };
+      
+      // Load real withdrawal data
+      const fetchWithdrawals = async () => {
+        if (creatorData.id) {
+          const withdrawalData = await getCreatorWithdrawals(creatorData.id);
+          setWithdrawals(withdrawalData);
+        }
+      };
+      
+      // Load real balance data
+      const fetchBalance = async () => {
+        if (creatorData.id) {
+          const balance = await getAvailableBalance(creatorData.id);
+          setAvailableBalance(balance);
+        }
+      };
+      
+      fetchTransactions();
+      fetchWithdrawals();
+      fetchBalance();
     }
   }, [user]);
 
   const handleViewMimo = (id: string) => {
-    const mimo = mockMimos.find(m => m.id === id);
+    const mimo = transactions.find(m => m.id === id);
     setSelectedMimo(mimo);
     setDetailDialogOpen(true);
   };
@@ -194,9 +182,10 @@ const Dashboard = () => {
     setProfileDialogOpen(false);
   };
 
-  const totalAmount = mockMimos.reduce((acc, mimo) => acc + mimo.amount, 0);
-  const pendingCount = mockMimos.filter(mimo => !mimo.rewardDelivered).length;
-  const availableBalance = 170; // Mock available balance
+  // Calculate real stats based on actual data
+  const totalAmount = transactions.reduce((acc, mimo) => acc + (mimo.creator_amount || 0), 0);
+  const pendingRewards = transactions.filter(mimo => !mimo.reward_delivered).length;
+  const uniqueFans = new Set(transactions.map(tx => tx.fan_id || tx.id)).size;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -272,7 +261,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold">{mockMimos.length}</span>
+                  <span className="text-2xl font-bold">{uniqueFans}</span>
                   <Users className="h-5 w-5 text-mimo-primary" />
                 </div>
               </CardContent>
@@ -284,7 +273,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold">{pendingCount}</span>
+                  <span className="text-2xl font-bold">{pendingRewards}</span>
                   <AlertCircle className="h-5 w-5 text-yellow-500" />
                 </div>
               </CardContent>
@@ -303,54 +292,60 @@ const Dashboard = () => {
                 <Tabs defaultValue="all">
                   <TabsList>
                     <TabsTrigger value="all">Todos</TabsTrigger>
-                    <TabsTrigger value="pending">Pendentes ({pendingCount})</TabsTrigger>
-                    <TabsTrigger value="delivered">Entregues ({mockMimos.length - pendingCount})</TabsTrigger>
+                    <TabsTrigger value="pending">Pendentes ({pendingRewards})</TabsTrigger>
+                    <TabsTrigger value="delivered">Entregues ({transactions.length - pendingRewards})</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="all" className="space-y-4 mt-4">
-                    {mockMimos.map(mimo => (
-                      <ReceivedMimo
-                        key={mimo.id}
-                        id={mimo.id}
-                        username={mimo.username}
-                        amount={mimo.amount}
-                        packageName={mimo.packageName}
-                        createdAt={mimo.createdAt}
-                        rewardDelivered={mimo.rewardDelivered}
-                        onViewClick={handleViewMimo}
-                      />
-                    ))}
+                    {transactions.length > 0 ? (
+                      transactions.map(tx => (
+                        <ReceivedMimo
+                          key={tx.id}
+                          id={tx.id}
+                          username={tx.fan_username || "Fã anônimo"}
+                          amount={tx.creator_amount || 0}
+                          packageName={tx.package_name || "Mimo"}
+                          createdAt={new Date(tx.created_at)}
+                          rewardDelivered={!!tx.reward_delivered}
+                          onViewClick={handleViewMimo}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center p-8">
+                        <p className="text-muted-foreground">Você ainda não recebeu nenhum mimo.</p>
+                      </div>
+                    )}
                   </TabsContent>
                   
                   <TabsContent value="pending" className="space-y-4 mt-4">
-                    {mockMimos
-                      .filter(mimo => !mimo.rewardDelivered)
-                      .map(mimo => (
+                    {transactions
+                      .filter(tx => !tx.reward_delivered)
+                      .map(tx => (
                         <ReceivedMimo
-                          key={mimo.id}
-                          id={mimo.id}
-                          username={mimo.username}
-                          amount={mimo.amount}
-                          packageName={mimo.packageName}
-                          createdAt={mimo.createdAt}
-                          rewardDelivered={mimo.rewardDelivered}
+                          key={tx.id}
+                          id={tx.id}
+                          username={tx.fan_username || "Fã anônimo"}
+                          amount={tx.creator_amount || 0}
+                          packageName={tx.package_name || "Mimo"}
+                          createdAt={new Date(tx.created_at)}
+                          rewardDelivered={false}
                           onViewClick={handleViewMimo}
                         />
                       ))}
                   </TabsContent>
                   
                   <TabsContent value="delivered" className="space-y-4 mt-4">
-                    {mockMimos
-                      .filter(mimo => mimo.rewardDelivered)
-                      .map(mimo => (
+                    {transactions
+                      .filter(tx => tx.reward_delivered)
+                      .map(tx => (
                         <ReceivedMimo
-                          key={mimo.id}
-                          id={mimo.id}
-                          username={mimo.username}
-                          amount={mimo.amount}
-                          packageName={mimo.packageName}
-                          createdAt={mimo.createdAt}
-                          rewardDelivered={mimo.rewardDelivered}
+                          key={tx.id}
+                          id={tx.id}
+                          username={tx.fan_username || "Fã anônimo"}
+                          amount={tx.creator_amount || 0}
+                          packageName={tx.package_name || "Mimo"}
+                          createdAt={new Date(tx.created_at)}
+                          rewardDelivered={true}
                           onViewClick={handleViewMimo}
                         />
                       ))}
@@ -371,9 +366,9 @@ const Dashboard = () => {
                 </Button>
               </div>
               
-              {mockWithdrawals.length > 0 ? (
+              {withdrawals.length > 0 ? (
                 <div className="space-y-4">
-                  {mockWithdrawals.map(withdrawal => (
+                  {withdrawals.map(withdrawal => (
                     <Card key={withdrawal.id} className="overflow-hidden">
                       <CardContent className="p-0">
                         <div className="flex items-center border-l-4 p-4 border-l-mimo-primary bg-gradient-to-r from-mimo-primary/5 to-background">
@@ -390,7 +385,7 @@ const Dashboard = () => {
                               <div>
                                 <p className="font-semibold text-lg">R${withdrawal.amount}</p>
                                 <p className="text-sm text-muted-foreground">
-                                  Solicitado em {withdrawal.requestDate.toLocaleDateString()}
+                                  Solicitado em {new Date(withdrawal.created_at).toLocaleDateString()}
                                 </p>
                               </div>
                               
@@ -405,9 +400,9 @@ const Dashboard = () => {
                               </div>
                             </div>
                             
-                            {withdrawal.status === 'completed' && withdrawal.completedDate && (
+                            {withdrawal.status === 'completed' && withdrawal.updated_at && (
                               <p className="text-xs text-muted-foreground mt-1">
-                                Pago em {withdrawal.completedDate.toLocaleDateString()}
+                                Pago em {new Date(withdrawal.updated_at).toLocaleDateString()}
                               </p>
                             )}
                           </div>
@@ -429,42 +424,7 @@ const Dashboard = () => {
             </TabsContent>
             
             <TabsContent value="page">
-              <Card className="shadow-lg overflow-hidden border-mimo-primary/20">
-                <CardHeader className="bg-gradient-to-r from-mimo-primary/20 to-transparent">
-                  <CardTitle>Minha página de criador</CardTitle>
-                  <CardDescription>
-                    Configure sua página personalizada para receber mimos dos seus fãs.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="flex flex-wrap gap-4">
-                    <Button className="flex items-center gap-2 bg-gradient-to-r from-mimo-primary to-mimo-secondary text-white">
-                      <LinkIcon className="h-4 w-4" />
-                      <span>Copiar link da minha página</span>
-                    </Button>
-                    <Button variant="outline" className="flex items-center gap-2 border-mimo-primary text-mimo-primary" asChild>
-                      <Link to="/editar-pagina">
-                        <FileText className="h-4 w-4" />
-                        <span>Editar página</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" className="flex items-center gap-2 text-muted-foreground">
-                      <Shield className="h-4 w-4" />
-                      <span>Ver estatísticas</span>
-                    </Button>
-                  </div>
-                </CardContent>
-                <CardFooter className="bg-muted/50 flex justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    Última atualização: {new Date().toLocaleDateString()}
-                  </p>
-                  <Button variant="link" className="text-mimo-primary p-0" asChild>
-                    <Link to={`/criador/${user?.username || ''}`} target="_blank">
-                      Ver minha página <ChevronRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
+              {user?.username && <PagePreview username={user.username} />}
             </TabsContent>
           </Tabs>
         </div>
@@ -481,20 +441,20 @@ const Dashboard = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Fã</p>
-                    <p className="font-medium">{selectedMimo.username}</p>
+                    <p className="font-medium">{selectedMimo.fan_username || "Fã anônimo"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Valor</p>
-                    <p className="font-medium">R${selectedMimo.amount}</p>
+                    <p className="font-medium">R${selectedMimo.creator_amount}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Pacote</p>
-                    <p className="font-medium">{selectedMimo.packageName}</p>
+                    <p className="font-medium">{selectedMimo.package_name || "Mimo"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Status</p>
                     <div className="flex items-center">
-                      {selectedMimo.rewardDelivered ? (
+                      {selectedMimo.reward_delivered ? (
                         <>
                           <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
                           <span>Entregue</span>
@@ -510,7 +470,7 @@ const Dashboard = () => {
                 </div>
                 
                 <div className="pt-4 flex justify-end">
-                  {!selectedMimo.rewardDelivered && (
+                  {!selectedMimo.reward_delivered && (
                     <Button 
                       className="mimo-button"
                       onClick={() => {
@@ -521,7 +481,7 @@ const Dashboard = () => {
                       Enviar recompensa
                     </Button>
                   )}
-                  {selectedMimo.rewardDelivered && (
+                  {selectedMimo.reward_delivered && (
                     <Button variant="outline">
                       Ver recompensa enviada
                     </Button>
@@ -543,7 +503,7 @@ const Dashboard = () => {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Enviar para</p>
-                  <p className="font-medium">{selectedMimo.username} ({selectedMimo.packageName})</p>
+                  <p className="font-medium">{selectedMimo.fan_username || "Fã anônimo"} ({selectedMimo.package_name || "Mimo"})</p>
                 </div>
                 
                 <div className="space-y-2">
@@ -645,7 +605,7 @@ const Dashboard = () => {
                   Dados para saque
                 </h4>
                 <p className="text-sm text-foreground/70 mb-1">
-                  <span className="text-mimo-primary">PIX:</span> CPF - 123.456.789-00
+                  <span className="text-mimo-primary">PIX:</span> CPF - ***.***.***-**
                 </p>
                 <p className="text-xs text-muted-foreground">
                   O valor será enviado para a chave PIX cadastrada em até 24h após a solicitação.
@@ -756,6 +716,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   className="sm:flex-1 flex items-center justify-center gap-2 text-rose-500 hover:text-rose-600"
+                  onClick={logout}
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Sair</span>

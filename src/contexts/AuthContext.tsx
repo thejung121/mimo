@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { Creator } from '@/types/creator';
 import { getCreatorData, saveCreatorData } from '@/services/creatorDataService';
-import { supabase } from '@/services/supabaseService';
+import { getCurrentUser } from '@/services/supabase';
 
 // Define auth user type
 export interface AuthUser {
@@ -37,7 +37,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check for existing session on mount
   useEffect(() => {
-    const loadUser = () => {
+    const loadUser = async () => {
+      setIsLoading(true);
+      
+      // First try to get user from Supabase
+      const supabaseUser = await getCurrentUser();
+      
+      if (supabaseUser) {
+        // If we have a Supabase user, use that
+        const authUser: AuthUser = {
+          id: supabaseUser.id,
+          name: supabaseUser.user_metadata?.name || 'User',
+          email: supabaseUser.email || '',
+          username: supabaseUser.user_metadata?.username || '',
+          avatar: supabaseUser.user_metadata?.avatar || ''
+        };
+        setUser(authUser);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fallback to localStorage
       const storedUser = localStorage.getItem(LOCAL_STORAGE_KEY);
       
       if (storedUser) {
