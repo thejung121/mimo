@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 
@@ -6,15 +5,27 @@ import type { Database } from '@/types/supabase';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+// In development or when environment variables are not set,
+// use demo values to prevent the app from crashing
+const useDemo = !supabaseUrl || !supabaseAnonKey;
+
+if (useDemo) {
+  console.warn(
+    'Supabase environment variables are missing. Using demo mode with limited functionality. ' +
+    'Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env.local file.'
+  );
 }
 
-// Create Supabase client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+// Create Supabase client - use demo settings if needed
+export const supabase = createClient<Database>(
+  useDemo ? 'https://demo-supabase-url.supabase.co' : supabaseUrl,
+  useDemo ? 'demo-anon-key' : supabaseAnonKey
+);
 
 // User-related functions
 export const getCurrentUser = async () => {
+  if (useDemo) return null;
+  
   const { data: { user }, error } = await supabase.auth.getUser();
   
   if (error) {
@@ -27,6 +38,8 @@ export const getCurrentUser = async () => {
 
 // Creator-related functions
 export const getCreatorByUsername = async (username: string) => {
+  if (useDemo) return null;
+  
   const { data, error } = await supabase
     .from('creators')
     .select('*, social_links(*)')
