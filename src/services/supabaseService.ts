@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 
@@ -17,9 +18,10 @@ if (useDemo) {
 }
 
 // Create Supabase client - use demo settings if needed
+// Make sure to use a valid URL format for the demo
 export const supabase = createClient<Database>(
-  useDemo ? 'https://demo-supabase-url.supabase.co' : supabaseUrl,
-  useDemo ? 'demo-anon-key' : supabaseAnonKey
+  useDemo ? 'https://example.supabase.co' : supabaseUrl,
+  useDemo ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlbW8iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxMzA5ODU0MCwiZXhwIjoxOTI4Njc0NTQwfQ.magsCuCyBc1-NOQ6F_Vz2A' : supabaseAnonKey
 );
 
 // User-related functions
