@@ -1,7 +1,27 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Creator, MimoPackage } from '@/types/creator';
+import { Creator, MimoPackage, SocialLink } from '@/types/creator';
 import { convertSupabaseUser } from './authService';
+
+// Helper function to convert Json to SocialLink array
+const convertJsonToSocialLinks = (jsonData: any): SocialLink[] => {
+  if (!jsonData) return [];
+  if (Array.isArray(jsonData)) {
+    return jsonData.map(link => ({
+      type: link.type as 'instagram' | 'twitter' | 'youtube' | 'website' | 'privacy',
+      url: link.url || ''
+    }));
+  }
+  return [];
+};
+
+// Helper function to prepare social links for database storage
+const prepareSocialLinksForDb = (socialLinks: SocialLink[]): any[] => {
+  return socialLinks.map(link => ({
+    type: link.type,
+    url: link.url
+  }));
+};
 
 // Get creator by username
 export const getCreatorByUsername = async (username: string): Promise<Creator | null> => {
@@ -26,7 +46,7 @@ export const getCreatorByUsername = async (username: string): Promise<Creator | 
     description: data.bio || '',
     coverTitle: data.thank_you_message || `Página de ${data.name}`,
     coverSubtitle: "Envie-me um mimo e ajude meu trabalho!",
-    socialLinks: data.social_links || [],
+    socialLinks: convertJsonToSocialLinks(data.social_links),
     about: data.bio || `Olá! Eu sou ${data.name} e esta é minha página de mimos.`
   };
 };
@@ -67,7 +87,7 @@ export const updateCreatorProfile = async (creator: Creator): Promise<boolean> =
       cover_image: creator.cover,
       bio: creator.about,
       thank_you_message: creator.coverTitle,
-      social_links: creator.socialLinks
+      social_links: prepareSocialLinksForDb(creator.socialLinks)
     })
     .eq('id', creator.id)
     .select();
@@ -109,7 +129,7 @@ export const getCurrentCreator = async (): Promise<Creator | null> => {
     description: data.bio || '',
     coverTitle: data.thank_you_message || `Página de ${data.name}`,
     coverSubtitle: "Envie-me um mimo e ajude meu trabalho!",
-    socialLinks: data.social_links || [],
+    socialLinks: convertJsonToSocialLinks(data.social_links),
     about: data.bio || `Olá! Eu sou ${data.name} e esta é minha página de mimos.`
   };
 };
