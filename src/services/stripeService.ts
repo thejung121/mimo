@@ -1,5 +1,5 @@
 
-import { supabase } from '@/services/supabaseService';
+import { supabase } from '@/services/supabase';
 
 export interface CheckoutData {
   packageId: string;

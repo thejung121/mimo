@@ -11,7 +11,7 @@ import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import MimoTabContent from '@/components/MimoTabContent';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { getCreatorByUsername, getCreatorPackages } from '@/services/supabaseService';
+import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase';
 import { adaptCreator, adaptMimoPackage, getUserMetadata } from '@/utils/typeAdapters';
 import { Creator, MimoPackage } from '@/types/creator';
 
