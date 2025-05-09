@@ -27,6 +27,11 @@ export {
 
 // Combined save function
 export const saveAllData = (creator: Creator, packages: MimoPackage[]): void => {
+  // Import the functions to use them within this function
+  // This resolves the "Cannot find name" errors
+  const { saveCreatorData } = require('./profileService');
+  const { saveMimoPackages } = require('./packageService');
+  
   saveCreatorData(creator);
   saveMimoPackages(packages);
 };
