@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Lock, ArrowRight } from 'lucide-react';
+import { ArrowRight, Check, ExternalLink } from 'lucide-react';
 import UserInfoForm from './purchase/UserInfoForm';
 import PaymentForm from './purchase/PaymentForm';
 import PackageSummary from './purchase/PackageSummary';
@@ -76,8 +76,6 @@ const PurchaseFlow = ({
       setProcessing(false);
       setStep('success');
       
-      // Instead of just showing a toast, we now set the state to success
-      // which will show the success screen with a link to the reward
       toast({
         title: 'Mimo enviado com sucesso!',
         description: 'Seu acesso ao conteúdo exclusivo está disponível agora.',
@@ -95,6 +93,15 @@ const PurchaseFlow = ({
     setEmail('');
     setWhatsapp('');
     setStep('preview');
+  };
+
+  const copyLinkToClipboard = () => {
+    const rewardUrl = `${window.location.origin}/recompensa/${rewardId}`;
+    navigator.clipboard.writeText(rewardUrl);
+    toast({
+      title: "Link copiado!",
+      description: "O link de acesso foi copiado para a área de transferência.",
+    });
   };
 
   return (
@@ -167,9 +174,14 @@ const PurchaseFlow = ({
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-700">
-                <h3 className="font-semibold text-lg mb-2">Compra realizada com sucesso!</h3>
-                <p>Seu mimo foi enviado e você já pode acessar o conteúdo exclusivo.</p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-700 flex items-center gap-2">
+                <div className="bg-green-100 rounded-full p-1">
+                  <Check className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Compra realizada com sucesso!</h3>
+                  <p>Seu mimo foi enviado e você já pode acessar o conteúdo exclusivo.</p>
+                </div>
               </div>
               
               <div className="border border-border rounded-lg p-4">
@@ -177,6 +189,21 @@ const PurchaseFlow = ({
                 <p className="text-sm text-muted-foreground mb-1">Mimo: {packageTitle}</p>
                 <p className="text-sm text-muted-foreground mb-1">Valor: R$ {packagePrice.toFixed(2)}</p>
                 <p className="text-sm text-muted-foreground">Criador(a): {creatorName}</p>
+              </div>
+              
+              <div className="border border-dashed border-mimo-primary/40 bg-mimo-primary/5 rounded-lg p-4">
+                <h4 className="font-medium mb-2 text-mimo-primary flex items-center gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  Link de acesso ao conteúdo
+                </h4>
+                <p className="text-sm mb-3">Este link dá acesso ao conteúdo exclusivo que você comprou:</p>
+                <div className="bg-white border border-border rounded-lg p-2 flex items-center justify-between mb-2">
+                  <span className="text-sm truncate">{window.location.origin}/recompensa/{rewardId}</span>
+                  <Button variant="outline" size="sm" onClick={copyLinkToClipboard}>Copiar</Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Este link é pessoal e ficará disponível por 30 dias.
+                </p>
               </div>
               
               <Button 
@@ -188,7 +215,7 @@ const PurchaseFlow = ({
               </Button>
               
               <p className="text-sm text-muted-foreground text-center">
-                O link de acesso também foi enviado para o email {email} e ficará disponível por 30 dias.
+                O link de acesso também foi enviado para o email {email}.
               </p>
             </div>
           )}

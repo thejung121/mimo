@@ -16,7 +16,7 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
             Simplicidade que transforma
           </Badge>
           <h2 className="text-2xl md:text-4xl font-bold mb-6">
-            Três passos para decolar
+            Três passos para monetizar
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
             Sem burocracias, sem esperas, sem complicações. Uma jornada desenhada para
@@ -32,10 +32,10 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
                   1
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-2">Defina seu universo</h3>
+                  <h3 className="font-semibold text-xl mb-2">Crie sua página de links</h3>
                   <p className="text-gray-600 mb-3">
-                    Construa seu espaço com sua identidade e defina experiências 
-                    exclusivas que só você pode oferecer. Sem fórmulas, seu estilo.
+                    Monte seu hub personalizado para conectar com seus admiradores. 
+                    Uma página que reflete sua personalidade e conecta todos os seus canais.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center text-sm text-gray-600">
@@ -44,11 +44,11 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Offerings personalizados</span>
+                      <span>Personalização completa</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Integração com seu ecossistema</span>
+                      <span>Integração com suas redes</span>
                     </li>
                   </ul>
                 </div>
@@ -59,23 +59,23 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
                   2
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-2">Amplifique</h3>
+                  <h3 className="font-semibold text-xl mb-2">Suba seu conteúdo personalizado</h3>
                   <p className="text-gray-600 mb-3">
-                    Leve sua proposta ao mundo com um link personalizado que 
-                    conecta seus admiradores diretamente ao que você tem a oferecer.
+                    Adicione conteúdos exclusivos, e-books, mentorias, ou experiências únicas
+                    que seus admiradores valorizam e desejam apoiar.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Sua marca no endereço</span>
+                      <span>Upload simples e rápido</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Visibilidade estratégica</span>
+                      <span>Suporte a múltiplos formatos</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Promoção orgânica</span>
+                      <span>Proteção do seu conteúdo</span>
                     </li>
                   </ul>
                 </div>
@@ -86,23 +86,23 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
                   3
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-2">Realize</h3>
+                  <h3 className="font-semibold text-xl mb-2">Promova e monetize automaticamente</h3>
                   <p className="text-gray-600 mb-3">
-                    Quando alguém reconhece o valor do seu trabalho, o PIX chega instantaneamente
-                    e você entrega a experiência sem intermediários ou atrasos.
+                    Compartilhe sua página, receba mimos e veja seu conteúdo sendo entregue
+                    automaticamente para seus admiradores, sem intervenção manual.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Transferência imediata</span>
+                      <span>Entrega automática</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Taxa justa de apenas 10%</span>
+                      <span>Recebimento por PIX imediato</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Autonomia financeira real</span>
+                      <span>Análises de performance</span>
                     </li>
                   </ul>
                 </div>
