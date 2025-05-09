@@ -77,13 +77,6 @@ const NavBar = () => {
                     {isAuthenticated ? (
                       <>
                         <Link 
-                          to="/dashboard" 
-                          className="text-foreground/70 hover:text-foreground transition-colors px-3 py-2"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          Dashboard
-                        </Link>
-                        <Link 
                           to={`/criador/${user?.username}`} 
                           className="text-foreground/70 hover:text-foreground transition-colors px-3 py-2"
                           onClick={() => setMobileMenuOpen(false)}
@@ -121,37 +114,36 @@ const NavBar = () => {
               </Link>
               
               {isAuthenticated ? (
-                <>
-                  <Link to="/dashboard" className="text-foreground/70 hover:text-foreground transition-colors">
-                    Dashboard
-                  </Link>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="rounded-full h-8 w-8 p-0">
-                        <User className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link to={`/criador/${user?.username}`} className="cursor-pointer">
-                          <Heart className="h-4 w-4 mr-2" /> Ver Minha Página
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/editar-pagina" className="cursor-pointer">
-                          <Settings className="h-4 w-4 mr-2" /> Editar Página
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={logout} className="text-rose-500 focus:text-rose-500 cursor-pointer">
-                        <LogOut className="h-4 w-4 mr-2" /> Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="rounded-full h-8 w-8 p-0">
+                      <User className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="cursor-pointer">
+                        <Settings className="h-4 w-4 mr-2" /> Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={`/criador/${user?.username}`} className="cursor-pointer">
+                        <Heart className="h-4 w-4 mr-2" /> Ver Minha Página
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/editar-pagina" className="cursor-pointer">
+                        <Settings className="h-4 w-4 mr-2" /> Editar Página
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout} className="text-rose-500 focus:text-rose-500 cursor-pointer">
+                      <LogOut className="h-4 w-4 mr-2" /> Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Button variant="outline" className="border-mimo-primary text-mimo-primary hover:text-white hover:bg-mimo-primary" asChild>
                   <Link to="/login"><LogIn className="h-4 w-4 mr-2" /> Entrar</Link>
