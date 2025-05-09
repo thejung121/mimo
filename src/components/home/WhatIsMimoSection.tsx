@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Gift, Heart, Sparkles, Check } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -11,21 +11,21 @@ interface WhatIsMimoSectionProps {
 
 const WhatIsMimoSection = ({ featuresRef }: WhatIsMimoSectionProps) => {
   const isMobile = useIsMobile();
-
+  
   return (
     <section className="py-16 md:py-20 bg-white">
       <div className="mimo-container">
         <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16 px-4 sm:px-0">
           <Badge className="mb-4 px-3 py-1 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
-            O que é um Mimo?
+            Desperte o valor do seu conteúdo
           </Badge>
           <h2 className="text-2xl md:text-4xl font-bold mb-6">
-            Uma nova forma de monetizar{isMobile ? " " : <br/>}seu conteúdo exclusivo
+            Uma jornada além das assinaturas{isMobile ? " " : <br/>}regulares
           </h2>
           <p className="text-base md:text-lg text-gray-600">
-            Mimo é uma contribuição que um fã faz para apoiar uma criadora, e em troca
-            recebe uma recompensa personalizada. É uma forma mais natural, espontânea e
-            significativa de monetização.
+            Aquele conteúdo especial merece mais do que uma simples assinatura mensal.
+            Com o Mimo, você oferece experiências exclusivas enquanto seus fãs expressam
+            seu apoio de forma mais significativa.
           </p>
         </div>
         
@@ -36,23 +36,23 @@ const WhatIsMimoSection = ({ featuresRef }: WhatIsMimoSectionProps) => {
               <div className="bg-green-100 text-green-600 rounded-full w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                 <Gift className="h-6 w-6" />
               </div>
-              <h3 className="font-semibold text-xl mb-3">Conteúdo especial</h3>
+              <h3 className="font-semibold text-xl mb-3">Além do ordinário</h3>
               <p className="text-gray-600 mb-6">
-                Ofereça conteúdos especiais que não cabem no seu modelo de assinatura mensal.
-                Produtos de valor mais elevado e exclusivos.
+                Liberte seu melhor conteúdo das limitações das assinaturas mensais.
+                Crie experiências premium que refletem seu verdadeiro valor.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Maior valor por transação</span>
+                  <span>Valorização justa do seu trabalho</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Sem obrigação de produção contínua</span>
+                  <span>Liberdade criativa sem pressão</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Conteúdo premium diferenciado</span>
+                  <span>Produtos de alto valor percebido</span>
                 </li>
               </ul>
             </CardContent>
@@ -64,23 +64,23 @@ const WhatIsMimoSection = ({ featuresRef }: WhatIsMimoSectionProps) => {
               <div className="bg-mimo-primary/20 text-mimo-primary rounded-full w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                 <Heart className="h-6 w-6" />
               </div>
-              <h3 className="font-semibold text-xl mb-3">Renda complementar</h3>
+              <h3 className="font-semibold text-xl mb-3">Caminho para liberdade</h3>
               <p className="text-gray-600 mb-6">
-                Receba pagamentos extras sem comprometer sua plataforma principal.
-                Uma fonte adicional de renda para suas metas financeiras.
+                Transforme seus objetivos financeiros em realidade com uma receita 
+                adicional que respeita seus limites e valoriza sua autonomia.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Taxa de apenas 10%</span>
+                  <span>PIX instantâneo, sem esperas</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Pagamento via PIX imediato</span>
+                  <span>Taxa que respeita seu trabalho</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Alcance bateria financeiras</span>
+                  <span>Potencialize metas importantes</span>
                 </li>
               </ul>
             </CardContent>
@@ -92,23 +92,23 @@ const WhatIsMimoSection = ({ featuresRef }: WhatIsMimoSectionProps) => {
               <div className="bg-purple-100 text-purple-600 rounded-full w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                 <Sparkles className="h-6 w-6" />
               </div>
-              <h3 className="font-semibold text-xl mb-3">Diferencial Mimo</h3>
+              <h3 className="font-semibold text-xl mb-3">Conexões autênticas</h3>
               <p className="text-gray-600 mb-6">
-                Uma plataforma pensada para incentivar trocas genuínas e espontâneas, sem
-                as barreiras e complexidades das plataformas tradicionais.
+                Construa relações genuínas baseadas na troca de valor real, sem
+                as barreiras artificiais que distanciam você de quem realmente aprecia seu trabalho.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Sem obrigação de assinatura</span>
+                  <span>Experiências memoráveis</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Experiência personalizada</span>
+                  <span>Engajamento mais profundo</span>
                 </li>
                 <li className="flex items-center text-sm text-gray-600">
                   <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Conexões mais significativas</span>
+                  <span>Fidelização natural</span>
                 </li>
               </ul>
             </CardContent>

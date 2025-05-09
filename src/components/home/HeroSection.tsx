@@ -21,18 +21,17 @@ const HeroSection = ({ heroRef }: HeroSectionProps) => {
       <div ref={heroRef} className="mimo-container relative z-10 opacity-0">
         <div className="max-w-3xl mx-auto text-center">
           <Badge className="mb-6 px-4 py-1.5 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
-            Monetização para criadoras de conteúdo
+            Para criadoras de conteúdo
           </Badge>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Aumente sua renda com <span className="text-mimo-primary">mimos</span>{" "}
+            Monetize com <span className="text-mimo-primary">mimos</span>{" "}
             {!isMobile && <br />}
-            exclusivos para seus fãs
+            seus melhores conteúdos exclusivos
           </h1>
           
           <p className="text-lg md:text-xl text-gray-600 mb-8 md:mb-10 max-w-2xl mx-auto px-4 sm:px-0">
-            Mimo é uma plataforma que permite você monetizar conteúdos especiais 
-            de forma direta, sem assinaturas mensais ou taxas abusivas.
+            Mimo é uma contribuição que um fã faz para apoiar uma criadora, e em troca recebe uma recompensa personalizada. É uma forma mais natural, espontânea e significativa de monetização.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 sm:px-0">

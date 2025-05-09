@@ -13,13 +13,14 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
       <div className="mimo-container">
         <div className="text-center mb-12 md:mb-16 px-4 sm:px-0">
           <Badge className="mb-4 px-3 py-1 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
-            Simples e Descomplicado
+            Simplicidade que transforma
           </Badge>
           <h2 className="text-2xl md:text-4xl font-bold mb-6">
-            Como o Mimo funciona
+            Três passos para decolar
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-            A plataforma mais direta para conectar criadoras e fãs, sem burocracias ou complicações.
+            Sem burocracias, sem esperas, sem complicações. Uma jornada desenhada para
+            priorizar o que realmente importa: sua criação e seu público.
           </p>
         </div>
         
@@ -31,23 +32,23 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
                   1
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-2">Crie sua página</h3>
+                  <h3 className="font-semibold text-xl mb-2">Defina seu universo</h3>
                   <p className="text-gray-600 mb-3">
-                    Personalize sua página com sua identidade, crie pacotes especiais e defina as 
-                    recompensas que vai oferecer. Rápido e sem burocracia.
+                    Construa seu espaço com sua identidade e defina experiências 
+                    exclusivas que só você pode oferecer. Sem fórmulas, seu estilo.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Design completo da sua página</span>
+                      <span>Visual que reflete sua essência</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Múltiplos pacotes com preços diferentes</span>
+                      <span>Offerings personalizados</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Integração com suas redes sociais</span>
+                      <span>Integração com seu ecossistema</span>
                     </li>
                   </ul>
                 </div>
@@ -58,23 +59,23 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
                   2
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-2">Compartilhe</h3>
+                  <h3 className="font-semibold text-xl mb-2">Amplifique</h3>
                   <p className="text-gray-600 mb-3">
-                    Compartilhe sua página Mimo nas redes sociais e com seus seguidores. 
-                    Cada link é personalizado com seu nome de usuário.
+                    Leve sua proposta ao mundo com um link personalizado que 
+                    conecta seus admiradores diretamente ao que você tem a oferecer.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Links personalizados</span>
+                      <span>Sua marca no endereço</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Compartilhamento direto</span>
+                      <span>Visibilidade estratégica</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Ferramentas de promoção</span>
+                      <span>Promoção orgânica</span>
                     </li>
                   </ul>
                 </div>
@@ -85,23 +86,23 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
                   3
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl mb-2">Receba pagamentos</h3>
+                  <h3 className="font-semibold text-xl mb-2">Realize</h3>
                   <p className="text-gray-600 mb-3">
-                    Quando um fã compra seu mimo, você recebe o pagamento imediatamente via PIX e
-                    entrega o conteúdo exclusivo através de um link seguro.
+                    Quando alguém reconhece o valor do seu trabalho, o PIX chega instantaneamente
+                    e você entrega a experiência sem intermediários ou atrasos.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>PIX direto para sua conta</span>
+                      <span>Transferência imediata</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Taxa de apenas 10%</span>
+                      <span>Taxa justa de apenas 10%</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Sem tempo mínimo de saque</span>
+                      <span>Autonomia financeira real</span>
                     </li>
                   </ul>
                 </div>
@@ -142,9 +143,13 @@ const HowItWorksSection = ({ howItWorksRef }: HowItWorksSectionProps) => {
                 </div>
               </div>
               <div className="space-y-3">
-                <div className="h-4 w-full bg-gray-200 rounded"></div>
-                <div className="h-4 w-4/5 bg-gray-200 rounded"></div>
-                <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                <div className="flex items-center justify-between">
+                  <div className="h-5 w-24 bg-gray-200 rounded"></div>
+                  <div className="h-5 w-16 bg-mimo-primary/30 rounded"></div>
+                </div>
+                <div className="h-3 w-full bg-gray-100 rounded mb-2"></div>
+                <div className="h-3 w-4/5 bg-gray-100 rounded"></div>
+                <div className="mt-4 h-10 rounded-lg bg-gradient-to-r from-mimo-primary/80 to-mimo-secondary/80"></div>
               </div>
             </div>
           </div>
