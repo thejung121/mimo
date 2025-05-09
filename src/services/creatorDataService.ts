@@ -1,7 +1,7 @@
 
 import { Creator, MimoPackage } from '@/types/creator';
 
-// Mock creator data for initial setup
+// Mock creator data for initial display only when not logged in
 const initialCreator: Creator = {
   name: 'Maria Fernanda',
   username: 'mariafernanda',
@@ -27,7 +27,7 @@ const initialCreator: Creator = {
   ]
 };
 
-// Mock package data for initial setup
+// Initial package examples - only shown for demo purposes when not logged in
 const initialPackages: MimoPackage[] = [
   {
     id: 1,
@@ -93,7 +93,7 @@ export const getCreatorData = (): Creator => {
       return JSON.parse(storedCreator);
     } catch (e) {
       console.error("Failed to parse creator data", e);
-      // If parsing fails, return a new creator for this user
+      // If parsing fails, return a new creator for this user with minimal data
       return {
         id: user.id,
         name: user.name,
@@ -105,15 +105,15 @@ export const getCreatorData = (): Creator => {
         cover: "/placeholder.svg",
         description: `Criador de conteúdo`,
         socialLinks: [
-          { type: "instagram", url: `https://instagram.com/${user.username}` },
-          { type: "twitter", url: `https://twitter.com/${user.username}` },
+          { type: "instagram", url: "" },
+          { type: "twitter", url: "" },
           { type: "website", url: "" }
         ]
       };
     }
   }
   
-  // If no stored creator data, create a default profile
+  // If no stored creator data, create a default profile with minimal data
   return {
     id: user.id,
     name: user.name,
@@ -125,8 +125,8 @@ export const getCreatorData = (): Creator => {
     cover: "/placeholder.svg",
     description: `Criador de conteúdo`,
     socialLinks: [
-      { type: "instagram", url: `https://instagram.com/${user.username}` },
-      { type: "twitter", url: `https://twitter.com/${user.username}` },
+      { type: "instagram", url: "" },
+      { type: "twitter", url: "" },
       { type: "website", url: "" }
     ]
   };
@@ -150,12 +150,13 @@ export const getMimoPackages = (): MimoPackage[] => {
       return JSON.parse(storedPackages);
     } catch (e) {
       console.error("Failed to parse packages data", e);
-      return initialPackages;
+      // Return empty array instead of demo packages
+      return [];
     }
   }
   
-  // If no stored packages, return the initial packages
-  return initialPackages;
+  // If no stored packages, return empty array for new users
+  return [];
 };
 
 // Save creator data with user ID association

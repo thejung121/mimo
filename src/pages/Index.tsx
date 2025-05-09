@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -41,7 +40,7 @@ const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
-  const testimonialsRef = useRef<HTMLDivElement>(null);
+  const integrationRef = useRef<HTMLDivElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -65,7 +64,7 @@ const Index = () => {
       heroRef.current,
       featuresRef.current,
       howItWorksRef.current,
-      testimonialsRef.current,
+      integrationRef.current,
       comparisonRef.current,
       ctaRef.current
     ];
@@ -240,18 +239,18 @@ const Index = () => {
           <div ref={heroRef} className="mimo-container relative z-10 opacity-0">
             <div className="max-w-3xl mx-auto text-center">
               <Badge className="mb-6 px-4 py-1.5 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
-                Uma nova forma de conexão entre criadores e fãs
+                Monetização para criadoras de conteúdo
               </Badge>
               
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Envie <span className="text-mimo-primary">mimos</span>, receba{" "}
+                Aumente sua renda com <span className="text-mimo-primary">mimos</span>{" "}
                 {!isMobile && <br />}
-                recompensas exclusivas
+                exclusivos para seus fãs
               </h1>
               
               <p className="text-lg md:text-xl text-gray-600 mb-8 md:mb-10 max-w-2xl mx-auto px-4 sm:px-0">
-                Mimo é a plataforma que conecta criadores e fãs de forma direta, 
-                simples e transparente. Sem assinaturas obrigatórias, sem taxas abusivas.
+                Mimo é uma plataforma que permite você monetizar conteúdos especiais 
+                de forma direta, sem assinaturas mensais ou taxas abusivas.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 sm:px-0">
@@ -268,16 +267,16 @@ const Index = () => {
               
               <div className="mt-12 md:mt-16 grid grid-cols-3 gap-2 md:gap-6 max-w-xl mx-auto text-center">
                 <div>
-                  <div className="text-xl md:text-2xl font-bold text-mimo-primary">250+</div>
-                  <p className="text-xs md:text-sm text-gray-500">Criadores ativos</p>
+                  <div className="text-xl md:text-2xl font-bold text-mimo-primary">10%</div>
+                  <p className="text-xs md:text-sm text-gray-500">Taxa única</p>
                 </div>
                 <div>
-                  <div className="text-xl md:text-2xl font-bold text-mimo-primary">15.000+</div>
-                  <p className="text-xs md:text-sm text-gray-500">Mimos enviados</p>
+                  <div className="text-xl md:text-2xl font-bold text-mimo-primary">PIX</div>
+                  <p className="text-xs md:text-sm text-gray-500">Pagamento imediato</p>
                 </div>
                 <div>
-                  <div className="text-xl md:text-2xl font-bold text-mimo-primary">R$1M+</div>
-                  <p className="text-xs md:text-sm text-gray-500">Distribuídos</p>
+                  <div className="text-xl md:text-2xl font-bold text-mimo-primary">R$100+</div>
+                  <p className="text-xs md:text-sm text-gray-500">Ticket médio alto</p>
                 </div>
               </div>
             </div>
@@ -292,7 +291,7 @@ const Index = () => {
                 O que é um Mimo?
               </Badge>
               <h2 className="text-2xl md:text-4xl font-bold mb-6">
-                Uma troca justa e direta entre{isMobile ? " " : <br/>}criadores e admiradores
+                Uma nova forma de monetizar{isMobile ? " " : <br/>}seu conteúdo exclusivo
               </h2>
               <p className="text-base md:text-lg text-gray-600">
                 Mimo é uma contribuição que um fã faz para apoiar uma criadora, e em troca
@@ -308,23 +307,23 @@ const Index = () => {
                   <div className="bg-green-100 text-green-600 rounded-full w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                     <Gift className="h-6 w-6" />
                   </div>
-                  <h3 className="font-semibold text-xl mb-3">Para o fã</h3>
+                  <h3 className="font-semibold text-xl mb-3">Conteúdo especial</h3>
                   <p className="text-gray-600 mb-6">
-                    Envie um mimo para uma criadora que você admira e receba conteúdo exclusivo,
-                    mensagens personalizadas ou outras recompensas únicas.
+                    Ofereça conteúdos especiais que não cabem no seu modelo de assinatura mensal.
+                    Produtos de valor mais elevado e exclusivos.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Sem necessidade de cadastro</span>
+                      <span>Maior valor por transação</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Escolha quanto quer enviar</span>
+                      <span>Sem obrigação de produção contínua</span>
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Receba conteúdo exclusivo</span>
+                      <span>Conteúdo premium diferenciado</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -336,10 +335,10 @@ const Index = () => {
                   <div className="bg-mimo-primary/20 text-mimo-primary rounded-full w-12 h-12 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                     <Heart className="h-6 w-6" />
                   </div>
-                  <h3 className="font-semibold text-xl mb-3">Para a criadora</h3>
+                  <h3 className="font-semibold text-xl mb-3">Renda complementar</h3>
                   <p className="text-gray-600 mb-6">
-                    Receba apoio financeiro dos seus fãs e ofereça em troca conteúdos exclusivos
-                    que você já produz, sem a pressão de entregas recorrentes.
+                    Receba pagamentos extras sem comprometer sua plataforma principal.
+                    Uma fonte adicional de renda para suas metas financeiras.
                   </p>
                   <ul className="space-y-2">
                     <li className="flex items-center text-sm text-gray-600">
@@ -352,7 +351,7 @@ const Index = () => {
                     </li>
                     <li className="flex items-center text-sm text-gray-600">
                       <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                      <span>Liberdade para criar</span>
+                      <span>Alcance bateria financeiras</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -389,8 +388,66 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Comparison Section */}
+        {/* Integration with other platforms */}
         <section className="py-16 md:py-20 bg-gray-50">
+          <div className="mimo-container">
+            <div ref={integrationRef} className="max-w-3xl mx-auto mb-12 md:mb-16 px-4 sm:px-0 opacity-0">
+              <div className="text-center">
+                <Badge className="mb-4 px-3 py-1 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
+                  Integração Perfeita
+                </Badge>
+                <h2 className="text-2xl md:text-4xl font-bold mb-6">
+                  Coexistência com suas plataformas atuais
+                </h2>
+              </div>
+              
+              <Card className="border-none shadow-lg p-6">
+                <CardContent className="p-0">
+                  <div className="prose max-w-none text-gray-700">
+                    <p className="text-lg mb-6">
+                      Não precisa abandonar sua plataforma atual! Mimo foi desenhado para coexistir e
+                      complementar sua presença em plataformas como Privacy e OnlyFans.
+                    </p>
+                    
+                    <div className="grid md:grid-cols-2 gap-6 mb-6">
+                      <div className="bg-white rounded-lg border border-gray-200 p-4">
+                        <h4 className="font-medium text-lg mb-3 text-mimo-primary flex items-center">
+                          <Check className="h-5 w-5 mr-2" />
+                          Integração complementar
+                        </h4>
+                        <p>"Use a Privacy para o conteúdo de sempre. Use o Mimo para quem quer te presentear de verdade."</p>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg border border-gray-200 p-4">
+                        <h4 className="font-medium text-lg mb-3 text-mimo-primary flex items-center">
+                          <Check className="h-5 w-5 mr-2" />
+                          Valores emocionais maiores
+                        </h4>
+                        <p>O Mimo é para conteúdos especiais com valor emocional maior, que não cabem numa assinatura mensal.</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-mimo-primary/5 border border-mimo-primary/20 rounded-lg p-4 mb-6">
+                      <p className="italic">
+                        "O Mimo não veio para substituir, mas para potencializar suas fontes de renda. 
+                        Continue com suas assinaturas mensais e adicione essa nova fonte de receita para 
+                        conteúdos especiais e diferenciados."
+                      </p>
+                    </div>
+                    
+                    <p>
+                      Direcione seus fãs para as plataformas certas: cada uma tem seu propósito. 
+                      O Mimo é o canhão extra para quando você quiser alcançar metas financeiras específicas.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+        
+        {/* Comparison Section */}
+        <section className="py-16 md:py-20 bg-white">
           <div className="mimo-container">
             <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16 px-4 sm:px-0">
               <Badge className="mb-4 px-3 py-1 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
@@ -400,8 +457,8 @@ const Index = () => {
                 Compare e veja a diferença
               </h2>
               <p className="text-base md:text-lg text-gray-600">
-                Mimo é a alternativa mais justa, transparente e natural para monetização
-                de conteúdo. Veja como nos comparamos às outras plataformas.
+                Mimo é a alternativa mais justa e flexível para monetização de conteúdo especial.
+                Veja como nos comparamos às outras plataformas.
               </p>
             </div>
             
@@ -475,7 +532,7 @@ const Index = () => {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-16 md:py-20 bg-white">
+        <section className="py-16 md:py-20 bg-gray-50">
           <div className="mimo-container">
             <div className="text-center mb-12 md:mb-16 px-4 sm:px-0">
               <Badge className="mb-4 px-3 py-1 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
@@ -485,7 +542,7 @@ const Index = () => {
                 Como o Mimo funciona
               </h2>
               <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-                A plataforma mais direta para conectar criadores e fãs, sem burocracias ou complicações.
+                A plataforma mais direta para conectar criadoras e fãs, sem burocracias ou complicações.
               </p>
             </div>
             
@@ -497,23 +554,23 @@ const Index = () => {
                       1
                     </div>
                     <div>
-                      <h3 className="font-semibold text-xl mb-2">Para criadoras</h3>
+                      <h3 className="font-semibold text-xl mb-2">Crie sua página</h3>
                       <p className="text-gray-600 mb-3">
-                        Crie sua página personalizada, configure seus pacotes de mimos e as recompensas 
-                        que deseja oferecer em troca.
+                        Personalize sua página com sua identidade, crie pacotes especiais e defina as 
+                        recompensas que vai oferecer. Rápido e sem burocracia.
                       </p>
                       <ul className="space-y-2">
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>Personalize sua página de forma completa</span>
+                          <span>Design completo da sua página</span>
                         </li>
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>Defina diferentes valores e recompensas</span>
+                          <span>Múltiplos pacotes com preços diferentes</span>
                         </li>
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>Compartilhe sua página nas redes sociais</span>
+                          <span>Integração com suas redes sociais</span>
                         </li>
                       </ul>
                     </div>
@@ -524,23 +581,23 @@ const Index = () => {
                       2
                     </div>
                     <div>
-                      <h3 className="font-semibold text-xl mb-2">Para fãs</h3>
+                      <h3 className="font-semibold text-xl mb-2">Compartilhe</h3>
                       <p className="text-gray-600 mb-3">
-                        Escolha um pacote de mimo, faça um pagamento único via PIX e receba conteúdo 
-                        exclusivo sem necessidade de assinatura.
+                        Compartilhe sua página Mimo nas redes sociais e com seus seguidores. 
+                        Cada link é personalizado com seu nome de usuário.
                       </p>
                       <ul className="space-y-2">
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>Sem cadastro ou cartão de crédito</span>
+                          <span>Links personalizados</span>
                         </li>
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>Pagamento fácil via PIX</span>
+                          <span>Compartilhamento direto</span>
                         </li>
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>Acesso ao link exclusivo por 30 dias</span>
+                          <span>Ferramentas de promoção</span>
                         </li>
                       </ul>
                     </div>
@@ -551,23 +608,23 @@ const Index = () => {
                       3
                     </div>
                     <div>
-                      <h3 className="font-semibold text-xl mb-2">Conexão direta</h3>
+                      <h3 className="font-semibold text-xl mb-2">Receba pagamentos</h3>
                       <p className="text-gray-600 mb-3">
-                        A criadora recebe o pagamento de forma imediata e envia o conteúdo exclusivo 
-                        para o fã através de um link seguro.
+                        Quando um fã compra seu mimo, você recebe o pagamento imediatamente via PIX e
+                        entrega o conteúdo exclusivo através de um link seguro.
                       </p>
                       <ul className="space-y-2">
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>PIX direto para a conta da criadora</span>
+                          <span>PIX direto para sua conta</span>
                         </li>
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>Links seguros e temporários</span>
+                          <span>Taxa de apenas 10%</span>
                         </li>
                         <li className="flex items-center text-sm text-gray-600">
                           <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                          <span>Relação mais próxima e significativa</span>
+                          <span>Sem tempo mínimo de saque</span>
                         </li>
                       </ul>
                     </div>
@@ -608,186 +665,4 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <div className="h-6 bg-gray-200 rounded-md w-3/4 animate-pulse"></div>
-                    <div className="h-4 bg-gray-100 rounded-md w-full animate-pulse"></div>
-                    <div className="h-4 bg-gray-100 rounded-md w-full animate-pulse"></div>
-                    <div className="h-4 bg-gray-100 rounded-md w-4/5 animate-pulse"></div>
-                  </div>
-                  <div className="mt-6 grid grid-cols-2 gap-3">
-                    <div className="h-12 bg-mimo-primary/20 rounded-lg animate-pulse"></div>
-                    <div className="h-12 bg-gray-100 rounded-lg animate-pulse"></div>
-                  </div>
-                  <div className="mt-6 p-4 bg-green-50 border border-green-100 rounded-lg">
-                    <div className="flex gap-2 items-center">
-                      <BadgeDollarSign className="h-5 w-5 text-green-600" />
-                      <div className="h-4 w-full bg-green-100 rounded animate-pulse"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Testimonials */}
-        <section ref={testimonialsRef} className="py-16 md:py-20 bg-gray-50 opacity-0">
-          <div className="mimo-container">
-            <div className="text-center mb-12 md:mb-16 px-4 sm:px-0">
-              <Badge className="mb-4 px-3 py-1 text-sm bg-mimo-primary/10 text-mimo-primary border-none">
-                Histórias de Sucesso
-              </Badge>
-              <h2 className="text-2xl md:text-4xl font-bold mb-6">
-                Criadoras que estão prosperando
-              </h2>
-              <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
-                Veja como criadores diversos estão transformando suas paixões em renda através do Mimo.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 sm:px-0">
-              <Card className="border-none shadow-md hover:shadow-xl transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-full bg-gray-200"></div>
-                    <div>
-                      <p className="font-semibold text-lg">Juliana M.</p>
-                      <p className="text-sm text-gray-500">Fotógrafa & Modelo</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 mb-6">
-                    "Depois de anos lutando com as plataformas de assinatura, encontrei no Mimo a flexibilidade que precisava. Sem a pressão de produzir conteúdo toda semana, posso me dedicar a criar coisas realmente especiais."
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-xs text-gray-500">Ganhos mensais</p>
-                      <p className="text-lg font-bold text-mimo-primary">R$6.800+</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="text-mimo-primary">
-                      Ver perfil <ArrowUpRight className="ml-1 h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md hover:shadow-xl transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-full bg-gray-200"></div>
-                    <div>
-                      <p className="font-semibold text-lg">Pedro K.</p>
-                      <p className="text-sm text-gray-500">Músico & Compositor</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 mb-6">
-                    "Como músico independente, o Mimo me permitiu monetizar meu trabalho sem intermediários. Ofereço músicas exclusivas, demos e até aulas personalizadas. A resposta dos fãs tem sido incrível!"
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-xs text-gray-500">Ganhos mensais</p>
-                      <p className="text-lg font-bold text-mimo-primary">R$4.200+</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="text-mimo-primary">
-                      Ver perfil <ArrowUpRight className="ml-1 h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-none shadow-md hover:shadow-xl transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-16 h-16 rounded-full bg-gray-200"></div>
-                    <div>
-                      <p className="font-semibold text-lg">Amanda S.</p>
-                      <p className="text-sm text-gray-500">Artista Digital</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 mb-6">
-                    "O pagamento imediato via PIX mudou completamente minha vida. Antes esperava semanas para receber, agora consigo planejar melhor minhas finanças e investir mais no meu trabalho!"
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-xs text-gray-500">Ganhos mensais</p>
-                      <p className="text-lg font-bold text-mimo-primary">R$5.500+</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="text-mimo-primary">
-                      Ver perfil <ArrowUpRight className="ml-1 h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-        
-        {/* CTA Section */}
-        <section ref={ctaRef} className="py-16 md:py-20 bg-gradient-to-br from-mimo-primary to-mimo-tertiary text-white opacity-0">
-          <div className="mimo-container text-center px-4 sm:px-0">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl md:text-4xl font-bold mb-6">
-                Liberte seu potencial criativo
-              </h2>
-              <p className="text-lg md:text-xl mb-8 text-white/90">
-                Dê o próximo passo na sua jornada criativa. Crie sua página, conecte-se com seus fãs
-                e comece a receber mimos hoje mesmo.
-              </p>
-              
-              <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-12">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-left w-full md:flex-1 md:max-w-xs">
-                  <Users className="h-8 w-8 mb-4 text-white" />
-                  <h3 className="text-xl font-bold mb-2">Para criadoras</h3>
-                  <p className="text-white/80 mb-4">
-                    Monetize seu conteúdo sem pressão, com taxas justas e pagamentos imediatos.
-                  </p>
-                  <Button asChild className="bg-white text-mimo-primary hover:bg-white/90 rounded-full w-full group">
-                    <Link to="/cadastro">
-                      Criar minha página
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </Button>
-                </div>
-                
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-left w-full md:flex-1 md:max-w-xs">
-                  <Heart className="h-8 w-8 mb-4 text-white" />
-                  <h3 className="text-xl font-bold mb-2">Para fãs</h3>
-                  <p className="text-white/80 mb-4">
-                    Apoie seus criadores favoritos de forma direta e receba recompensas exclusivas.
-                  </p>
-                  <Button asChild variant="outline" className="border-white text-white hover:bg-white/20 rounded-full w-full">
-                    <Link to="/explorar">
-                      Descobrir criadores
-                      <ChevronRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm text-white/80">
-                <div className="flex items-center">
-                  <Check className="h-4 w-4 mr-1 text-white" />
-                  <span>Sem taxas ocultas</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="h-4 w-4 mr-1 text-white" />
-                  <span>Pagamentos via PIX</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="h-4 w-4 mr-1 text-white" />
-                  <span>Suporte personalizado</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="h-4 w-4 mr-1 text-white" />
-                  <span>Cancelamento a qualquer momento</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default Index;
+                    <div className="h-

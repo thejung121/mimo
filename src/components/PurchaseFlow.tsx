@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -9,7 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Lock } from 'lucide-react';
+import { Lock, ArrowRight } from 'lucide-react';
 import UserInfoForm from './purchase/UserInfoForm';
 import PaymentForm from './purchase/PaymentForm';
 import PackageSummary from './purchase/PackageSummary';
@@ -31,11 +32,13 @@ const PurchaseFlow = ({
   creatorName,
 }: PurchaseFlowProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [userAlias, setUserAlias] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [step, setStep] = useState<'preview' | 'payment'>('preview');
+  const [step, setStep] = useState<'preview' | 'payment' | 'success'>('preview');
+  const [rewardId, setRewardId] = useState('');
 
   const handleProceedToPayment = () => {
     // Validate required fields
@@ -64,29 +67,50 @@ const PurchaseFlow = ({
   const handlePayment = () => {
     setProcessing(true);
 
+    // Generate a unique reward ID for the purchase
+    const generatedRewardId = `reward-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    setRewardId(generatedRewardId);
+
+    // Simulate payment processing
     setTimeout(() => {
+      setProcessing(false);
+      setStep('success');
+      
+      // Instead of just showing a toast, we now set the state to success
+      // which will show the success screen with a link to the reward
       toast({
         title: 'Mimo enviado com sucesso!',
-        description: `Obrigado pelo seu apoio. Você receberá o acesso às recompensas no email ${email}.`,
+        description: 'Seu acesso ao conteúdo exclusivo está disponível agora.',
       });
-      setProcessing(false);
-      setUserAlias('');
-      setEmail('');
-      setWhatsapp('');
-      setStep('preview');
-      onClose();
     }, 2000);
+  };
+  
+  const handleAccessReward = () => {
+    // Close the modal and navigate to the reward page
+    onClose();
+    navigate(`/recompensa/${rewardId}`);
+    
+    // Reset the form state for future purchases
+    setUserAlias('');
+    setEmail('');
+    setWhatsapp('');
+    setStep('preview');
   };
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{step === 'preview' ? 'Enviar Mimo' : 'Finalizar Compra'}</SheetTitle>
+          <SheetTitle>
+            {step === 'preview' ? 'Enviar Mimo' : 
+             step === 'payment' ? 'Finalizar Compra' : 'Compra Concluída'}
+          </SheetTitle>
           <SheetDescription>
             {step === 'preview'
               ? `Envie um presente para ${creatorName}`
-              : 'Complete seu pagamento para finalizar'}
+              : step === 'payment'
+              ? 'Complete seu pagamento para finalizar'
+              : 'Seu acesso já está disponível!'}
           </SheetDescription>
         </SheetHeader>
 
@@ -118,7 +142,7 @@ const PurchaseFlow = ({
                 </Button>
               </div>
             </div>
-          ) : (
+          ) : step === 'payment' ? (
             <div className="space-y-4">
               <PackageSummary packageTitle={packageTitle} packagePrice={packagePrice} />
 
@@ -140,6 +164,32 @@ const PurchaseFlow = ({
                   Voltar
                 </Button>
               </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-700">
+                <h3 className="font-semibold text-lg mb-2">Compra realizada com sucesso!</h3>
+                <p>Seu mimo foi enviado e você já pode acessar o conteúdo exclusivo.</p>
+              </div>
+              
+              <div className="border border-border rounded-lg p-4">
+                <h4 className="font-medium mb-2">Detalhes da compra:</h4>
+                <p className="text-sm text-muted-foreground mb-1">Mimo: {packageTitle}</p>
+                <p className="text-sm text-muted-foreground mb-1">Valor: R$ {packagePrice.toFixed(2)}</p>
+                <p className="text-sm text-muted-foreground">Criador(a): {creatorName}</p>
+              </div>
+              
+              <Button 
+                onClick={handleAccessReward}
+                className="w-full bg-gradient-to-r from-mimo-primary to-mimo-secondary flex items-center justify-center gap-2"
+              >
+                Acessar meu conteúdo agora
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              
+              <p className="text-sm text-muted-foreground text-center">
+                O link de acesso também foi enviado para o email {email} e ficará disponível por 30 dias.
+              </p>
             </div>
           )}
         </div>
