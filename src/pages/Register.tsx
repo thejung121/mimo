@@ -21,6 +21,7 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [document, setDocument] = useState(''); // Added document state
   const [isLoading, setIsLoading] = useState(false);
   
   const { register, isAuthenticated } = useAuth();
@@ -37,6 +38,28 @@ const Register = () => {
   const handleStartRegistration = () => {
     setStartRegistration(true);
     setTimeout(() => setShowForm(true), 500); // Add a delay for smoother transition
+  };
+  
+  // Function to format CPF/CNPJ as user types
+  const formatDocument = (value: string) => {
+    // Remove non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Format based on length (CPF or CNPJ)
+    if (digits.length <= 11) {
+      // CPF format: 123.456.789-01
+      return digits
+        .replace(/(\d{3})(?=\d)/, '$1.')
+        .replace(/(\d{3})(?=\d)/, '$1.')
+        .replace(/(\d{3})(?=\d)/, '$1-');
+    } else {
+      // CNPJ format: 12.345.678/0001-90
+      return digits
+        .replace(/(\d{2})(?=\d)/, '$1.')
+        .replace(/(\d{3})(?=\d)/, '$1.')
+        .replace(/(\d{3})(?=\d)/, '$1/')
+        .replace(/(\d{4})(?=\d)/, '$1-');
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -70,6 +93,15 @@ const Register = () => {
       return;
     }
     
+    if (!document.trim()) {
+      toast({
+        title: "CPF/CNPJ obrigatório",
+        description: "Por favor, informe seu CPF ou CNPJ para recebimento via PIX",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!password) {
       toast({
         title: "Senha obrigatória",
@@ -91,7 +123,8 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      const success = await register(name, email, password, username);
+      // Pass document to register function
+      const success = await register(name, email, password, username, document);
       
       if (success) {
         // Directly navigate to dashboard after registration without needing email confirmation
@@ -217,6 +250,21 @@ const Register = () => {
                         />
                         <p className="text-xs text-muted-foreground">
                           Este será o endereço da sua página: mimo.com/criador/{username || 'seunome'}
+                        </p>
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="document">CPF/CNPJ (para recebimento PIX)</Label>
+                        <Input 
+                          id="document" 
+                          type="text" 
+                          placeholder="000.000.000-00" 
+                          value={document}
+                          onChange={(e) => setDocument(formatDocument(e.target.value))}
+                          disabled={isLoading}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          O CPF/CNPJ será registrado como sua chave PIX para recebimentos
                         </p>
                       </div>
                       

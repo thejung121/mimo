@@ -62,7 +62,7 @@ const Dashboard = () => {
         name: user.name || '',
         email: user.email || '',
         phone: "",
-        document: "***.***.***-**"
+        document: user.document || ''
       }));
       
       // Load real transaction data

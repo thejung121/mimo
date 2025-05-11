@@ -52,7 +52,7 @@ export const useAuthService = () => {
     }
   };
 
-  const register = async (name: string, email: string, password: string, username: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, username: string, document?: string): Promise<boolean> => {
     try {
       // Use regular signUp method with data parameter to store user metadata
       const { data, error } = await supabase.auth.signUp({
@@ -61,7 +61,8 @@ export const useAuthService = () => {
         options: {
           data: {
             name,
-            username
+            username,
+            document: document || '' // Store CPF/CNPJ in user metadata
           },
           // Skip email confirmation by not requiring emailRedirectTo
           emailRedirectTo: undefined
@@ -137,6 +138,7 @@ export const convertSupabaseUser = (user: any): AuthUser | null => {
     name: user.user_metadata?.name || 'User',
     email: user.email || '',
     username: user.user_metadata?.username || '',
-    avatar: user.user_metadata?.avatar || ''
+    avatar: user.user_metadata?.avatar || '',
+    document: user.user_metadata?.document || '' // Add document field
   };
 };
