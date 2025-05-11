@@ -43,9 +43,19 @@ export const useCreatorProfile = () => {
           setAvatarPreview(creatorData.avatar);
         } else {
           console.error('No creator data found');
+          toast({
+            title: "Erro ao carregar dados",
+            description: "Não foi possível carregar os dados do seu perfil",
+            variant: "destructive"
+          });
         }
       } catch (error) {
         console.error('Error loading creator data:', error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Ocorreu um erro ao carregar seu perfil. Tente novamente.",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }
@@ -54,7 +64,7 @@ export const useCreatorProfile = () => {
     if (user?.id) {
       loadCreator();
     }
-  }, [user]);
+  }, [user, toast]);
 
   // Handler for updating the creator
   const handleCreatorChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -177,12 +187,14 @@ export const useCreatorProfile = () => {
           title: "Perfil salvo com sucesso!",
           description: "As alterações no seu perfil foram salvas.",
         });
+        return true;
       } else {
         toast({
           title: "Erro ao salvar perfil",
           description: "Ocorreu um erro ao salvar seu perfil.",
           variant: "destructive"
         });
+        return false;
       }
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -191,6 +203,7 @@ export const useCreatorProfile = () => {
         description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
         variant: "destructive"
       });
+      return false;
     }
   };
 
