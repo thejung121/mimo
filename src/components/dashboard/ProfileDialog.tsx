@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -45,7 +46,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
   setUserProfile,
   onUpdateProfile
 }) => {
-  const { logout, user } = useAuth();
+  const { logout, user, updateUserProfile } = useAuth();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -75,16 +76,28 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
     setIsUpdating(true);
     
     try {
-      // Update user metadata
-      const { error } = await supabase.auth.updateUser({
-        data: { 
+      // Update user metadata using the context function
+      if (updateUserProfile) {
+        const success = await updateUserProfile({
           name: userProfile.name,
           document: userProfile.document,
-        }
-      });
+        });
 
-      if (error) {
-        throw error;
+        if (!success) {
+          throw new Error("Failed to update profile");
+        }
+      } else {
+        // Fallback if updateUserProfile is not available
+        const { error } = await supabase.auth.updateUser({
+          data: { 
+            name: userProfile.name,
+            document: userProfile.document,
+          }
+        });
+
+        if (error) {
+          throw error;
+        }
       }
 
       // Update password if provided

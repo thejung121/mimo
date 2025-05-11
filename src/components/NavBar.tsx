@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import MimoLogo from './MimoLogo';
 
-const EnhancedNavBar: React.FC = () => {
+const NavBar: React.FC = () => {
   const { isAuthenticated } = useAuth();
 
   return (
@@ -39,4 +40,4 @@ const EnhancedNavBar: React.FC = () => {
   );
 };
 
-export default EnhancedNavBar;
+export default NavBar;
