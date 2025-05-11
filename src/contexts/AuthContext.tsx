@@ -34,6 +34,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateUserProfile = async (userData: { name?: string; document?: string }) => {
+    try {
+      // Update user metadata in Supabase
+      const { error } = await supabase.auth.updateUser({
+        data: userData
+      });
+      
+      if (error) {
+        toast({
+          title: "Erro ao atualizar perfil",
+          description: error.message || "Ocorreu um erro ao atualizar seu perfil.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      toast({
+        title: "Perfil atualizado",
+        description: "Suas informações foram atualizadas com sucesso.",
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: error.message || "Ocorreu um erro inesperado.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -42,7 +75,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         register,
-        logout: handleLogout
+        logout: handleLogout,
+        updateUserProfile
       }}
     >
       {children}

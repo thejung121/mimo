@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -46,7 +45,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
   setUserProfile,
   onUpdateProfile
 }) => {
-  const { logout, user, updateUserProfile } = useAuth();
+  const { logout, user } = useAuth();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
 

@@ -17,4 +17,5 @@ export interface AuthContextProps {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string, username: string, document?: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  updateUserProfile?: (userData: { name?: string; document?: string }) => Promise<boolean>;
 }
