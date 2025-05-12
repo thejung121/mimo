@@ -1,7 +1,7 @@
 
 import { Creator } from '@/types/creator';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { saveCreatorData } from '@/services/creator/profileService';
 import { useAuth } from '@/contexts/AuthContext';
 

@@ -1,8 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
-import { Creator } from '@/types/creator';
+import { Creator, MimoPackage } from '@/types/creator';
 import { getCreatorData } from '@/services/creator/profileService';
+import { getPackagesByUsername } from '@/services/creator/packageService';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
+import MimoTabContent from '@/components/MimoTabContent';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heart } from 'lucide-react';
 
 interface PagePreviewProps {
   username: string;
@@ -12,6 +16,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [creator, setCreator] = useState<Creator | null>(null);
+  const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>([]);
 
   useEffect(() => {
     const loadCreatorForPreview = async () => {
@@ -31,6 +36,18 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
           
           setCreator(creatorData);
           setError(null);
+          
+          // Carregar pacotes do criador
+          try {
+            const packages = getPackagesByUsername(creatorData.username);
+            console.log('Loaded packages for preview:', packages);
+            
+            // Filtrar apenas pacotes não ocultos
+            const visiblePackages = packages.filter(pkg => !pkg.isHidden);
+            setMimoPackages(visiblePackages);
+          } catch (err) {
+            console.error('Error loading packages for preview:', err);
+          }
         } else {
           setError("Nenhum dado de criador encontrado. Configure seu perfil primeiro.");
         }
@@ -62,7 +79,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
   }
 
   return (
-    <div className="w-full h-[400px] overflow-auto border rounded-md">
+    <div className="w-full h-[600px] overflow-auto border rounded-md">
       <div className="relative h-[200px] bg-gradient-to-r from-primary-500 to-primary-700">
         {creator.cover && creator.cover !== '/placeholder.svg' && (
           <img 
@@ -100,6 +117,26 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
           ) : (
             <p className="text-sm text-muted-foreground">Sem redes sociais configuradas</p>
           )}
+        </div>
+        
+        {/* Seção de Pacotes */}
+        <div className="mt-6 pt-4 border-t">
+          <Tabs defaultValue="mimos" className="mb-6">
+            <div className="flex justify-center">
+              <TabsList className="w-[200px] mb-6">
+                <TabsTrigger value="mimos" className="w-full">
+                  <Heart className="mr-2 h-4 w-4" /> Mimos
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="mimos">
+              <MimoTabContent 
+                mimoPackages={mimoPackages} 
+                onSelectPackage={() => {}} 
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
