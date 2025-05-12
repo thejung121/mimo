@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import PagePreview from '@/components/PagePreview';
+import { saveMimoPackages } from '@/services/creator/packageService';
 
 const MyPageDashboard = () => {
   const { user } = useAuth();
@@ -25,16 +26,25 @@ const MyPageDashboard = () => {
         title: "Link copiado!",
         description: "Link de divulgação copiado para a área de transferência.",
       });
+    } else {
+      toast({
+        title: "Nome de usuário não definido",
+        description: "Configure seu nome de usuário no perfil.",
+        variant: "destructive"
+      });
     }
   };
 
   const togglePackageVisibility = (id: number) => {
-    setMimoPackages(prev => prev.map(pkg => {
+    const updatedPackages = mimoPackages.map(pkg => {
       if (pkg.id === id) {
         return { ...pkg, isHidden: !pkg.isHidden };
       }
       return pkg;
-    }));
+    });
+    
+    setMimoPackages(updatedPackages);
+    saveMimoPackages(updatedPackages);
 
     toast({
       title: "Configuração salva",
@@ -62,16 +72,28 @@ const MyPageDashboard = () => {
                   <Copy className="h-4 w-4" />
                   Copiar Link de Divulgação
                 </Button>
-                <Button 
-                  className="flex items-center gap-2" 
-                  variant="outline"
-                  asChild
-                >
-                  <Link to={`/criador/${user?.username || ''}`} target="_blank">
+                {user?.username ? (
+                  <Button 
+                    className="flex items-center gap-2" 
+                    variant="outline"
+                    asChild
+                  >
+                    <Link to={`/criador/${user.username}`} target="_blank">
+                      <ExternalLink className="h-4 w-4" />
+                      Ver Página Atualizada
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    className="flex items-center gap-2"
+                    variant="outline"
+                    disabled
+                    title="Configure seu nome de usuário no perfil"
+                  >
                     <ExternalLink className="h-4 w-4" />
                     Ver Página Atualizada
-                  </Link>
-                </Button>
+                  </Button>
+                )}
                 <Button 
                   className="flex items-center gap-2 mimo-button" 
                   asChild

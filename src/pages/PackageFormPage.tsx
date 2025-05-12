@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -10,6 +9,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import MediaUploader from '@/components/MediaUploader';
 import MediaItemDisplay from '@/components/MediaItemDisplay';
 import { useToast } from '@/components/ui/use-toast';
+import { saveMimoPackages } from '@/services/creator/packageService';
 
 const PackageFormPage = () => {
   const { id } = useParams();
@@ -19,6 +19,7 @@ const PackageFormPage = () => {
   
   const {
     mimoPackages,
+    setMimoPackages,
     newPackage,
     handleAddFeature,
     handleFeatureChange,
@@ -27,7 +28,6 @@ const PackageFormPage = () => {
     handleAddMedia,
     handleRemoveMedia,
     handleTogglePreview,
-    handleSavePackage,
     handleEditPackage
   } = useMimoPackages();
 
@@ -53,7 +53,52 @@ const PackageFormPage = () => {
   }, [isEditing, id, mimoPackages]);
 
   const handleFormSubmit = () => {
-    handleSavePackage();
+    // Basic validations
+    if (!newPackage.title.trim()) {
+      toast({
+        title: "Título obrigatório",
+        description: "Por favor, insira um título para o pacote.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPackage.price <= 0) {
+      toast({
+        title: "Preço inválido",
+        description: "Por favor, insira um preço válido maior que zero.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Filter empty features
+    const filteredFeatures = newPackage.features.filter(feature => feature.trim());
+    if (filteredFeatures.length === 0) {
+      toast({
+        title: "Características obrigatórias",
+        description: "Por favor, insira ao menos uma característica para o pacote.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create a new package with a unique ID or use existing ID if editing
+    const packageId = isEditing && id ? parseInt(id) : Math.max(0, ...mimoPackages.map(p => p.id || 0)) + 1;
+    
+    const packageToSave = {
+      ...newPackage,
+      id: packageId,
+      features: filteredFeatures
+    };
+
+    // Update the packages list
+    const updatedPackages = [...mimoPackages, packageToSave];
+    setMimoPackages(updatedPackages);
+    
+    // Save to localStorage
+    saveMimoPackages(updatedPackages);
+
     navigate('/dashboard/pacotes');
     toast({
       title: isEditing ? "Pacote atualizado" : "Pacote criado",

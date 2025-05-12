@@ -40,6 +40,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         title: "Link copiado!",
         description: "Link de divulgação copiado para a área de transferência.",
       });
+    } else {
+      toast({
+        title: "Nome de usuário não definido",
+        description: "Configure seu nome de usuário no perfil.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -77,16 +83,28 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
               <Copy className="h-4 w-4" />
               Copiar Link de Divulgação
             </Button>
-            <Button 
-              className="flex items-center gap-2" 
-              variant="outline"
-              asChild
-            >
-              <Link to={`/criador/${user?.username || ''}`} target="_blank">
+            {user?.username ? (
+              <Button 
+                className="flex items-center gap-2" 
+                variant="outline"
+                asChild
+              >
+                <Link to={`/criador/${user.username}`} target="_blank">
+                  <ExternalLink className="h-4 w-4" />
+                  Ver Página Atualizada
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                className="flex items-center gap-2"
+                variant="outline"
+                disabled
+                title="Configure seu nome de usuário no perfil"
+              >
                 <ExternalLink className="h-4 w-4" />
                 Ver Página Atualizada
-              </Link>
-            </Button>
+              </Button>
+            )}
             <Button 
               className="flex items-center gap-2 mimo-button" 
               asChild
@@ -99,7 +117,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           </div>
 
           <div className="w-full overflow-x-hidden border rounded-lg">
-            {user?.username && <PagePreview username={user.username} />}
+            {user?.username ? (
+              <PagePreview username={user.username} />
+            ) : (
+              <div className="p-8 text-center">
+                <p>Configure um nome de usuário para visualizar sua página</p>
+              </div>
+            )}
           </div>
         </div>
       </TabsContent>

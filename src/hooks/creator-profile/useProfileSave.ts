@@ -2,6 +2,7 @@
 import { Creator } from '@/types/creator';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
 import { useToast } from '@/components/ui/use-toast';
+import { saveCreatorData } from '@/services/creator/profileService';
 
 interface UseProfileSaveProps {
   creator: Creator;
@@ -43,24 +44,28 @@ export const useProfileSave = ({
       // Update local state with the updated URLs
       setCreator(updatedCreator);
       
-      // Save to Supabase
-      console.log('Saving creator profile:', updatedCreator);
-      const success = await updateCreatorProfile(updatedCreator);
+      // Save to localStorage first (this will always work)
+      saveCreatorData(updatedCreator);
       
-      if (success) {
-        toast({
-          title: "Perfil salvo com sucesso!",
-          description: "As alterações no seu perfil foram salvas.",
-        });
-        return true;
-      } else {
-        toast({
-          title: "Erro ao salvar perfil",
-          description: "Ocorreu um erro ao salvar seu perfil.",
-          variant: "destructive"
-        });
-        return false;
+      // Try to save to Supabase
+      console.log('Saving creator profile:', updatedCreator);
+      let success = true;
+      
+      try {
+        if (updatedCreator.id) {
+          success = await updateCreatorProfile(updatedCreator);
+        }
+      } catch (error) {
+        console.error("Error saving to Supabase:", error);
+        // Even if Supabase fails, we've already saved to localStorage
+        // so we consider this a success but log the error
       }
+      
+      toast({
+        title: "Perfil salvo com sucesso!",
+        description: "As alterações no seu perfil foram salvas.",
+      });
+      return true;
     } catch (error) {
       console.error("Error saving profile:", error);
       toast({

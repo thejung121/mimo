@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { MimoPackage } from '@/types/creator';
+import { saveMimoPackages } from '@/services/creator/packageService';
 
 export const usePackageCRUD = (
   mimoPackages: MimoPackage[], 
@@ -62,7 +63,11 @@ export const usePackageCRUD = (
     };
 
     // Add the new package to the list
-    setMimoPackages(prev => [...prev, packageToAdd]);
+    const updatedPackages = [...mimoPackages, packageToAdd];
+    setMimoPackages(updatedPackages);
+    
+    // Save the updated packages to localStorage
+    saveMimoPackages(updatedPackages);
     
     // Clean the form and hide it
     setNewPackage({...emptyPackage});
@@ -76,7 +81,9 @@ export const usePackageCRUD = (
 
   // Handler to delete an existing package
   const handleDeletePackage = (id: number) => {
-    setMimoPackages(prev => prev.filter(p => p.id !== id));
+    const updatedPackages = mimoPackages.filter(p => p.id !== id);
+    setMimoPackages(updatedPackages);
+    saveMimoPackages(updatedPackages);
     
     toast({
       title: "Pacote excluído",
@@ -92,7 +99,9 @@ export const usePackageCRUD = (
       setShowNewPackageForm(true);
       
       // Remove the package from the list while it's being edited
-      setMimoPackages(prev => prev.filter(p => p.id !== id));
+      const updatedPackages = mimoPackages.filter(p => p.id !== id);
+      setMimoPackages(updatedPackages);
+      saveMimoPackages(updatedPackages);
     }
   };
 

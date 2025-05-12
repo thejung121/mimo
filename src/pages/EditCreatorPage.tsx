@@ -9,6 +9,7 @@ import { Save, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
+import { saveCreatorData, saveMimoPackages } from '@/services/creator';
 // Importing a new component that will contain all editor sections in one view
 import UnifiedEditorSection from '@/components/UnifiedEditorSection';
 
@@ -40,24 +41,39 @@ const EditCreatorPage = () => {
     handleEditPackage,
     handleSaveProfile,
     setShowNewPackageForm,
+    setMimoPackages
   } = useCreatorEditor();
 
-  // Enhanced save function that explicitly updates the profile and then redirects
+  // Enhanced save function that explicitly updates the profile and packages
   const handleSaveAll = async () => {
     try {
       // First save the profile
-      await handleSaveProfile();
+      const profileSaved = await handleSaveProfile();
       
-      toast({
-        title: "Alterações salvas com sucesso!",
-        description: "Todas as suas alterações foram salvas.",
-      });
-      
-      // Navigate to the creator page to see the changes
-      if (user?.username || creator.username) {
-        navigate(`/criador/${user?.username || creator.username}`);
-      } else {
-        navigate('/dashboard');
+      if (profileSaved) {
+        // Also save packages explicitly
+        saveMimoPackages(mimoPackages);
+        
+        toast({
+          title: "Alterações salvas com sucesso!",
+          description: "Todas as suas alterações foram salvas.",
+        });
+        
+        // Navigate to the creator page to see the changes
+        const username = user?.username || creator.username;
+        if (username) {
+          // Prefetch the user's page to ensure it loads correctly
+          setTimeout(() => {
+            navigate(`/criador/${username}`);
+          }, 100);
+        } else {
+          navigate('/dashboard');
+          toast({
+            title: "Nome de usuário não definido",
+            description: "Configure seu nome de usuário no perfil para ver sua página.",
+            variant: "warning"
+          });
+        }
       }
     } catch (error) {
       console.error('Error saving changes:', error);
@@ -78,16 +94,28 @@ const EditCreatorPage = () => {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">Editar Página</h1>
             <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-                asChild
-              >
-                <Link to={`/criador/${user?.username || creator.username}`} target="_blank">
+              {user?.username || creator.username ? (
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  asChild
+                >
+                  <Link to={`/criador/${user?.username || creator.username}`} target="_blank">
+                    <Eye className="h-4 w-4" />
+                    Ver Minha Página
+                  </Link>
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  disabled
+                  title="Configure seu nome de usuário no perfil"
+                >
                   <Eye className="h-4 w-4" />
                   Ver Minha Página
-                </Link>
-              </Button>
+                </Button>
+              )}
               <Button 
                 className="mimo-button" 
                 onClick={handleSaveAll}
