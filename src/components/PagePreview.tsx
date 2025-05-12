@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { Creator } from '@/types/creator';
 import { getCreatorData } from '@/services/creator/profileService';
-import { getCurrentUser } from '@/services/supabase/authService';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 
 interface PagePreviewProps {
@@ -19,32 +18,25 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
       try {
         setIsLoading(true);
         
-        // Try to get user data from localStorage
-        const userData = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (!userData) {
-          setError("No user data found");
-          return;
-        }
-        
-        const user = JSON.parse(userData);
-        
-        // Check if the loaded user has the requested username
-        if (user.username !== username) {
-          setError(`Username mismatch: ${user.username} vs ${username}`);
-          return;
-        }
-        
-        // Get creator data from localStorage
+        // Get creator data from localStorage directly
         const creatorData = getCreatorData();
+        
         if (creatorData) {
           console.log('PagePreview loaded creator data:', creatorData);
+          
+          // Verify the username matches what we expect
+          if (creatorData.username && creatorData.username !== username && username) {
+            console.warn(`Username mismatch: ${creatorData.username} vs ${username}`);
+          }
+          
           setCreator(creatorData);
+          setError(null);
         } else {
-          setError("No creator data found");
+          setError("Nenhum dado de criador encontrado. Configure seu perfil primeiro.");
         }
       } catch (error) {
         console.error('Error loading preview:', error);
-        setError("Failed to load preview");
+        setError("Falha ao carregar prévia");
       } finally {
         setIsLoading(false);
       }

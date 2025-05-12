@@ -28,22 +28,32 @@ export const useProfileSave = ({
     try {
       let updatedCreator = {...creator};
       
-      // Upload files if they exist
+      // Attempt to upload files if they exist, but handle errors gracefully
       if (coverFile) {
-        const coverUrl = await uploadFile(coverFile, 'user_uploads', 'covers');
-        if (coverUrl) {
-          updatedCreator.cover = coverUrl;
+        try {
+          const coverUrl = await uploadFile(coverFile, 'user_uploads', 'covers');
+          if (coverUrl) {
+            updatedCreator.cover = coverUrl;
+          }
+        } catch (error) {
+          console.error("Error uploading cover:", error);
+          // Don't fail the entire save operation, just log the error
         }
       }
       
       if (avatarFile) {
-        const avatarUrl = await uploadFile(avatarFile, 'user_uploads', 'avatars');
-        if (avatarUrl) {
-          updatedCreator.avatar = avatarUrl;
+        try {
+          const avatarUrl = await uploadFile(avatarFile, 'user_uploads', 'avatars');
+          if (avatarUrl) {
+            updatedCreator.avatar = avatarUrl;
+          }
+        } catch (error) {
+          console.error("Error uploading avatar:", error);
+          // Don't fail the entire save operation, just log the error
         }
       }
       
-      // Update local state with the updated URLs
+      // Update local state with the updated URLs (if any)
       setCreator(updatedCreator);
       
       // Also update the username in auth context if changed
@@ -57,6 +67,7 @@ export const useProfileSave = ({
           console.log('Updated username in auth context');
         } catch (error) {
           console.error('Error updating username in auth context:', error);
+          // Continue with the save operation even if this fails
         }
       }
       
