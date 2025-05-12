@@ -1,130 +1,40 @@
 
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React from 'react';
 import CreatorNavBar from '@/components/CreatorNavBar';
 import CreatorFooter from '@/components/CreatorFooter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Loader2 } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
 import CreatorHero from '@/components/CreatorHero';
 import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import MimoTabContent from '@/components/MimoTabContent';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase/creatorService';
-import { Creator, MimoPackage } from '@/types/creator';
+import LoadingState from '@/components/creator/LoadingState';
+import NotFoundState from '@/components/creator/NotFoundState';
+import AdminBanner from '@/components/creator/AdminBanner';
+import { useCreatorPage } from '@/hooks/useCreatorPage';
 
 const CreatorPage = () => {
-  const { username } = useParams();
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const { user } = useAuth();
-  
-  const [creator, setCreator] = useState<Creator | null>(null);
-  const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<MimoPackage | null>(null);
-  const [purchaseFlowOpen, setPurchaseFlowOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Check if this is the user's own page
-  const isOwnPage = user ? user.username === username : false;
-
-  // Always scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  // Load creator and package data
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!username) return;
-      
-      setIsLoading(true);
-      
-      try {
-        // Get creator data from Supabase
-        const creatorData = await getCreatorByUsername(username);
-        
-        if (creatorData) {
-          setCreator(creatorData);
-          
-          // Get creator packages
-          if (creatorData.id) {
-            const packagesData = await getCreatorPackages(creatorData.id);
-            setMimoPackages(packagesData);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching creator data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [username]);
-
-  // Handle scroll effect for header
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-    if (currentScrollY > 100) {
-      setHeaderVisible(currentScrollY < lastScrollY);
-    } else {
-      setHeaderVisible(true);
-    }
-    setLastScrollY(currentScrollY);
-  };
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
-
-  const handleSelectPackage = (pkg: MimoPackage) => {
-    setSelectedPackage(pkg);
-    setPurchaseFlowOpen(true);
-  };
-
-  const scrollToMimoSection = () => {
-    const mimoSection = document.getElementById('mimo-section');
-    if (mimoSection) {
-      mimoSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const {
+    creator,
+    mimoPackages,
+    isLoading,
+    headerVisible,
+    isOwnPage,
+    selectedPackage,
+    purchaseFlowOpen,
+    handleSelectPackage,
+    scrollToMimoSection,
+    setPurchaseFlowOpen
+  } = useCreatorPage();
 
   // Show loading state
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-white">
-        <CreatorNavBar />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="flex flex-col items-center">
-            <Loader2 className="h-10 w-10 text-mimo-primary animate-spin mb-4" />
-            <p className="text-muted-foreground">Carregando perfil do criador...</p>
-          </div>
-        </div>
-        <CreatorFooter />
-      </div>
-    );
+    return <LoadingState />;
   }
   
   // Show not found state
   if (!creator) {
-    return (
-      <div className="min-h-screen flex flex-col bg-white">
-        <CreatorNavBar />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="flex flex-col items-center text-center px-4">
-            <h2 className="text-2xl font-bold mb-2">Criador não encontrado</h2>
-            <p className="text-muted-foreground mb-6">O criador que você está procurando não existe ou não está disponível.</p>
-            <Button onClick={() => window.history.back()}>
-              Voltar
-            </Button>
-          </div>
-        </div>
-        <CreatorFooter />
-      </div>
-    );
+    return <NotFoundState />;
   }
 
   return (
@@ -141,18 +51,7 @@ const CreatorPage = () => {
       
       <main className="flex-grow">
         {/* Admin banner if this is the user's own page */}
-        {isOwnPage && (
-          <div className="bg-mimo-primary/10 text-mimo-primary p-2 text-center">
-            <div className="flex justify-center items-center gap-3">
-              <p>Esta é a visualização pública da sua página</p>
-              <Button variant="outline" size="sm" className="border-mimo-primary text-mimo-primary hover:bg-mimo-primary hover:text-white" asChild>
-                <Link to="/editar-pagina">
-                  Editar página
-                </Link>
-              </Button>
-            </div>
-          </div>
-        )}
+        {isOwnPage && <AdminBanner />}
         
         {/* Hero Section */}
         <CreatorHero 
@@ -197,7 +96,6 @@ const CreatorPage = () => {
             open={purchaseFlowOpen}
             onClose={() => {
               setPurchaseFlowOpen(false);
-              setSelectedPackage(null);
             }}
             packageId={selectedPackage.id?.toString() || ''}
             packageTitle={selectedPackage.title}
