@@ -13,7 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export const useMimoPackages = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>([]);
+  const [mimoPackages, setMimoPackagesState] = useState<MimoPackage[]>([]);
   const [showNewPackageForm, setShowNewPackageForm] = useState(false);
   const [newPackage, setNewPackage] = useState<MimoPackage>({...emptyPackage});
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +28,7 @@ export const useMimoPackages = () => {
           const supabasePackages = await getCreatorPackages(user.id);
           if (supabasePackages && supabasePackages.length > 0) {
             console.log("Loaded packages from Supabase:", supabasePackages);
-            setMimoPackages(supabasePackages);
+            setMimoPackagesState(supabasePackages);
             setIsLoading(false);
             return;
           }
@@ -37,10 +37,10 @@ export const useMimoPackages = () => {
         // Fallback to local storage
         const localPackages = getMimoPackages();
         console.log("Loaded packages from local storage:", localPackages);
-        setMimoPackages(localPackages);
+        setMimoPackagesState(localPackages);
       } catch (error) {
         console.error("Error loading packages:", error);
-        setMimoPackages([]);
+        setMimoPackagesState([]);
       } finally {
         setIsLoading(false);
       }
@@ -65,10 +65,15 @@ export const useMimoPackages = () => {
     }));
   }, []);
 
-  const updateMimoPackages = useCallback((updater: (prev: MimoPackage[]) => MimoPackage[]) => {
+  // Enhanced setMimoPackages function that can handle both direct arrays and updater functions
+  const setMimoPackages = useCallback((updater: MimoPackage[] | ((prev: MimoPackage[]) => MimoPackage[])) => {
     // Add error handling to prevent state corruption
     try {
-      setMimoPackages(updater);
+      if (typeof updater === 'function') {
+        setMimoPackagesState(updater);
+      } else {
+        setMimoPackagesState(updater);
+      }
     } catch (error) {
       console.error("Error updating packages:", error);
       toast({
@@ -91,7 +96,7 @@ export const useMimoPackages = () => {
     handleAddMedia, 
     handleRemoveMedia, 
     handleTogglePreview 
-  } = usePackageMedia(mimoPackages, updateMimoPackages, newPackage, setNewPackage);
+  } = usePackageMedia(mimoPackages, setMimoPackages, newPackage, setNewPackage);
 
   // Import package CRUD operations
   const { 
@@ -102,7 +107,7 @@ export const useMimoPackages = () => {
     isSaving
   } = usePackageCRUD(
     mimoPackages, 
-    updateMimoPackages, 
+    setMimoPackages, 
     newPackage, 
     setNewPackage,
     emptyPackage,
@@ -111,7 +116,7 @@ export const useMimoPackages = () => {
 
   return {
     mimoPackages,
-    setMimoPackages: updateMimoPackages,
+    setMimoPackages,
     showNewPackageForm,
     newPackage,
     isLoading,
