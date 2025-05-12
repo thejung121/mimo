@@ -12,6 +12,7 @@ export const useCreatorPage = () => {
   const [selectedPackage, setSelectedPackage] = useState<MimoPackage | null>(null);
   const [purchaseFlowOpen, setPurchaseFlowOpen] = useState(false);
   const [customAmount, setCustomAmount] = useState<number | null>(null);
+  const [suggestedPrices] = useState<number[]>([10, 15, 25, 50]);
   
   const { username } = useParams<{ username: string }>();
   const mimoSectionRef = useRef<HTMLElement | null>(null);
@@ -80,7 +81,7 @@ export const useCreatorPage = () => {
       const customPackage: MimoPackage = {
         id: 'custom',
         title: 'Mimo Personalizado',
-        price: amount, // Now amount is explicitly typed as number
+        price: Number(amount), // Force numeric type to fix TS error
         creator_id: creator.id || '',
         features: ['Valor personalizado'],
         highlighted: false,
@@ -102,6 +103,7 @@ export const useCreatorPage = () => {
     selectedPackage,
     customAmount,
     purchaseFlowOpen,
+    suggestedPrices,
     handleSelectPackage,
     handleCustomAmount,
     scrollToMimoSection,

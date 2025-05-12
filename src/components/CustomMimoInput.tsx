@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 interface CustomMimoInputProps {
   onSubmit: (amount: number) => void;
   minimumAmount?: number;
+  suggestedPrices?: number[];
 }
 
 const CustomMimoInput: React.FC<CustomMimoInputProps> = ({ 
   onSubmit, 
-  minimumAmount = 10 
+  minimumAmount = 10,
+  suggestedPrices = [10, 15, 25, 50]
 }) => {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -33,11 +35,31 @@ const CustomMimoInput: React.FC<CustomMimoInputProps> = ({
     onSubmit(numAmount);
   };
 
+  const selectSuggestedPrice = (price: number) => {
+    setAmount(price.toString());
+    setError(null);
+  };
+
   return (
     <div className="mimo-card p-4">
       <h3 className="text-lg font-medium mb-3">Valor personalizado</h3>
       
       <div className="space-y-3">
+        <div className="flex flex-wrap gap-2 mb-3">
+          {suggestedPrices.map(price => (
+            <Button
+              key={price}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => selectSuggestedPrice(price)}
+              className={`px-4 ${amount === price.toString() ? 'border-mimo-primary bg-mimo-primary/10' : ''}`}
+            >
+              R$ {price}
+            </Button>
+          ))}
+        </div>
+
         <div>
           <Label htmlFor="custom-amount">Quanto você quer enviar?</Label>
           <div className="flex items-center mt-1">

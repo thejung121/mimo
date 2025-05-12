@@ -22,6 +22,7 @@ const CreatorPage = () => {
     isOwnPage,
     selectedPackage,
     purchaseFlowOpen,
+    suggestedPrices,
     handleSelectPackage,
     handleCustomAmount,
     scrollToMimoSection,
@@ -86,6 +87,7 @@ const CreatorPage = () => {
                   mimoPackages={mimoPackages} 
                   onSelectPackage={handleSelectPackage}
                   onCustomAmount={handleCustomAmount}
+                  suggestedPrices={suggestedPrices}
                 />
               </TabsContent>
             </Tabs>

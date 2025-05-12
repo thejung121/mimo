@@ -5,6 +5,10 @@ import MimosTab from './MimosTab';
 import WithdrawalsTab from './WithdrawalsTab';
 import PagePreview from '@/components/PagePreview';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Copy, ExternalLink, Edit } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface DashboardContentProps {
   activeTab: string;
@@ -26,6 +30,18 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   onOpenWithdrawalDialog
 }) => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  
+  const copyShareLink = () => {
+    if (user?.username) {
+      const shareLink = `${window.location.origin}/criador/${user.username}`;
+      navigator.clipboard.writeText(shareLink);
+      toast({
+        title: "Link copiado!",
+        description: "Link de divulgação copiado para a área de transferência.",
+      });
+    }
+  };
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8 max-w-full overflow-hidden">
@@ -51,8 +67,40 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       </TabsContent>
       
       <TabsContent value="page">
-        <div className="w-full overflow-x-hidden">
-          {user?.username && <PagePreview username={user.username} />}
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              className="flex items-center gap-2" 
+              variant="outline"
+              onClick={copyShareLink}
+            >
+              <Copy className="h-4 w-4" />
+              Copiar Link de Divulgação
+            </Button>
+            <Button 
+              className="flex items-center gap-2" 
+              variant="outline"
+              asChild
+            >
+              <Link to={`/criador/${user?.username || ''}`} target="_blank">
+                <ExternalLink className="h-4 w-4" />
+                Ver Página Atualizada
+              </Link>
+            </Button>
+            <Button 
+              className="flex items-center gap-2 mimo-button" 
+              asChild
+            >
+              <Link to="/editar-pagina">
+                <Edit className="h-4 w-4" />
+                Editar Página
+              </Link>
+            </Button>
+          </div>
+
+          <div className="w-full overflow-x-hidden border rounded-lg">
+            {user?.username && <PagePreview username={user.username} />}
+          </div>
         </div>
       </TabsContent>
     </Tabs>

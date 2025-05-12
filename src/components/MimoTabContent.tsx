@@ -8,9 +8,15 @@ interface MimoTabContentProps {
   mimoPackages: MimoPackageType[];
   onSelectPackage: (pkg: MimoPackageType) => void;
   onCustomAmount?: (amount: number) => void;
+  suggestedPrices?: number[];
 }
 
-const MimoTabContent = ({ mimoPackages, onSelectPackage, onCustomAmount }: MimoTabContentProps) => {
+const MimoTabContent = ({ 
+  mimoPackages, 
+  onSelectPackage, 
+  onCustomAmount,
+  suggestedPrices = [10, 15, 25, 50]
+}: MimoTabContentProps) => {
   // Sort packages by price
   const sortedPackages = [...mimoPackages].sort((a, b) => a.price - b.price);
   
@@ -53,6 +59,7 @@ const MimoTabContent = ({ mimoPackages, onSelectPackage, onCustomAmount }: MimoT
           <CustomMimoInput 
             onSubmit={onCustomAmount}
             minimumAmount={10}
+            suggestedPrices={suggestedPrices}
           />
         </div>
       )}

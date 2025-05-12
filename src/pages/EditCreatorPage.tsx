@@ -121,6 +121,18 @@ const EditCreatorPage = () => {
             onEditPackage={handleEditPackage}
             setShowNewPackageForm={setShowNewPackageForm}
           />
+          
+          {/* Bottom save button */}
+          <div className="mt-8 pt-4 border-t flex justify-center">
+            <Button 
+              className="mimo-button w-full max-w-md" 
+              onClick={handleSaveAll}
+              size="lg"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Salvar Todas as Alterações
+            </Button>
+          </div>
         </div>
       </main>
       

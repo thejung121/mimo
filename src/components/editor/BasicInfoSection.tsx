@@ -11,6 +11,23 @@ interface BasicInfoSectionProps {
 }
 
 const BasicInfoSection = ({ creator, onCreatorChange }: BasicInfoSectionProps) => {
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Replace spaces with dashes for URL compatibility
+    const formattedUsername = e.target.value.replace(/\s+/g, '-');
+    
+    // Create a new event with the modified value
+    const modifiedEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'username',
+        value: formattedUsername
+      }
+    };
+    
+    onCreatorChange(modifiedEvent);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -26,7 +43,7 @@ const BasicInfoSection = ({ creator, onCreatorChange }: BasicInfoSectionProps) =
             id="username"
             name="username"
             value={creator.username}
-            onChange={onCreatorChange}
+            onChange={handleUsernameChange}
             className="mimo-input"
             placeholder="Seu nome de usuário único"
           />
