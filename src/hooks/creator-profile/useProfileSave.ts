@@ -1,7 +1,7 @@
 
 import { Creator } from '@/types/creator';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { saveCreatorData } from '@/services/creator/profileService';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -88,11 +88,6 @@ export const useProfileSave = ({
         // Even if Supabase fails, we've already saved to localStorage
         // so we consider this a success but log the error
       }
-      
-      toast({
-        title: "Perfil salvo com sucesso!",
-        description: "As alterações no seu perfil foram salvas.",
-      });
       
       return true;
     } catch (error) {

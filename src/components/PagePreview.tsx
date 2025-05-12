@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Creator, MimoPackage } from '@/types/creator';
 import { getCreatorData } from '@/services/creator/profileService';
-import { getPackagesByUsername } from '@/services/creator/packageService';
+import { getMimoPackages } from '@/services/creator/packageService';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 import MimoTabContent from '@/components/MimoTabContent';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,12 +37,13 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
           setCreator(creatorData);
           setError(null);
           
-          // Carregar pacotes do criador
+          // Load the current user's packages directly from localStorage
           try {
-            const packages = getPackagesByUsername(creatorData.username);
+            // This will get all packages for the current user
+            const packages = getMimoPackages();
             console.log('Loaded packages for preview:', packages);
             
-            // Filtrar apenas pacotes não ocultos
+            // Filter only packages that are not hidden
             const visiblePackages = packages.filter(pkg => !pkg.isHidden);
             setMimoPackages(visiblePackages);
           } catch (err) {

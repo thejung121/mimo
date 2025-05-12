@@ -1,9 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useCreatorProfile } from '@/hooks/useCreatorProfile';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import ProfileEditor from '@/components/profile/ProfileEditor';
 
@@ -23,7 +23,7 @@ const ProfilePage = () => {
   const { user, updateUserProfile } = useAuth();
 
   // Sync creator username with auth user username
-  useEffect(() => {
+  React.useEffect(() => {
     if (user?.username && !creator.username) {
       handleCreatorChange({
         target: {
