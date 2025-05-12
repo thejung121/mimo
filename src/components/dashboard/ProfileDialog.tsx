@@ -52,6 +52,9 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Check if document is already set (non-empty)
+  const isDocumentSet = Boolean(user?.document);
+
   const handleUpdateProfile = async () => {
     setIsUpdating(true);
     
@@ -60,7 +63,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
       if (updateUserProfile) {
         const success = await updateUserProfile({
           name: userProfile.name,
-          document: userProfile.document,
+          document: isDocumentSet ? user?.document : userProfile.document, // Only update document if not already set
         });
 
         if (!success) {
@@ -71,7 +74,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
         const { error } = await supabase.auth.updateUser({
           data: { 
             name: userProfile.name,
-            document: userProfile.document,
+            document: isDocumentSet ? user?.document : userProfile.document, // Only update document if not already set
           }
         });
 
@@ -134,7 +137,10 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
   };
 
   const handleDocumentChange = (value: string) => {
-    setUserProfile(prev => ({ ...prev, document: value }));
+    // Only allow changing document if not already set
+    if (!isDocumentSet) {
+      setUserProfile(prev => ({ ...prev, document: value }));
+    }
   };
 
   const handleCurrentPasswordChange = (value: string) => {
@@ -172,6 +178,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
             document={userProfile.document}
             onDocumentChange={handleDocumentChange}
             isUpdating={isUpdating}
+            isDocumentSet={isDocumentSet}
           />
           
           {/* Password Section */}

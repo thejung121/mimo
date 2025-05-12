@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Creator } from '@/types/creator';
-import { getCreatorData } from '@/services/creatorDataService';
+import { getCurrentCreator } from '@/services/supabase/creatorService';
 import { useAuth } from '@/contexts/AuthContext';
 import { getCreatorTransactions, getAvailableBalance, getCreatorWithdrawals } from '@/services/supabase';
 
@@ -33,53 +33,57 @@ export const useDashboard = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [availableBalance, setAvailableBalance] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   
   const { user } = useAuth();
   
   useEffect(() => {
     // Use the authenticated user's information to load their creator profile
-    if (user) {
-      const creatorData = getCreatorData();
-      setCreator(creatorData);
+    const loadData = async () => {
+      setIsLoading(true);
       
-      // Set user profile data
-      setUserProfile(prev => ({
-        ...prev,
-        name: user.name || '',
-        email: user.email || '',
-        phone: "",
-        document: user.document || ''
-      }));
-      
-      // Load real transaction data
-      const fetchTransactions = async () => {
-        if (creatorData.id) {
-          const txData = await getCreatorTransactions(creatorData.id);
-          setTransactions(txData);
+      try {
+        if (user) {
+          // Load creator profile from Supabase
+          const creatorData = await getCurrentCreator();
+          setCreator(creatorData);
+          
+          // Set user profile data
+          setUserProfile(prev => ({
+            ...prev,
+            name: user.name || '',
+            email: user.email || '',
+            phone: "",
+            document: user.document || ''
+          }));
+          
+          // Load real transaction data
+          if (creatorData?.id) {
+            const [txData, withdrawalData, balance] = await Promise.all([
+              getCreatorTransactions(creatorData.id),
+              getCreatorWithdrawals(creatorData.id),
+              getAvailableBalance(creatorData.id)
+            ]);
+            
+            setTransactions(txData);
+            setWithdrawals(withdrawalData);
+            setAvailableBalance(balance);
+          }
         }
-      };
-      
-      // Load real withdrawal data
-      const fetchWithdrawals = async () => {
-        if (creatorData.id) {
-          const withdrawalData = await getCreatorWithdrawals(creatorData.id);
-          setWithdrawals(withdrawalData);
-        }
-      };
-      
-      // Load real balance data
-      const fetchBalance = async () => {
-        if (creatorData.id) {
-          const balance = await getAvailableBalance(creatorData.id);
-          setAvailableBalance(balance);
-        }
-      };
-      
-      fetchTransactions();
-      fetchWithdrawals();
-      fetchBalance();
-    }
-  }, [user]);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Ocorreu um erro ao carregar seus dados. Por favor, tente novamente.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [user, toast]);
 
   const handleViewMimo = (id: string) => {
     const mimo = transactions.find(m => m.id === id);
@@ -138,7 +142,7 @@ export const useDashboard = () => {
   };
 
   // Calculate real stats based on actual data
-  const totalAmount = transactions.reduce((acc, mimo) => acc + (mimo.creator_amount || 0), 0);
+  const totalAmount = transactions.reduce((acc, mimo) => acc + (mimo.creator_amount || mimo.amount || 0), 0);
   const pendingRewards = transactions.filter(mimo => !mimo.reward_delivered).length;
   const uniqueFans = new Set(transactions.map(tx => tx.fan_id || tx.id)).size;
 
@@ -161,6 +165,7 @@ export const useDashboard = () => {
     totalAmount,
     pendingRewards,
     uniqueFans,
+    isLoading,
     
     // Setters
     setDetailDialogOpen,

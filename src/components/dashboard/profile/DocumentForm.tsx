@@ -7,12 +7,14 @@ interface DocumentFormProps {
   document: string;
   onDocumentChange: (value: string) => void;
   isUpdating: boolean;
+  isDocumentSet?: boolean; // New prop to determine if document is already set
 }
 
 const DocumentForm: React.FC<DocumentFormProps> = ({
   document,
   onDocumentChange,
-  isUpdating
+  isUpdating,
+  isDocumentSet = false  // Default to false if not provided
 }) => {
   // Function to format CPF/CNPJ as user types
   const formatDocument = (value: string) => {
@@ -48,10 +50,13 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
         id="profile-document"
         value={document}
         onChange={handleDocumentChange}
-        disabled={isUpdating}
+        disabled={isUpdating || isDocumentSet}
+        className={isDocumentSet ? "bg-gray-100 cursor-not-allowed" : ""}
       />
       <p className="text-xs text-muted-foreground">
-        O CPF/CNPJ será registrado como sua chave PIX para recebimentos
+        {isDocumentSet 
+          ? "O CPF/CNPJ não pode ser alterado após o cadastro inicial" 
+          : "O CPF/CNPJ será registrado como sua chave PIX para recebimentos"}
       </p>
     </div>
   );
