@@ -50,8 +50,8 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col">
       <NavBar />
       
-      <main className="flex-grow py-8 bg-gradient-to-b from-background to-accent/10">
-        <div className="mimo-container">
+      <main className="flex-grow py-4 sm:py-8 bg-gradient-to-b from-background to-accent/10">
+        <div className="mimo-container px-3 sm:px-4 max-w-full overflow-x-hidden">
           <DashboardHeader onOpenProfileDialog={() => setProfileDialogOpen(true)} />
           
           <StatCards 

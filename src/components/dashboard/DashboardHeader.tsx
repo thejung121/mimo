@@ -13,28 +13,38 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenProfileDialog }
   const { user } = useAuth();
   
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Painel da Criadora</h1>
-        <p className="text-foreground/70">Olá, {user?.name}! Gerencie seus mimos, saldos e pagamentos</p>
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">Painel da Criadora</h1>
+        <p className="text-foreground/70 text-sm md:text-base">Olá, {user?.name}! Gerencie seus mimos, saldos e pagamentos</p>
       </div>
       
-      <div className="flex gap-4 mt-4 md:mt-0">
+      <div className="flex flex-wrap gap-2 md:gap-4 w-full md:w-auto">
         <Button 
           variant="outline" 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-xs md:text-sm flex-1 md:flex-initial justify-center"
           onClick={onOpenProfileDialog}
+          size="sm"
         >
           <User className="h-4 w-4" />
-          <span className="hidden sm:inline">Meu Perfil</span>
+          <span>Meu Perfil</span>
         </Button>
-        <Button variant="outline" className="flex items-center gap-2" asChild>
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2 text-xs md:text-sm flex-1 md:flex-initial justify-center" 
+          asChild
+          size="sm"
+        >
           <Link to={`/criador/${user?.username || ''}`} target="_blank">
             <Eye className="h-4 w-4" />
-            <span className="hidden sm:inline">Ver Minha Página</span>
+            <span>Ver Página</span>
           </Link>
         </Button>
-        <Button className="mimo-button" asChild>
+        <Button 
+          className="mimo-button text-xs md:text-sm flex-1 md:flex-initial justify-center" 
+          asChild
+          size="sm"
+        >
           <Link to="/editar-pagina">
             <Settings className="h-4 w-4 mr-2" />
             <span>Editar Página</span>

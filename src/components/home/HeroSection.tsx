@@ -26,9 +26,9 @@ const HeroSection = ({ heroRef }: HeroSectionProps) => {
           </Badge>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Envie <span className="text-mimo-primary">mimos</span>, receba{" "}
+            Monetize seu conteúdo, {" "}
             {!isMobile && <br />}
-            recompensas exclusivas
+            conquiste independência financeira
           </h1>
           
           <p className="text-lg md:text-xl text-gray-600 mb-8 md:mb-10 max-w-2xl mx-auto px-4 sm:px-0">
@@ -44,7 +44,7 @@ const HeroSection = ({ heroRef }: HeroSectionProps) => {
               </Link>
             </Button>
             <Button variant="outline" className="w-full sm:w-auto border-mimo-primary text-mimo-primary hover:bg-mimo-primary/5 hover:text-mimo-primary text-lg px-6 py-5 h-auto rounded-full shadow-sm">
-              Conheça os criadores
+              <Link to="/explorar">Conheça os criadores</Link>
             </Button>
           </div>
           

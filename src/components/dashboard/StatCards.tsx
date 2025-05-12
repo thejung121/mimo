@@ -20,27 +20,27 @@ const StatCards: React.FC<StatCardsProps> = ({
   onOpenWithdrawalDialog 
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
       <Card className="bg-gradient-to-br from-card to-accent/10 border-mimo-primary/20 shadow-lg animate-fade-in">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-muted-foreground text-sm font-normal">Total arrecadado</CardTitle>
+        <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-4">
+          <CardTitle className="text-muted-foreground text-xs sm:text-sm font-normal">Total arrecadado</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold">R${totalAmount}</span>
-            <DollarSign className="h-5 w-5 text-mimo-primary" />
+            <span className="text-base sm:text-2xl font-bold">R${totalAmount}</span>
+            <DollarSign className="h-4 sm:h-5 w-4 sm:w-5 text-mimo-primary" />
           </div>
         </CardContent>
       </Card>
       
       <Card className="bg-gradient-to-br from-card to-accent/10 border-mimo-primary/20 shadow-lg animate-fade-in" style={{animationDelay: "0.1s"}}>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-muted-foreground text-sm font-normal">Saldo disponível</CardTitle>
+        <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-4">
+          <CardTitle className="text-muted-foreground text-xs sm:text-sm font-normal">Saldo disponível</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col">
+        <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0 flex flex-col">
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold">R${availableBalance}</span>
-            <Wallet className="h-5 w-5 text-mimo-primary" />
+            <span className="text-base sm:text-2xl font-bold">R${availableBalance}</span>
+            <Wallet className="h-4 sm:h-5 w-4 sm:w-5 text-mimo-primary" />
           </div>
           <Button 
             variant="link" 
@@ -53,25 +53,25 @@ const StatCards: React.FC<StatCardsProps> = ({
       </Card>
       
       <Card className="bg-gradient-to-br from-card to-accent/10 border-mimo-primary/20 shadow-lg animate-fade-in" style={{animationDelay: "0.2s"}}>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-muted-foreground text-sm font-normal">Fãs únicos</CardTitle>
+        <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-4">
+          <CardTitle className="text-muted-foreground text-xs sm:text-sm font-normal">Fãs únicos</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold">{uniqueFans}</span>
-            <Users className="h-5 w-5 text-mimo-primary" />
+            <span className="text-base sm:text-2xl font-bold">{uniqueFans}</span>
+            <Users className="h-4 sm:h-5 w-4 sm:w-5 text-mimo-primary" />
           </div>
         </CardContent>
       </Card>
       
       <Card className="bg-gradient-to-br from-card to-accent/10 border-mimo-primary/20 shadow-lg animate-fade-in" style={{animationDelay: "0.3s"}}>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-muted-foreground text-sm font-normal">Recompensas pendentes</CardTitle>
+        <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-4">
+          <CardTitle className="text-muted-foreground text-xs sm:text-sm font-normal">Recompensas pendentes</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold">{pendingRewards}</span>
-            <AlertCircle className="h-5 w-5 text-yellow-500" />
+            <span className="text-base sm:text-2xl font-bold">{pendingRewards}</span>
+            <AlertCircle className="h-4 sm:h-5 w-4 sm:w-5 text-yellow-500" />
           </div>
         </CardContent>
       </Card>

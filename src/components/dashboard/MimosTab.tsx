@@ -11,15 +11,15 @@ interface MimosTabProps {
 
 const MimosTab: React.FC<MimosTabProps> = ({ transactions, pendingRewards, onViewMimo }) => {
   return (
-    <div className="bg-card p-4 rounded-lg shadow-sm mb-4">
-      <Tabs defaultValue="all">
-        <TabsList>
-          <TabsTrigger value="all">Todos</TabsTrigger>
-          <TabsTrigger value="pending">Pendentes ({pendingRewards})</TabsTrigger>
-          <TabsTrigger value="delivered">Entregues ({transactions.length - pendingRewards})</TabsTrigger>
+    <div className="bg-card p-3 sm:p-4 rounded-lg shadow-sm mb-4 overflow-x-auto">
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="w-full">
+          <TabsTrigger value="all" className="text-xs sm:text-sm">Todos</TabsTrigger>
+          <TabsTrigger value="pending" className="text-xs sm:text-sm">Pendentes ({pendingRewards})</TabsTrigger>
+          <TabsTrigger value="delivered" className="text-xs sm:text-sm">Entregues ({transactions.length - pendingRewards})</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="all" className="space-y-4 mt-4">
+        <TabsContent value="all" className="space-y-4 mt-4 w-full">
           {transactions.length > 0 ? (
             transactions.map(tx => (
               <ReceivedMimo
@@ -35,12 +35,12 @@ const MimosTab: React.FC<MimosTabProps> = ({ transactions, pendingRewards, onVie
             ))
           ) : (
             <div className="text-center p-8">
-              <p className="text-muted-foreground">Você ainda não recebeu nenhum mimo.</p>
+              <p className="text-muted-foreground text-sm sm:text-base">Você ainda não recebeu nenhum mimo.</p>
             </div>
           )}
         </TabsContent>
         
-        <TabsContent value="pending" className="space-y-4 mt-4">
+        <TabsContent value="pending" className="space-y-4 mt-4 w-full">
           {transactions
             .filter(tx => !tx.reward_delivered)
             .map(tx => (
@@ -57,7 +57,7 @@ const MimosTab: React.FC<MimosTabProps> = ({ transactions, pendingRewards, onVie
             ))}
         </TabsContent>
         
-        <TabsContent value="delivered" className="space-y-4 mt-4">
+        <TabsContent value="delivered" className="space-y-4 mt-4 w-full">
           {transactions
             .filter(tx => tx.reward_delivered)
             .map(tx => (

@@ -28,11 +28,11 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const { user } = useAuth();
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-      <TabsList className="mb-4 grid grid-cols-3">
-        <TabsTrigger value="mimos">Mimos</TabsTrigger>
-        <TabsTrigger value="withdrawals">Saques</TabsTrigger>
-        <TabsTrigger value="page">Minha Página</TabsTrigger>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8 max-w-full overflow-hidden">
+      <TabsList className="mb-4 grid grid-cols-3 w-full">
+        <TabsTrigger value="mimos" className="text-sm sm:text-base">Mimos</TabsTrigger>
+        <TabsTrigger value="withdrawals" className="text-sm sm:text-base">Saques</TabsTrigger>
+        <TabsTrigger value="page" className="text-sm sm:text-base">Minha Página</TabsTrigger>
       </TabsList>
       
       <TabsContent value="mimos" className="space-y-4">
@@ -51,7 +51,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       </TabsContent>
       
       <TabsContent value="page">
-        {user?.username && <PagePreview username={user.username} />}
+        <div className="w-full overflow-x-hidden">
+          {user?.username && <PagePreview username={user.username} />}
+        </div>
       </TabsContent>
     </Tabs>
   );
