@@ -47,6 +47,7 @@ export const useMimoPackages = () => {
   // Save packages whenever they change
   useEffect(() => {
     if (mimoPackages.length > 0) {
+      console.log("Saving packages to storage:", mimoPackages);
       saveMimoPackages(mimoPackages);
     }
   }, [mimoPackages]);
@@ -104,6 +105,7 @@ export const useMimoPackages = () => {
 
   return {
     mimoPackages,
+    setMimoPackages, // Expose this to allow direct updates
     showNewPackageForm,
     newPackage,
     handleAddFeature,

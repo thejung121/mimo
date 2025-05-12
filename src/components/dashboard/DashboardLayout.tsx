@@ -5,7 +5,7 @@ import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Package, User, Settings, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Package, User, Settings, ExternalLink, Eye } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -53,6 +53,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     isActive={pathname.includes('/dashboard/perfil')}
                   >
                     Meu Perfil
+                  </NavItem>
+                  
+                  <NavItem 
+                    to="/dashboard/minha-pagina" 
+                    icon={<Eye className="h-4 w-4" />}
+                    isActive={pathname.includes('/dashboard/minha-pagina')}
+                  >
+                    Minha Página
                   </NavItem>
                   
                   <NavItem 

@@ -1,143 +1,106 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { Route, Routes } from "react-router-dom";
+import Index from "@/pages/Index";
+import AboutUs from "@/pages/AboutUs";
+import Contact from "@/pages/Contact";
+import CreatorPage from "@/pages/CreatorPage";
+import EditCreatorPage from "@/pages/EditCreatorPage";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import Dashboard from "@/pages/Dashboard";
+import NotFound from "@/pages/NotFound";
+import PaymentSuccess from "@/pages/PaymentSuccess";
+import PaymentCanceled from "@/pages/PaymentCanceled";
+import RewardPage from "@/pages/RewardPage";
+import Terms from "@/pages/Terms";
+import ExploreCreators from "@/pages/ExploreCreators";
+import AdminDashboard from "@/pages/AdminDashboard";
+import PackagesPage from "@/pages/PackagesPage";
+import PackageFormPage from "@/pages/PackageFormPage";
+import ProfilePage from "@/pages/ProfilePage";
+import SettingsPage from "@/pages/SettingsPage";
+import MyPageDashboard from "@/pages/MyPageDashboard";
+
+// Import for auth-protected routes
 import PrivateRoute from "@/components/PrivateRoute";
 
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import CreatorPage from "./pages/CreatorPage";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import RewardPage from "./pages/RewardPage";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import EditCreatorPage from "./pages/EditCreatorPage";
-import AboutUs from "./pages/AboutUs";
-import ExploreCreators from "./pages/ExploreCreators";
-import Contact from "./pages/Contact";
-import Terms from "./pages/Terms";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import PaymentCanceled from "./pages/PaymentCanceled";
-import PackagesPage from "./pages/PackagesPage";
-import PackageFormPage from "./pages/PackageFormPage";
-import ProfilePage from "./pages/ProfilePage";
-import SettingsPage from "./pages/SettingsPage";
-
-// Componente para fazer scroll para o topo da página quando a rota muda
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-};
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false
-    }
-  }
-});
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/criador/:username" element={<CreatorPage />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/pacotes" 
-              element={
-                <PrivateRoute>
-                  <PackagesPage />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/pacotes/novo" 
-              element={
-                <PrivateRoute>
-                  <PackageFormPage />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/pacotes/editar/:id" 
-              element={
-                <PrivateRoute>
-                  <PackageFormPage />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/perfil" 
-              element={
-                <PrivateRoute>
-                  <ProfilePage />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard/configuracoes" 
-              element={
-                <PrivateRoute>
-                  <SettingsPage />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <PrivateRoute>
-                  <AdminDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route 
-              path="/editar-pagina" 
-              element={
-                <PrivateRoute>
-                  <EditCreatorPage />
-                </PrivateRoute>
-              }
-            />
-            <Route path="/recompensa/:rewardId" element={<RewardPage />} />
-            <Route path="/pagamento-sucesso" element={<PaymentSuccess />} />
-            <Route path="/pagamento-cancelado" element={<PaymentCanceled />} />
-            <Route path="/cadastro" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/sobre" element={<AboutUs />} />
-            <Route path="/explorar" element={<ExploreCreators />} />
-            <Route path="/contato" element={<Contact />} />
-            <Route path="/termos" element={<Terms />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/sobre" element={<AboutUs />} />
+      <Route path="/contato" element={<Contact />} />
+      <Route path="/explorar" element={<ExploreCreators />} />
+      <Route path="/termos" element={<Terms />} />
+      
+      {/* Authentication */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/cadastro" element={<Register />} />
+      
+      {/* Creator Pages */}
+      <Route path="/criador/:username" element={<CreatorPage />} />
+      <Route path="/editar-pagina" element={
+        <PrivateRoute>
+          <EditCreatorPage />
+        </PrivateRoute>
+      } />
+      
+      {/* Protected Routes */}
+      <Route path="/dashboard" element={
+        <PrivateRoute>
+          <Dashboard />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/pacotes" element={
+        <PrivateRoute>
+          <PackagesPage />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/pacotes/:id" element={
+        <PrivateRoute>
+          <PackageFormPage />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/pacotes/novo" element={
+        <PrivateRoute>
+          <PackageFormPage />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/pacotes/editar/:id" element={
+        <PrivateRoute>
+          <PackageFormPage />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/perfil" element={
+        <PrivateRoute>
+          <ProfilePage />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/minha-pagina" element={
+        <PrivateRoute>
+          <MyPageDashboard />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/configuracoes" element={
+        <PrivateRoute>
+          <SettingsPage />
+        </PrivateRoute>
+      } />
+      <Route path="/admin" element={
+        <PrivateRoute adminOnly>
+          <AdminDashboard />
+        </PrivateRoute>
+      } />
+      
+      {/* Payment Pages */}
+      <Route path="/pagamento/sucesso" element={<PaymentSuccess />} />
+      <Route path="/pagamento/cancelado" element={<PaymentCanceled />} />
+      <Route path="/recompensa/:id" element={<RewardPage />} />
+      
+      {/* 404 Not Found */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
 
 export default App;

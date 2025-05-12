@@ -13,12 +13,16 @@ const NavBar: React.FC = () => {
         <MimoLogo />
         
         <nav className="flex items-center gap-6">
-          <Link to="/explorar" className="text-foreground/70 hover:text-foreground transition-colors">
-            Explorar
-          </Link>
-          <Link to="/sobre" className="text-foreground/70 hover:text-foreground transition-colors">
-            Sobre
-          </Link>
+          {!isAuthenticated && (
+            <>
+              <Link to="/explorar" className="text-foreground/70 hover:text-foreground transition-colors">
+                Explorar
+              </Link>
+              <Link to="/sobre" className="text-foreground/70 hover:text-foreground transition-colors">
+                Sobre
+              </Link>
+            </>
+          )}
           
           {isAuthenticated ? (
             <Link to="/dashboard" className="mimo-button-outline">

@@ -2,6 +2,8 @@
 // Re-export all creator services
 import { Creator, MimoPackage } from '@/types/creator';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
+import { saveCreatorData } from './profileService';
+import { saveMimoPackages } from './packageService';
 
 // Re-export from profile service
 export { 
@@ -30,10 +32,6 @@ export {
 export const saveAllData = async (creator: Creator, packages: MimoPackage[]): Promise<boolean> => {
   try {
     console.log('Saving all data to Supabase and local storage');
-    
-    // Import the functions to use them within this function
-    const { saveCreatorData } = require('./profileService');
-    const { saveMimoPackages } = require('./packageService');
     
     // Try to save to Supabase first
     let success = false;
