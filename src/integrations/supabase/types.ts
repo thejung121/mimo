@@ -11,9 +11,13 @@ export type Database = {
     Tables: {
       creators: {
         Row: {
+          about: string | null
+          avatar: string | null
           bio: string | null
+          cover: string | null
           cover_image: string | null
           created_at: string | null
+          description: string | null
           id: string
           name: string
           profile_image: string | null
@@ -23,9 +27,13 @@ export type Database = {
           username: string
         }
         Insert: {
+          about?: string | null
+          avatar?: string | null
           bio?: string | null
+          cover?: string | null
           cover_image?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
           name: string
           profile_image?: string | null
@@ -35,9 +43,13 @@ export type Database = {
           username: string
         }
         Update: {
+          about?: string | null
+          avatar?: string | null
           bio?: string | null
+          cover?: string | null
           cover_image?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
           name?: string
           profile_image?: string | null
@@ -105,13 +117,82 @@ export type Database = {
           },
         ]
       }
+      package_features: {
+        Row: {
+          created_at: string
+          feature: string
+          id: string
+          package_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature: string
+          id?: string
+          package_id: string
+        }
+        Update: {
+          created_at?: string
+          feature?: string
+          id?: string
+          package_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_features_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      package_media: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          is_preview: boolean
+          package_id: string
+          type: string
+          url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_preview?: boolean
+          package_id: string
+          type: string
+          url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_preview?: boolean
+          package_id?: string
+          type?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_media_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       packages: {
         Row: {
           active: boolean | null
           created_at: string | null
           creator_id: string
           description: string | null
+          highlighted: boolean
           id: string
+          is_hidden: boolean
           price: number
           title: string
           updated_at: string | null
@@ -121,7 +202,9 @@ export type Database = {
           created_at?: string | null
           creator_id: string
           description?: string | null
+          highlighted?: boolean
           id?: string
+          is_hidden?: boolean
           price: number
           title: string
           updated_at?: string | null
@@ -131,7 +214,9 @@ export type Database = {
           created_at?: string | null
           creator_id?: string
           description?: string | null
+          highlighted?: boolean
           id?: string
+          is_hidden?: boolean
           price?: number
           title?: string
           updated_at?: string | null

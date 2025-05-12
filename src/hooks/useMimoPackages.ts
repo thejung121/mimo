@@ -16,17 +16,20 @@ export const useMimoPackages = () => {
   const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>([]);
   const [showNewPackageForm, setShowNewPackageForm] = useState(false);
   const [newPackage, setNewPackage] = useState<MimoPackage>({...emptyPackage});
+  const [isLoading, setIsLoading] = useState(true);
   
   // Load saved packages
   useEffect(() => {
     const loadPackages = async () => {
       try {
+        setIsLoading(true);
         // First try to load from Supabase if user is authenticated
         if (user?.id) {
           const supabasePackages = await getCreatorPackages(user.id);
           if (supabasePackages && supabasePackages.length > 0) {
             console.log("Loaded packages from Supabase:", supabasePackages);
             setMimoPackages(supabasePackages);
+            setIsLoading(false);
             return;
           }
         }
@@ -38,6 +41,8 @@ export const useMimoPackages = () => {
       } catch (error) {
         console.error("Error loading packages:", error);
         setMimoPackages([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -46,11 +51,11 @@ export const useMimoPackages = () => {
   
   // Save packages whenever they change
   useEffect(() => {
-    if (mimoPackages.length > 0) {
+    if (!isLoading && mimoPackages.length > 0) {
       console.log("Saving packages to storage:", mimoPackages);
       saveMimoPackages(mimoPackages);
     }
-  }, [mimoPackages]);
+  }, [mimoPackages, isLoading]);
   
   // Memoize state updates to reduce re-renders
   const updateNewPackage = useCallback((changes: Partial<MimoPackage>) => {
@@ -93,7 +98,8 @@ export const useMimoPackages = () => {
     handlePackageChange, 
     handleSavePackage, 
     handleDeletePackage, 
-    handleEditPackage 
+    handleEditPackage,
+    isSaving
   } = usePackageCRUD(
     mimoPackages, 
     updateMimoPackages, 
@@ -105,9 +111,11 @@ export const useMimoPackages = () => {
 
   return {
     mimoPackages,
-    setMimoPackages, // Expose this to allow direct updates
+    setMimoPackages: updateMimoPackages,
     showNewPackageForm,
     newPackage,
+    isLoading,
+    isSaving,
     handleAddFeature,
     handleFeatureChange,
     handleRemoveFeature,

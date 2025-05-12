@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase';
+import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase/creatorService';
 import { Creator, MimoPackage } from '@/types/creator';
 import { getPackagesByUsername } from '@/services/creator/packageService';
 import { useAuth } from '@/contexts/AuthContext';
@@ -89,35 +89,20 @@ export const useCreatorPage = () => {
             try {
               packages = getPackagesByUsername(username);
               console.log("Packages from localStorage by username:", packages);
-              
-              // If still empty and this is the current user, try direct lookup
-              if ((!packages || packages.length === 0) && user?.id && user?.username === username) {
-                const packagesKey = `mimo:packages:${user.id}`;
-                const storedPackages = localStorage.getItem(packagesKey);
-                
-                if (storedPackages) {
-                  try {
-                    packages = JSON.parse(storedPackages);
-                    console.log("Packages from direct localStorage lookup:", packages);
-                  } catch (e) {
-                    console.error("Error parsing localStorage packages:", e);
-                  }
-                }
-              }
             } catch (e) {
-              console.error("Error fetching from localStorage:", e);
+              console.error("Error getting packages from localStorage:", e);
             }
           }
           
-          // Only show non-hidden packages
-          const visiblePackages = packages.filter(pkg => !pkg.isHidden);
-          console.log("Visible packages for display:", visiblePackages);
-          setMimoPackages(visiblePackages);
+          // Filter out hidden packages for display
+          packages = packages.filter(pkg => !pkg.isHidden);
+          setMimoPackages(packages);
         } else {
-          console.error('No creator data found for username:', username);
+          console.log("Creator not found");
+          setCreator(null);
         }
       } catch (error) {
-        console.error('Failed to load creator page:', error);
+        console.error("Error in fetchCreator:", error);
       } finally {
         setIsLoading(false);
       }
@@ -125,7 +110,7 @@ export const useCreatorPage = () => {
     
     fetchCreator();
     
-    // Set up scroll listener for sticky header
+    // Setup scroll listener for sticky header
     const handleScroll = () => {
       if (window.scrollY > 300) {
         setHeaderVisible(true);
@@ -141,17 +126,6 @@ export const useCreatorPage = () => {
     };
   }, [username, user]);
   
-  // Check if this is the user's own creator page
-  const isOwnPage = user?.username === username;
-  
-  const scrollToMimoSection = () => {
-    if (!mimoSectionRef.current) {
-      mimoSectionRef.current = document.getElementById('mimo-section');
-    }
-    
-    mimoSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-  
   const handleSelectPackage = (pkg: MimoPackage) => {
     setSelectedPackage(pkg);
     setCustomAmount(null);
@@ -159,19 +133,26 @@ export const useCreatorPage = () => {
   };
   
   const handleCustomAmount = (amount: number) => {
-    // Create a custom package with the specified amount
-    const customPackage: MimoPackage = {
-      id: 9999, // Special ID for custom packages
+    setCustomAmount(amount);
+    setSelectedPackage({
+      id: 0,
       title: "Valor personalizado",
-      price: amount, // Using number directly
-      features: ["Mimo com valor personalizado"],
+      price: amount,
+      features: ["Valor personalizado definido por você"],
       highlighted: false,
       media: []
-    };
-    
-    // Process the package selection with this custom package
-    handleSelectPackage(customPackage);
+    });
+    setPurchaseFlowOpen(true);
   };
+  
+  const scrollToMimoSection = () => {
+    const mimoSection = document.getElementById('mimo-section');
+    if (mimoSection) {
+      mimoSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
+  const isOwnPage = user?.username === username;
   
   return {
     creator,
@@ -180,7 +161,6 @@ export const useCreatorPage = () => {
     headerVisible,
     isOwnPage,
     selectedPackage,
-    customAmount,
     purchaseFlowOpen,
     suggestedPrices,
     handleSelectPackage,
