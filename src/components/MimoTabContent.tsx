@@ -29,7 +29,7 @@ const MimoTabContent = ({ mimoPackages, onSelectPackage, onCustomAmount }: MimoT
             price={pkg.price}
             features={pkg.features || []}
             highlighed={index === highlightedIndex}
-            previewImageUrl={pkg.image_url}
+            previewImageUrl={pkg.media && pkg.media.length > 0 ? pkg.media[0].url : undefined}
             onClick={() => onSelectPackage(pkg)}
           />
         ))}

@@ -83,7 +83,8 @@ export const useCreatorPage = () => {
         price: amount,
         creator_id: creator.id || '',
         features: ['Valor personalizado'],
-        active: true
+        highlighted: false,
+        media: []
       };
       
       setSelectedPackage(customPackage);
