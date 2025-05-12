@@ -132,7 +132,7 @@ const MyPageFullDashboard = () => {
         
         // Force hard reload of the page to ensure we load fresh data from storage/API
         setTimeout(() => {
-          window.location.href = window.location.href;
+          window.location.reload();
         }, 1500);
       } else {
         toast({

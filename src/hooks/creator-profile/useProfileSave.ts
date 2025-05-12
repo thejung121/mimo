@@ -39,7 +39,7 @@ export const useProfileSave = ({
       // Upload cover image if available
       if (coverFile) {
         try {
-          console.log('Uploading cover file:', coverFile);
+          console.log('Uploading cover file:', coverFile.name);
           const coverUrl = await uploadFile(coverFile, 'user_uploads', 'covers');
           if (coverUrl) {
             console.log('Cover uploaded successfully:', coverUrl);
@@ -60,7 +60,7 @@ export const useProfileSave = ({
       // Upload avatar image if available
       if (avatarFile) {
         try {
-          console.log('Uploading avatar file:', avatarFile);
+          console.log('Uploading avatar file:', avatarFile.name);
           const avatarUrl = await uploadFile(avatarFile, 'user_uploads', 'avatars');
           if (avatarUrl) {
             console.log('Avatar uploaded successfully:', avatarUrl);
@@ -108,18 +108,20 @@ export const useProfileSave = ({
       // Always update local state with the updated URLs (if any)
       setCreator(updatedCreator);
       
-      // Always save to localStorage to ensure data is available locally
-      // Force refresh to ensure clean data
+      // Save to localStorage with force refresh flag 
       saveCreatorData(updatedCreator, true);
       console.log('Creator data saved to localStorage with force refresh:', updatedCreator);
       
       // Show success toast
-      if (uploadSuccessful || supabaseSuccess) {
-        toast({
-          title: "Perfil atualizado com sucesso!",
-          description: "Suas informações foram atualizadas e salvas."
-        });
-      }
+      toast({
+        title: "Perfil atualizado com sucesso!",
+        description: "Suas informações foram atualizadas e salvas."
+      });
+      
+      // Force page reload after successful save to ensure fresh data is loaded
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
       
       return true;
     } catch (error) {

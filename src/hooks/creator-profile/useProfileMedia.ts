@@ -123,7 +123,7 @@ export const useProfileMedia = () => {
     }
   };
 
-  // Initialize preview images when creator data is loaded (memoized)
+  // Initialize preview images when creator data is loaded
   const initializeImagePreviews = useCallback((cover: string, avatar: string) => {
     if (cover && cover !== '/placeholder.svg') {
       setCoverPreview(cover);
