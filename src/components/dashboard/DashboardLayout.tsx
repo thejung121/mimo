@@ -77,24 +77,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   </div>
                 </div>
               </nav>
-              
-              {/* Dashboard Quick Actions */}
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-3">
-                <Link to="/dashboard/minha-pagina" className="block">
-                  <div className="bg-background p-4 rounded-lg border hover:border-primary/50 hover:bg-accent/5 transition-colors">
-                    <Eye className="h-8 w-8 text-primary mb-2" />
-                    <h3 className="font-medium">Gerenciar Página</h3>
-                    <p className="text-sm text-muted-foreground">Atualize seu perfil e pacotes</p>
-                  </div>
-                </Link>
-                <Link to="/dashboard/pacotes/novo" className="block">
-                  <div className="bg-background p-4 rounded-lg border hover:border-primary/50 hover:bg-accent/5 transition-colors">
-                    <Package className="h-8 w-8 text-primary mb-2" />
-                    <h3 className="font-medium">Novo Pacote</h3>
-                    <p className="text-sm text-muted-foreground">Crie um novo pacote de mimo</p>
-                  </div>
-                </Link>
-              </div>
             </div>
             
             {/* Main Content */}
