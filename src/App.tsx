@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CreatorPage from "./pages/CreatorPage";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import RewardPage from "./pages/RewardPage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -61,6 +62,14 @@ const App = () => (
                   <Dashboard />
                 </PrivateRoute>
               } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
             />
             <Route 
               path="/editar-pagina" 

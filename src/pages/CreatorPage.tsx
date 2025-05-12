@@ -23,6 +23,7 @@ const CreatorPage = () => {
     selectedPackage,
     purchaseFlowOpen,
     handleSelectPackage,
+    handleCustomAmount,
     scrollToMimoSection,
     setPurchaseFlowOpen
   } = useCreatorPage();
@@ -67,7 +68,7 @@ const CreatorPage = () => {
                 Envie um Mimo
               </h2>
               <p className="text-gray-600 text-sm">
-                Escolha um dos pacotes abaixo para apoiar
+                Escolha um dos pacotes abaixo ou digite um valor personalizado
               </p>
             </div>
             
@@ -84,6 +85,7 @@ const CreatorPage = () => {
                 <MimoTabContent 
                   mimoPackages={mimoPackages} 
                   onSelectPackage={handleSelectPackage}
+                  onCustomAmount={handleCustomAmount}
                 />
               </TabsContent>
             </Tabs>

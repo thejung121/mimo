@@ -34,9 +34,17 @@ serve(async (req) => {
     // Parse request body
     const { packageId, packageTitle, packagePrice, creatorId, creatorName, userAlias, email, whatsapp } = await req.json() as CheckoutRequest;
 
-    if (!packageId || !packageTitle || packagePrice === undefined || !creatorId || !userAlias) {
+    if (!packageTitle || packagePrice === undefined || !creatorId || !userAlias) {
       return new Response(
         JSON.stringify({ error: "Missing required parameters" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    // Validate minimum price (R$5)
+    if (packagePrice < 5) {
+      return new Response(
+        JSON.stringify({ error: "Minimum price is R$5" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
@@ -56,7 +64,7 @@ serve(async (req) => {
     const { data: transaction, error: transactionError } = await supabaseAdmin
       .from("transactions")
       .insert({
-        package_id: packageId,
+        package_id: packageId === 'custom' ? null : packageId, // Handle custom amounts
         creator_id: creatorId,
         buyer_alias: userAlias,
         buyer_email: email,
@@ -64,6 +72,7 @@ serve(async (req) => {
         amount: packagePrice,
         platform_fee: platformFee,
         creator_amount: creatorAmount,
+        package_name: packageId === 'custom' ? 'Mimo Personalizado' : packageTitle,
         status: "pending"
       })
       .select()
@@ -81,7 +90,7 @@ serve(async (req) => {
           price_data: {
             currency: "brl",
             product_data: {
-              name: `Mimo: ${packageTitle}`,
+              name: packageId === 'custom' ? `Mimo Personalizado: R$${packagePrice}` : `Mimo: ${packageTitle}`,
               description: `Para: ${creatorName}`,
             },
             unit_amount: packagePrice * 100, // Stripe uses cents
@@ -96,6 +105,7 @@ serve(async (req) => {
         transaction_id: transaction.id,
         creator_id: creatorId,
         package_id: packageId,
+        is_custom: packageId === 'custom' ? 'true' : 'false',
       },
     });
 
