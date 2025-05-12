@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { 
   Dialog, 
   DialogContent, 
@@ -8,12 +7,15 @@ import {
   DialogTitle, 
   DialogFooter 
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+// Import the smaller component parts
+import PersonalInfoForm from './profile/PersonalInfoForm';
+import DocumentForm from './profile/DocumentForm';
+import PasswordForm from './profile/PasswordForm';
+import DialogFooterActions from './profile/DialogFooterActions';
 
 interface ProfileDialogProps {
   open: boolean;
@@ -49,28 +51,6 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
   const { logout, user, updateUserProfile } = useAuth();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
-
-  // Function to format CPF/CNPJ as user types
-  const formatDocument = (value: string) => {
-    // Remove non-digit characters
-    const digits = value.replace(/\D/g, '');
-    
-    // Format based on length (CPF or CNPJ)
-    if (digits.length <= 11) {
-      // CPF format: 123.456.789-01
-      return digits
-        .replace(/(\d{3})(?=\d)/, '$1.')
-        .replace(/(\d{3})(?=\d)/, '$1.')
-        .replace(/(\d{3})(?=\d)/, '$1-');
-    } else {
-      // CNPJ format: 12.345.678/0001-90
-      return digits
-        .replace(/(\d{2})(?=\d)/, '$1.')
-        .replace(/(\d{3})(?=\d)/, '$1.')
-        .replace(/(\d{3})(?=\d)/, '$1/')
-        .replace(/(\d{4})(?=\d)/, '$1-');
-    }
-  };
 
   const handleUpdateProfile = async () => {
     setIsUpdating(true);
@@ -144,6 +124,31 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
     }
   };
 
+  // Handlers for updating user profile fields
+  const handleNameChange = (value: string) => {
+    setUserProfile(prev => ({ ...prev, name: value }));
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setUserProfile(prev => ({ ...prev, phone: value }));
+  };
+
+  const handleDocumentChange = (value: string) => {
+    setUserProfile(prev => ({ ...prev, document: value }));
+  };
+
+  const handleCurrentPasswordChange = (value: string) => {
+    setUserProfile(prev => ({ ...prev, currentPassword: value }));
+  };
+
+  const handleNewPasswordChange = (value: string) => {
+    setUserProfile(prev => ({ ...prev, newPassword: value }));
+  };
+
+  const handleConfirmPasswordChange = (value: string) => {
+    setUserProfile(prev => ({ ...prev, confirmPassword: value }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -152,109 +157,41 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
         </DialogHeader>
         
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="profile-name">Nome completo</Label>
-            <Input 
-              id="profile-name"
-              value={userProfile.name}
-              onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
-              disabled={isUpdating}
-            />
-          </div>
+          {/* Personal Information Section */}
+          <PersonalInfoForm 
+            name={userProfile.name}
+            email={userProfile.email}
+            phone={userProfile.phone}
+            onNameChange={handleNameChange}
+            onPhoneChange={handlePhoneChange}
+            isUpdating={isUpdating}
+          />
           
-          <div className="space-y-2">
-            <Label htmlFor="profile-email">Email</Label>
-            <Input 
-              id="profile-email"
-              type="email"
-              value={userProfile.email}
-              onChange={(e) => setUserProfile({...userProfile, email: e.target.value})}
-              disabled={true} // Email can't be changed
-            />
-          </div>
+          {/* Document Section */}
+          <DocumentForm 
+            document={userProfile.document}
+            onDocumentChange={handleDocumentChange}
+            isUpdating={isUpdating}
+          />
           
-          <div className="space-y-2">
-            <Label htmlFor="profile-phone">WhatsApp</Label>
-            <Input 
-              id="profile-phone"
-              value={userProfile.phone}
-              onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
-              disabled={isUpdating}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="profile-document">CPF/CNPJ (Para recebimento PIX)</Label>
-            <Input 
-              id="profile-document"
-              value={userProfile.document}
-              onChange={(e) => setUserProfile({...userProfile, document: formatDocument(e.target.value)})}
-              disabled={isUpdating}
-            />
-            <p className="text-xs text-muted-foreground">
-              O CPF/CNPJ será registrado como sua chave PIX para recebimentos
-            </p>
-          </div>
-          
-          <div className="border-t pt-4 mt-4">
-            <h4 className="text-sm font-medium mb-3">Alterar senha</h4>
-            
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <Label htmlFor="current-password">Senha atual</Label>
-                <Input 
-                  id="current-password"
-                  type="password"
-                  value={userProfile.currentPassword}
-                  onChange={(e) => setUserProfile({...userProfile, currentPassword: e.target.value})}
-                  disabled={isUpdating}
-                />
-              </div>
-              
-              <div className="space-y-1">
-                <Label htmlFor="new-password">Nova senha</Label>
-                <Input 
-                  id="new-password"
-                  type="password"
-                  value={userProfile.newPassword}
-                  onChange={(e) => setUserProfile({...userProfile, newPassword: e.target.value})}
-                  disabled={isUpdating}
-                />
-              </div>
-              
-              <div className="space-y-1">
-                <Label htmlFor="confirm-password">Confirmar nova senha</Label>
-                <Input 
-                  id="confirm-password"
-                  type="password"
-                  value={userProfile.confirmPassword}
-                  onChange={(e) => setUserProfile({...userProfile, confirmPassword: e.target.value})}
-                  disabled={isUpdating}
-                />
-              </div>
-            </div>
-          </div>
+          {/* Password Section */}
+          <PasswordForm 
+            currentPassword={userProfile.currentPassword}
+            newPassword={userProfile.newPassword}
+            confirmPassword={userProfile.confirmPassword}
+            onCurrentPasswordChange={handleCurrentPasswordChange}
+            onNewPasswordChange={handleNewPasswordChange}
+            onConfirmPasswordChange={handleConfirmPasswordChange}
+            isUpdating={isUpdating}
+          />
         </div>
         
         <DialogFooter>
-          <div className="w-full flex flex-col sm:flex-row gap-2">
-            <Button 
-              variant="outline" 
-              className="sm:flex-1 flex items-center justify-center gap-2 text-rose-500 hover:text-rose-600"
-              onClick={logout}
-              disabled={isUpdating}
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Sair</span>
-            </Button>
-            <Button 
-              onClick={handleUpdateProfile} 
-              className="sm:flex-1 mimo-button"
-              disabled={isUpdating}
-            >
-              {isUpdating ? "Salvando..." : "Salvar alterações"}
-            </Button>
-          </div>
+          <DialogFooterActions 
+            onLogout={logout}
+            onSave={handleUpdateProfile}
+            isUpdating={isUpdating}
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>
