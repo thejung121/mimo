@@ -3,6 +3,7 @@ import { Creator } from '@/types/creator';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
 import { useToast } from '@/components/ui/use-toast';
 import { saveCreatorData } from '@/services/creator/profileService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UseProfileSaveProps {
   creator: Creator;
@@ -20,6 +21,7 @@ export const useProfileSave = ({
   avatarFile
 }: UseProfileSaveProps) => {
   const { toast } = useToast();
+  const { user, updateUserProfile } = useAuth();
 
   // Handler to save the creator's profile
   const handleSaveProfile = async () => {
@@ -44,16 +46,31 @@ export const useProfileSave = ({
       // Update local state with the updated URLs
       setCreator(updatedCreator);
       
+      // Also update the username in auth context if changed
+      if (user && updateUserProfile && updatedCreator.username) {
+        try {
+          await updateUserProfile({ 
+            name: updatedCreator.name, 
+            username: updatedCreator.username,
+            document: user.document
+          });
+          console.log('Updated username in auth context');
+        } catch (error) {
+          console.error('Error updating username in auth context:', error);
+        }
+      }
+      
       // Save to localStorage first (this will always work)
       saveCreatorData(updatedCreator);
+      console.log('Creator data saved to localStorage:', updatedCreator);
       
       // Try to save to Supabase
-      console.log('Saving creator profile:', updatedCreator);
       let success = true;
       
       try {
         if (updatedCreator.id) {
           success = await updateCreatorProfile(updatedCreator);
+          console.log('Creator profile saved to Supabase:', success);
         }
       } catch (error) {
         console.error("Error saving to Supabase:", error);
@@ -65,6 +82,7 @@ export const useProfileSave = ({
         title: "Perfil salvo com sucesso!",
         description: "As alterações no seu perfil foram salvas.",
       });
+      
       return true;
     } catch (error) {
       console.error("Error saving profile:", error);

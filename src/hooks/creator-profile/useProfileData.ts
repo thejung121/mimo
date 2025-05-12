@@ -4,6 +4,7 @@ import { Creator } from '@/types/creator';
 import { useToast } from '@/components/ui/use-toast';
 import { getCurrentCreator } from '@/services/supabase/creatorService';
 import { useAuth } from '@/contexts/AuthContext';
+import { getCreatorData } from '@/services/creator/profileService';
 
 export const useProfileData = () => {
   const { toast } = useToast();
@@ -34,14 +35,23 @@ export const useProfileData = () => {
       setIsLoading(true);
       
       try {
-        const creatorData = await getCurrentCreator();
+        // First try to get from localStorage for instant loading
+        const localCreator = getCreatorData();
         
-        if (creatorData) {
-          console.log('Loaded creator data:', creatorData);
+        if (localCreator) {
+          console.log('Loaded creator data from localStorage:', localCreator);
+          setCreator(localCreator);
+        }
+        
+        // Then try to get from Supabase for the latest data
+        const supabaseCreator = await getCurrentCreator();
+        
+        if (supabaseCreator) {
+          console.log('Loaded creator data from Supabase:', supabaseCreator);
           
           // Ensure we have all required social links
           const requiredTypes = ['instagram', 'twitter', 'twitch', 'onlyfans', 'privacy'];
-          const socialLinks = [...(creatorData.socialLinks || [])];
+          const socialLinks = [...(supabaseCreator.socialLinks || [])];
           
           // Add missing social link types
           requiredTypes.forEach(type => {
@@ -54,24 +64,20 @@ export const useProfileData = () => {
           });
           
           setCreator({
-            ...creatorData,
+            ...supabaseCreator,
             socialLinks
-          });
-        } else {
-          console.error('No creator data found');
-          toast({
-            title: "Erro ao carregar dados",
-            description: "Não foi possível carregar os dados do seu perfil",
-            variant: "destructive"
           });
         }
       } catch (error) {
         console.error('Error loading creator data:', error);
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Ocorreu um erro ao carregar seu perfil. Tente novamente.",
-          variant: "destructive"
-        });
+        // Don't show error toast if we already have data from localStorage
+        if (!creator.id) {
+          toast({
+            title: "Erro ao carregar dados",
+            description: "Ocorreu um erro ao carregar seu perfil. Tente novamente.",
+            variant: "destructive"
+          });
+        }
       } finally {
         setIsLoading(false);
       }

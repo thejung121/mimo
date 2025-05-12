@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useCreatorProfile } from '@/hooks/useCreatorProfile';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Instagram, Twitter, Globe, Lock } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ProfilePage = () => {
   const {
@@ -22,6 +23,19 @@ const ProfilePage = () => {
   } = useCreatorProfile();
   
   const { toast } = useToast();
+  const { user, updateUserProfile } = useAuth();
+
+  // Sync creator username with auth user username
+  useEffect(() => {
+    if (user?.username && !creator.username) {
+      handleCreatorChange({
+        target: {
+          name: 'username',
+          value: user.username
+        }
+      } as React.ChangeEvent<HTMLInputElement>);
+    }
+  }, [user, creator, handleCreatorChange]);
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Replace spaces with dashes for URL compatibility
@@ -41,11 +55,27 @@ const ProfilePage = () => {
   };
 
   const handleSubmit = async () => {
-    await handleSaveProfile();
-    toast({
-      title: "Perfil atualizado",
-      description: "Seu perfil foi atualizado com sucesso."
-    });
+    // First update the user profile in auth context
+    if (updateUserProfile && creator.username) {
+      try {
+        await updateUserProfile({
+          name: creator.name,
+          username: creator.username
+        });
+      } catch (error) {
+        console.error('Error updating auth profile:', error);
+      }
+    }
+    
+    // Then save the creator profile data
+    const success = await handleSaveProfile();
+    
+    if (success) {
+      toast({
+        title: "Perfil atualizado",
+        description: "Seu perfil foi atualizado com sucesso."
+      });
+    }
   };
 
   // Get social links by type

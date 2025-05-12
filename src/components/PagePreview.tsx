@@ -1,97 +1,116 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Creator } from '@/types/creator';
+import { getCreatorData } from '@/services/creator/profileService';
+import { getCurrentUser } from '@/services/supabase/authService';
+import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 
 interface PagePreviewProps {
   username: string;
 }
 
 const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastRefresh, setLastRefresh] = useState(new Date());
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [loadAttempts, setLoadAttempts] = useState(0);
-  
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setIsLoaded(false);
-    setTimeout(() => {
-      setRefreshing(false);
-      setLastRefresh(new Date());
-      setLoadAttempts(0);
-    }, 800);
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [creator, setCreator] = useState<Creator | null>(null);
 
-  // Reset loaded state when username changes
   useEffect(() => {
-    setIsLoaded(false);
-    setLoadAttempts(0);
+    const loadCreatorForPreview = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Try to get user data from localStorage
+        const userData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (!userData) {
+          setError("No user data found");
+          return;
+        }
+        
+        const user = JSON.parse(userData);
+        
+        // Check if the loaded user has the requested username
+        if (user.username !== username) {
+          setError(`Username mismatch: ${user.username} vs ${username}`);
+          return;
+        }
+        
+        // Get creator data from localStorage
+        const creatorData = getCreatorData();
+        if (creatorData) {
+          console.log('PagePreview loaded creator data:', creatorData);
+          setCreator(creatorData);
+        } else {
+          setError("No creator data found");
+        }
+      } catch (error) {
+        console.error('Error loading preview:', error);
+        setError("Failed to load preview");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadCreatorForPreview();
   }, [username]);
-  
-  // Handle iframe load error
-  const handleIframeError = () => {
-    if (loadAttempts < 3) {
-      // Try again after a short delay
-      setTimeout(() => {
-        setLoadAttempts(prev => prev + 1);
-        setLastRefresh(new Date());
-      }, 1000);
-    }
-  };
-  
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-[300px] flex items-center justify-center">
+        <p>Carregando prévia...</p>
+      </div>
+    );
+  }
+
+  if (error || !creator) {
+    return (
+      <div className="w-full h-[300px] flex items-center justify-center">
+        <p className="text-red-500">Erro ao carregar prévia: {error || 'Dados do criador não encontrados'}</p>
+      </div>
+    );
+  }
+
   return (
-    <Card className="shadow-lg overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-mimo-primary/10 to-transparent">
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Preview da sua página</CardTitle>
-            <CardDescription>Veja como sua página vai aparecer para seus fãs.</CardDescription>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            disabled={refreshing}
-            onClick={handleRefresh}
-            className="flex items-center gap-1"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            <span>Atualizar</span>
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="border rounded-lg overflow-hidden relative">
-          {!isLoaded && (
-            <div className="absolute inset-0 bg-background flex items-center justify-center z-10">
-              <div className="flex flex-col items-center gap-4">
-                <RefreshCw className="h-8 w-8 animate-spin text-mimo-primary" />
-                <p className="text-sm text-muted-foreground">Carregando preview...</p>
-                {loadAttempts > 1 && (
-                  <p className="text-xs text-muted-foreground">
-                    Tentativa {loadAttempts}/3
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-          <iframe 
-            src={`/criador/${username}?t=${lastRefresh.getTime()}`} 
-            className="w-full h-[600px]"
-            title="Preview da página"
-            loading="eager" 
-            sandbox="allow-scripts allow-same-origin"
-            onLoad={() => setIsLoaded(true)}
-            onError={handleIframeError}
-            style={{ opacity: isLoaded ? 1 : 0.3, transition: 'opacity 0.3s ease' }}
+    <div className="w-full h-[400px] overflow-auto border rounded-md">
+      <div className="relative h-[200px] bg-gradient-to-r from-primary-500 to-primary-700">
+        {creator.cover && creator.cover !== '/placeholder.svg' && (
+          <img 
+            src={creator.cover} 
+            alt="Capa"
+            className="w-full h-full object-cover"
           />
+        )}
+        <div className="absolute -bottom-10 left-4">
+          <div className="w-20 h-20 rounded-full border-4 border-white overflow-hidden bg-white">
+            <img 
+              src={creator.avatar || '/placeholder.svg'} 
+              alt="Avatar" 
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
-        <div className="p-3 text-xs text-muted-foreground bg-gray-50 border-t">
-          <p>Última atualização: {lastRefresh.toLocaleTimeString()}</p>
+      </div>
+      
+      <div className="pt-12 px-4 pb-4">
+        <h2 className="text-xl font-bold">{creator.name}</h2>
+        <p className="text-sm text-muted-foreground mb-4">@{creator.username}</p>
+        
+        <div className="prose prose-sm max-w-none">
+          <p>{creator.description || creator.about}</p>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="mt-4 flex gap-2">
+          {creator.socialLinks && creator.socialLinks.filter(link => link.url).length > 0 ? (
+            creator.socialLinks.filter(link => link.url).map((link, i) => (
+              <div key={i} className="p-1 bg-muted rounded-md">
+                {link.type}
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">Sem redes sociais configuradas</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

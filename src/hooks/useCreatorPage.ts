@@ -28,8 +28,27 @@ export const useCreatorPage = () => {
         setIsLoading(true);
         console.log("Fetching creator with username:", username);
         
-        // Get creator profile
-        const creatorData = await getCreatorByUsername(username);
+        // Get creator profile from Supabase
+        let creatorData = await getCreatorByUsername(username);
+        
+        // If not found in Supabase, try to get from localStorage (useful for development)
+        if (!creatorData) {
+          console.log("Creator not found in Supabase, trying localStorage...");
+          
+          // Check if this is the current user's profile
+          if (user?.username === username) {
+            // If so, we can get the data from localStorage using the "mimo:creator:" prefix
+            const storedCreator = localStorage.getItem(`mimo:creator:${user.id}`);
+            if (storedCreator) {
+              try {
+                creatorData = JSON.parse(storedCreator);
+                console.log("Found creator in localStorage:", creatorData);
+              } catch (e) {
+                console.error("Error parsing localStorage creator data:", e);
+              }
+            }
+          }
+        }
         
         if (creatorData) {
           console.log("Creator found:", creatorData);
@@ -57,7 +76,10 @@ export const useCreatorPage = () => {
             }
           }
           
-          setMimoPackages(packages);
+          // Only show non-hidden packages
+          const visiblePackages = packages.filter(pkg => !pkg.isHidden);
+          console.log("Visible packages:", visiblePackages);
+          setMimoPackages(visiblePackages);
         } else {
           console.error('No creator data found for username:', username);
         }
@@ -84,7 +106,7 @@ export const useCreatorPage = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [username]);
+  }, [username, user]);
   
   // Check if this is the user's own creator page
   const isOwnPage = user?.username === username;

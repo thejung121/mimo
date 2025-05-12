@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import CreatorNavBar from '@/components/CreatorNavBar';
 import CreatorFooter from '@/components/CreatorFooter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,6 +28,20 @@ const CreatorPage = () => {
     scrollToMimoSection,
     setPurchaseFlowOpen
   } = useCreatorPage();
+
+  // Add more debug logging to trace any issues
+  useEffect(() => {
+    if (creator) {
+      console.log('CreatorPage loaded with creator data:', {
+        name: creator.name,
+        username: creator.username,
+        avatar: creator.avatar,
+        cover: creator.cover,
+        description: creator.description,
+        socialLinks: creator.socialLinks
+      });
+    }
+  }, [creator]);
 
   // Show loading state
   if (isLoading) {

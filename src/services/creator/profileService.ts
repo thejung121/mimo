@@ -40,6 +40,7 @@ export const getCreatorData = (): Creator => {
   
   // If not logged in, return the initial creator data
   if (!user) {
+    console.log('No user found, returning initial creator data');
     return initialCreator;
   }
   
@@ -49,7 +50,17 @@ export const getCreatorData = (): Creator => {
   
   if (storedCreator) {
     try {
-      return JSON.parse(storedCreator);
+      const parsedCreator = JSON.parse(storedCreator);
+      console.log('Loaded creator data from localStorage:', parsedCreator);
+      
+      // Ensure the creator has the latest username from the user object
+      if (user.username && (!parsedCreator.username || parsedCreator.username !== user.username)) {
+        parsedCreator.username = user.username;
+        // Save the updated creator data
+        saveCreatorData(parsedCreator);
+      }
+      
+      return parsedCreator;
     } catch (e) {
       console.error("Failed to parse creator data", e);
       // If parsing fails, return a new creator for this user with minimal data
@@ -58,6 +69,7 @@ export const getCreatorData = (): Creator => {
   }
   
   // If no stored creator data, create a default profile with minimal data
+  console.log('No stored creator data, creating default creator');
   return createDefaultCreator(user);
 };
 
@@ -65,23 +77,26 @@ export const getCreatorData = (): Creator => {
 export const createDefaultCreator = (user: any): Creator => {
   const defaultCreator: Creator = {
     id: user.id,
-    name: user.name,
-    username: user.username,
-    coverTitle: `Página de ${user.name}`,
+    name: user.name || '',
+    username: user.username || '',
+    coverTitle: `Página de ${user.name || 'Criador'}`,
     coverSubtitle: "Envie-me um mimo e ajude meu trabalho!",
-    about: `Olá! Eu sou ${user.name} e esta é minha página de mimos. Aqui você pode me apoiar e receber conteúdo exclusivo.`,
+    about: `Olá! Eu sou ${user.name || 'Criador'} e esta é minha página de mimos. Aqui você pode me apoiar e receber conteúdo exclusivo.`,
     avatar: "/placeholder.svg", 
     cover: "/placeholder.svg",
     description: `Criador de conteúdo`,
     socialLinks: [
       { type: "instagram", url: "" },
       { type: "twitter", url: "" },
-      { type: "website", url: "" }
+      { type: "twitch", url: "" },
+      { type: "onlyfans", url: "" },
+      { type: "privacy", url: "" }
     ]
   };
   
   // Save this default creator to localStorage
   saveCreatorData(defaultCreator);
+  console.log('Created and saved default creator:', defaultCreator);
   
   return defaultCreator;
 };
@@ -96,6 +111,14 @@ export const saveCreatorData = (creator: Creator): void => {
     return;
   }
   
+  // Also update user data in localStorage with the new username if it changed
+  if (creator.username && user.username !== creator.username) {
+    user.username = creator.username;
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
+    console.log('Updated username in user data:', user.username);
+  }
+  
   const creatorKey = `mimo:creator:${user.id}`;
   localStorage.setItem(creatorKey, JSON.stringify(creator));
+  console.log('Saved creator data to localStorage:', creator);
 };
