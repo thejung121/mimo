@@ -7,6 +7,7 @@ export interface AuthUser {
   username: string;
   avatar?: string;
   document?: string; // Add document field for CPF/PIX
+  role?: string; // Add role field for admin check
 }
 
 // Auth Context Props Interface
