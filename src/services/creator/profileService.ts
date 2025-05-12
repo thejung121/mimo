@@ -102,7 +102,8 @@ export const createDefaultCreator = (user: any): Creator => {
 };
 
 // Save creator data with user ID association
-export const saveCreatorData = (creator: Creator): void => {
+// Added forceRefresh parameter to optionally clear the data first
+export const saveCreatorData = (creator: Creator, forceRefresh = false): void => {
   const user = getCurrentUser();
   
   if (!user) {
@@ -119,6 +120,14 @@ export const saveCreatorData = (creator: Creator): void => {
   }
   
   const creatorKey = `mimo:creator:${user.id}`;
+  
+  // If forceRefresh is true, first remove any existing data
+  if (forceRefresh) {
+    localStorage.removeItem(creatorKey);
+    console.log('Removed existing creator data for refresh');
+  }
+  
+  // Save the new data
   localStorage.setItem(creatorKey, JSON.stringify(creator));
   console.log('Saved creator data to localStorage:', creator);
 };

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import ProfileEditor from '@/components/profile/ProfileEditor';
-import PagePreview from '@/components/PagePreview';
 import { Loader2 } from 'lucide-react';
 
 const ProfilePage = () => {
@@ -96,52 +95,45 @@ const ProfilePage = () => {
 
   return (
     <DashboardLayout>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 bg-background rounded-lg border shadow-sm p-4 sm:p-6">
-          <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
-          
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="ml-2 text-muted-foreground">Carregando perfil...</p>
-            </div>
-          ) : (
-            <>
-              <ProfileEditor
-                creator={creator}
-                coverPreview={coverPreview}
-                avatarPreview={avatarPreview}
-                handleCreatorChange={handleCreatorChange}
-                handleSocialLinkChange={handleSocialLinkChange}
-                handleCoverChange={handleCoverChange}
-                handleAvatarChange={handleAvatarChange}
-              />
-              
-              <div className="flex justify-between items-center pt-4 mt-6 border-t">
-                <p className="text-sm text-muted-foreground">
-                  Atualize suas informações de perfil
-                </p>
-                <Button 
-                  onClick={handleSubmit} 
-                  className="mimo-button"
-                  disabled={isSaving}
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Salvando...
-                    </>
-                  ) : "Salvar Alterações"}
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
+      <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6">
+        <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
         
-        <div className="md:col-span-1 bg-background rounded-lg border shadow-sm p-4">
-          <h2 className="text-lg font-semibold mb-4">Prévia da página</h2>
-          <PagePreview username={creator.username || ''} />
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="ml-2 text-muted-foreground">Carregando perfil...</p>
+          </div>
+        ) : (
+          <>
+            <ProfileEditor
+              creator={creator}
+              coverPreview={coverPreview}
+              avatarPreview={avatarPreview}
+              handleCreatorChange={handleCreatorChange}
+              handleSocialLinkChange={handleSocialLinkChange}
+              handleCoverChange={handleCoverChange}
+              handleAvatarChange={handleAvatarChange}
+            />
+            
+            <div className="flex justify-between items-center pt-4 mt-6 border-t">
+              <p className="text-sm text-muted-foreground">
+                Atualize suas informações de perfil
+              </p>
+              <Button 
+                onClick={handleSubmit} 
+                className="mimo-button"
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Salvando...
+                  </>
+                ) : "Salvar Alterações"}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

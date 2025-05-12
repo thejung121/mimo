@@ -73,9 +73,9 @@ export const useProfileSave = ({
       // Update local state with the updated URLs (if any)
       setCreator(updatedCreator);
       
-      // Save to localStorage first (this will always work)
-      saveCreatorData(updatedCreator);
-      console.log('Creator data saved to localStorage:', updatedCreator);
+      // Save to localStorage with force refresh to ensure data is updated
+      saveCreatorData(updatedCreator, true);
+      console.log('Creator data saved to localStorage with force refresh:', updatedCreator);
       
       // Try to save to Supabase
       let supabaseSuccess = false;
@@ -92,7 +92,6 @@ export const useProfileSave = ({
           description: "Suas informações foram salvas localmente, mas não foi possível salvá-las no banco de dados.",
           variant: "destructive"
         });
-        // Even if Supabase fails, we've already saved to localStorage
         return true; // Return true since we saved to localStorage successfully
       }
       
