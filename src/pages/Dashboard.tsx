@@ -1,122 +1,144 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatCards from '@/components/dashboard/StatCards';
-import MimosTab from '@/components/dashboard/MimosTab';
-import WithdrawalsTab from '@/components/dashboard/WithdrawalsTab';
-import { useDashboard } from '@/hooks/useDashboard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { Copy, ExternalLink, Edit } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import DashboardContent from '@/components/dashboard/DashboardContent';
+import DashboardDialogs from '@/components/dashboard/DashboardDialogs';
 import { useAuth } from '@/contexts/AuthContext';
-import PagePreview from '@/components/PagePreview';
+import { useDashboard } from '@/hooks/useDashboard';
+import ProfileDialog from '@/components/dashboard/ProfileDialog';
+import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  
   const {
-    // State & Data
+    detailDialogOpen,
+    rewardDialogOpen,
+    selectedMimo,
+    rewardMessage,
+    rewardFiles,
+    withdrawalDialogOpen,
+    withdrawalAmount,
+    activeTab,
+    profileDialogOpen,
+    creator,
     transactions,
     withdrawals,
     availableBalance,
     totalAmount,
     pendingRewards,
     uniqueFans,
-    activeTab,
-    
-    // Handlers
+    isLoading,
+    setDetailDialogOpen,
+    setRewardDialogOpen,
+    setRewardMessage,
+    setRewardFiles,
+    setWithdrawalDialogOpen,
+    setWithdrawalAmount,
     setActiveTab,
+    setProfileDialogOpen,
     handleViewMimo,
-    setWithdrawalDialogOpen
+    handleSendReward,
+    handleRequestWithdrawal,
+    handleUpdateProfile
   } = useDashboard();
 
-  const { toast } = useToast();
-  const { user } = useAuth();
-  
-  const copyShareLink = () => {
-    if (user?.username) {
-      const shareLink = `${window.location.origin}/criador/${user.username}`;
-      navigator.clipboard.writeText(shareLink);
-      toast({
-        title: "Link copiado!",
-        description: "Link de divulgação copiado para a área de transferência.",
-      });
+  const [userProfile, setUserProfile] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: "",
+    document: user?.document || "",
+    username: user?.username || "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+
+  // Update user profile state when user data changes
+  useEffect(() => {
+    if (user) {
+      setUserProfile(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        document: user.document || prev.document,
+        username: user.username || prev.username
+      }));
+    }
+  }, [user]);
+
+  // Function to handle profile update and propagate to localStorage
+  const handleProfileUpdate = () => {
+    handleUpdateProfile();
+    
+    // Update localStorage to ensure changes are available immediately
+    const storedUser = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        userData.username = userProfile.username;
+        userData.name = userProfile.name;
+        userData.document = userProfile.document;
+        
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(userData));
+        console.log('Updated user data in localStorage:', userData);
+      } catch (error) {
+        console.error('Error updating localStorage user data:', error);
+      }
     }
   };
 
   return (
     <DashboardLayout>
       <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6">
-        <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+        <DashboardHeader onOpenProfileDialog={() => setProfileDialogOpen(true)} />
         
         <StatCards 
-          totalAmount={totalAmount}
-          availableBalance={availableBalance}
+          totalAmount={totalAmount} 
+          pendingRewards={pendingRewards} 
           uniqueFans={uniqueFans}
-          pendingRewards={pendingRewards}
+          availableBalance={availableBalance}
           onOpenWithdrawalDialog={() => setWithdrawalDialogOpen(true)}
         />
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-          <TabsList className="mb-4 grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="mimos" className="text-sm sm:text-base">Mimos</TabsTrigger>
-            <TabsTrigger value="withdrawals" className="text-sm sm:text-base">Saques</TabsTrigger>
-            <TabsTrigger value="page" className="text-sm sm:text-base">Minha Página</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="mimos" className="space-y-4">
-            <MimosTab 
-              transactions={transactions} 
-              pendingRewards={pendingRewards}
-              onViewMimo={handleViewMimo}
-            />
-          </TabsContent>
-          
-          <TabsContent value="withdrawals" className="space-y-4">
-            <WithdrawalsTab 
-              withdrawals={withdrawals}
-              onOpenWithdrawalDialog={() => setWithdrawalDialogOpen(true)}
-            />
-          </TabsContent>
-          
-          <TabsContent value="page">
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-3">
-                <Button 
-                  className="flex items-center gap-2" 
-                  variant="outline"
-                  onClick={copyShareLink}
-                >
-                  <Copy className="h-4 w-4" />
-                  Copiar Link de Divulgação
-                </Button>
-                <Button 
-                  className="flex items-center gap-2" 
-                  variant="outline"
-                  asChild
-                >
-                  <Link to={`/criador/${user?.username || ''}`} target="_blank">
-                    <ExternalLink className="h-4 w-4" />
-                    Ver Página Atualizada
-                  </Link>
-                </Button>
-                <Button 
-                  className="flex items-center gap-2 mimo-button" 
-                  asChild
-                >
-                  <Link to="/editar-pagina">
-                    <Edit className="h-4 w-4" />
-                    Editar Página
-                  </Link>
-                </Button>
-              </div>
-
-              <div className="w-full overflow-x-hidden border rounded-lg">
-                {user?.username && <PagePreview username={user.username} />}
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+        <DashboardContent 
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          transactions={transactions}
+          withdrawals={withdrawals}
+          pendingRewards={pendingRewards}
+          onViewMimo={handleViewMimo}
+          onOpenWithdrawalDialog={() => setWithdrawalDialogOpen(true)}
+        />
+        
+        <DashboardDialogs 
+          detailDialogOpen={detailDialogOpen}
+          setDetailDialogOpen={setDetailDialogOpen}
+          rewardDialogOpen={rewardDialogOpen}
+          setRewardDialogOpen={setRewardDialogOpen}
+          selectedMimo={selectedMimo}
+          rewardMessage={rewardMessage}
+          setRewardMessage={setRewardMessage}
+          rewardFiles={rewardFiles}
+          setRewardFiles={setRewardFiles}
+          onSendReward={handleSendReward}
+          withdrawalDialogOpen={withdrawalDialogOpen}
+          setWithdrawalDialogOpen={setWithdrawalDialogOpen}
+          withdrawalAmount={withdrawalAmount}
+          setWithdrawalAmount={setWithdrawalAmount}
+          availableBalance={availableBalance}
+          onRequestWithdrawal={handleRequestWithdrawal}
+        />
+        
+        <ProfileDialog
+          open={profileDialogOpen}
+          onOpenChange={setProfileDialogOpen}
+          userProfile={userProfile}
+          setUserProfile={setUserProfile}
+          onUpdateProfile={handleProfileUpdate}
+        />
       </div>
     </DashboardLayout>
   );

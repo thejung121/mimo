@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,12 +11,21 @@ import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import PagePreview from '@/components/PagePreview';
-import { saveMimoPackages } from '@/services/creator/packageService';
+import { saveMimoPackages, getMimoPackages } from '@/services/creator/packageService';
 
 const MyPageDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { mimoPackages, setMimoPackages } = useMimoPackages();
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Force reload packages
+  useEffect(() => {
+    const loadedPackages = getMimoPackages();
+    setMimoPackages(loadedPackages);
+    setIsLoaded(true);
+    console.log("MyPageDashboard loaded packages:", loadedPackages);
+  }, [setMimoPackages]);
 
   const copyShareLink = () => {
     if (user?.username) {
@@ -45,6 +54,7 @@ const MyPageDashboard = () => {
     
     setMimoPackages(updatedPackages);
     saveMimoPackages(updatedPackages);
+    console.log("Saved package visibility changes:", updatedPackages);
 
     toast({
       title: "Configuração salva",
@@ -112,7 +122,11 @@ const MyPageDashboard = () => {
               <CardTitle>Pacotes Disponíveis</CardTitle>
             </CardHeader>
             <CardContent>
-              {mimoPackages.length === 0 ? (
+              {!isLoaded ? (
+                <div className="text-center py-4">
+                  <p>Carregando pacotes...</p>
+                </div>
+              ) : mimoPackages.length === 0 ? (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground mb-4">Você ainda não criou nenhum pacote</p>
                   <Button asChild>
@@ -169,6 +183,12 @@ const MyPageDashboard = () => {
                 ) : (
                   <div className="p-8 text-center">
                     <p>Configure um nome de usuário para visualizar sua página</p>
+                    <Button 
+                      className="mt-4" 
+                      onClick={() => document.getElementById('open-profile-dialog')?.click()}
+                    >
+                      Configurar Nome de Usuário
+                    </Button>
                   </div>
                 )}
               </div>

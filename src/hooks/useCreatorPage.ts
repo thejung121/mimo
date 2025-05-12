@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase';
 import { Creator, MimoPackage } from '@/types/creator';
+import { getPackagesByUsername } from '@/services/creator/packageService';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useCreatorPage = () => {
   const [creator, setCreator] = useState<Creator | null>(null);
@@ -16,6 +18,7 @@ export const useCreatorPage = () => {
   
   const { username } = useParams<{ username: string }>();
   const mimoSectionRef = useRef<HTMLElement | null>(null);
+  const { user } = useAuth();
   
   useEffect(() => {
     const fetchCreator = async () => {
@@ -23,15 +26,40 @@ export const useCreatorPage = () => {
       
       try {
         setIsLoading(true);
+        console.log("Fetching creator with username:", username);
         
         // Get creator profile
         const creatorData = await getCreatorByUsername(username);
-        setCreator(creatorData);
         
-        // If creator found, get their packages
-        if (creatorData?.id) {
-          const packages = await getCreatorPackages(creatorData.id);
+        if (creatorData) {
+          console.log("Creator found:", creatorData);
+          setCreator(creatorData);
+          
+          // Try to get packages from Supabase first
+          let packages: MimoPackage[] = [];
+          
+          if (creatorData?.id) {
+            try {
+              packages = await getCreatorPackages(creatorData.id);
+              console.log("Packages from Supabase:", packages);
+            } catch (e) {
+              console.error("Error fetching from Supabase:", e);
+            }
+          }
+          
+          // If no packages from Supabase or empty, try from localStorage
+          if (!packages || packages.length === 0) {
+            try {
+              packages = getPackagesByUsername(username);
+              console.log("Packages from localStorage:", packages);
+            } catch (e) {
+              console.error("Error fetching from localStorage:", e);
+            }
+          }
+          
           setMimoPackages(packages);
+        } else {
+          console.error('No creator data found for username:', username);
         }
       } catch (error) {
         console.error('Failed to load creator page:', error);
@@ -59,7 +87,7 @@ export const useCreatorPage = () => {
   }, [username]);
   
   // Check if this is the user's own creator page
-  const isOwnPage = false; // This will be implemented with auth context later
+  const isOwnPage = user?.username === username;
   
   const scrollToMimoSection = () => {
     if (!mimoSectionRef.current) {

@@ -21,6 +21,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenProfileDialog }
       
       <div className="flex flex-wrap gap-2 md:gap-4 w-full md:w-auto">
         <Button 
+          id="open-profile-dialog"
           variant="outline" 
           className="flex items-center gap-2 text-xs md:text-sm flex-1 md:flex-initial justify-center"
           onClick={onOpenProfileDialog}
@@ -29,17 +30,30 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenProfileDialog }
           <User className="h-4 w-4" />
           <span>Meu Perfil</span>
         </Button>
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2 text-xs md:text-sm flex-1 md:flex-initial justify-center" 
-          asChild
-          size="sm"
-        >
-          <Link to={`/criador/${user?.username || ''}`} target="_blank">
+        {user?.username ? (
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 text-xs md:text-sm flex-1 md:flex-initial justify-center" 
+            asChild
+            size="sm"
+          >
+            <Link to={`/criador/${user.username}`} target="_blank">
+              <Eye className="h-4 w-4" />
+              <span>Ver Página</span>
+            </Link>
+          </Button>
+        ) : (
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2 text-xs md:text-sm flex-1 md:flex-initial justify-center"
+            size="sm"
+            onClick={onOpenProfileDialog}
+            title="Configure seu nome de usuário no perfil"
+          >
             <Eye className="h-4 w-4" />
-            <span>Ver Página</span>
-          </Link>
-        </Button>
+            <span>Configure Nome de Usuário</span>
+          </Button>
+        )}
         <Button 
           className="mimo-button text-xs md:text-sm flex-1 md:flex-initial justify-center" 
           asChild

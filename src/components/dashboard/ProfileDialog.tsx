@@ -16,6 +16,8 @@ import PersonalInfoForm from './profile/PersonalInfoForm';
 import DocumentForm from './profile/DocumentForm';
 import PasswordForm from './profile/PasswordForm';
 import DialogFooterActions from './profile/DialogFooterActions';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface ProfileDialogProps {
   open: boolean;
@@ -25,6 +27,7 @@ interface ProfileDialogProps {
     email: string;
     phone: string;
     document: string;
+    username: string; // Added username field
     currentPassword: string;
     newPassword: string;
     confirmPassword: string;
@@ -34,6 +37,7 @@ interface ProfileDialogProps {
     email: string;
     phone: string;
     document: string;
+    username: string; // Added username field
     currentPassword: string;
     newPassword: string;
     confirmPassword: string;
@@ -59,11 +63,15 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
     setIsUpdating(true);
     
     try {
+      // Format username - replace spaces with dashes
+      const formattedUsername = userProfile.username.replace(/\s+/g, '-');
+      
       // Update user metadata using the context function
       if (updateUserProfile) {
         const success = await updateUserProfile({
           name: userProfile.name,
-          document: isDocumentSet ? user?.document : userProfile.document, // Only update document if not already set
+          document: isDocumentSet ? user?.document : userProfile.document,
+          username: formattedUsername, // Add username to update
         });
 
         if (!success) {
@@ -74,7 +82,8 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
         const { error } = await supabase.auth.updateUser({
           data: { 
             name: userProfile.name,
-            document: isDocumentSet ? user?.document : userProfile.document, // Only update document if not already set
+            document: isDocumentSet ? user?.document : userProfile.document,
+            username: formattedUsername, // Add username to update
           }
         });
 
@@ -115,6 +124,12 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
         title: "Perfil atualizado com sucesso!",
         description: "Suas informações pessoais foram atualizadas.",
       });
+      
+      // Force page reload to update user data in all components
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
     } catch (error: any) {
       console.error('Error updating profile:', error);
       toast({
@@ -130,6 +145,12 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
   // Handlers for updating user profile fields
   const handleNameChange = (value: string) => {
     setUserProfile(prev => ({ ...prev, name: value }));
+  };
+
+  const handleUsernameChange = (value: string) => {
+    // Format username as user types - replace spaces with dashes
+    const formattedValue = value.replace(/\s+/g, '-');
+    setUserProfile(prev => ({ ...prev, username: formattedValue }));
   };
 
   const handlePhoneChange = (value: string) => {
@@ -163,6 +184,22 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
         </DialogHeader>
         
         <div className="space-y-4">
+          {/* Username Field - Added */}
+          <div className="space-y-2">
+            <Label htmlFor="username">Nome de usuário (URL da sua página)</Label>
+            <Input
+              id="username"
+              value={userProfile.username}
+              onChange={(e) => handleUsernameChange(e.target.value)}
+              placeholder="seu-nome-de-usuario"
+              disabled={isUpdating}
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">
+              Este será o link da sua página: mimo.app/criador/<strong>{userProfile.username}</strong>
+            </p>
+          </div>
+          
           {/* Personal Information Section */}
           <PersonalInfoForm 
             name={userProfile.name}
