@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase';
@@ -76,22 +75,18 @@ export const useCreatorPage = () => {
   };
   
   const handleCustomAmount = (amount: number) => {
-    // Create a virtual package with the custom amount
-    if (creator) {
-      const customPackage: MimoPackage = {
-        id: 'custom',
-        title: 'Mimo Personalizado',
-        price: Number(amount), // Force numeric type to fix TS error
-        creator_id: creator.id || '',
-        features: ['Valor personalizado'],
-        highlighted: false,
-        media: []
-      };
-      
-      setSelectedPackage(customPackage);
-      setCustomAmount(amount);
-      setPurchaseFlowOpen(true);
-    }
+    // Create a custom package with the specified amount
+    const customPackage: MimoPackage = {
+      id: 9999, // Special ID for custom packages
+      title: "Valor personalizado",
+      price: amount, // Now using number directly
+      features: ["Mimo com valor personalizado"],
+      highlighted: false,
+      media: []
+    };
+    
+    // Process the package selection with this custom package
+    handleSelectPackage(customPackage);
   };
   
   return {

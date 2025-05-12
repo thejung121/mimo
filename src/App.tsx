@@ -23,6 +23,10 @@ import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
+import PackagesPage from "./pages/PackagesPage";
+import PackageFormPage from "./pages/PackageFormPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 
 // Componente para fazer scroll para o topo da página quando a rota muda
 const ScrollToTop = () => {
@@ -60,6 +64,46 @@ const App = () => (
               element={
                 <PrivateRoute>
                   <Dashboard />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/pacotes" 
+              element={
+                <PrivateRoute>
+                  <PackagesPage />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/pacotes/novo" 
+              element={
+                <PrivateRoute>
+                  <PackageFormPage />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/pacotes/editar/:id" 
+              element={
+                <PrivateRoute>
+                  <PackageFormPage />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/perfil" 
+              element={
+                <PrivateRoute>
+                  <ProfilePage />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/configuracoes" 
+              element={
+                <PrivateRoute>
+                  <SettingsPage />
                 </PrivateRoute>
               } 
             />

@@ -1,0 +1,153 @@
+
+import React, { useState } from 'react';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useMimoPackages } from '@/hooks/useMimoPackages';
+
+const PackagesPage = () => {
+  const {
+    mimoPackages,
+    handleDeletePackage,
+  } = useMimoPackages();
+  
+  const navigate = useNavigate();
+  const [packages, setPackages] = useState(mimoPackages.map(pkg => ({
+    ...pkg,
+    isActive: pkg.isHidden !== true
+  })));
+
+  const togglePackageStatus = (id: number) => {
+    setPackages(prev => prev.map(pkg => {
+      if (pkg.id === id) {
+        return { ...pkg, isActive: !pkg.isActive };
+      }
+      return pkg;
+    }));
+  };
+
+  const editPackage = (id: number) => {
+    navigate(`/dashboard/pacotes/editar/${id}`);
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Gerenciar Pacotes</h1>
+          <Button asChild>
+            <Link to="/dashboard/pacotes/novo" className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Novo Pacote
+            </Link>
+          </Button>
+        </div>
+        
+        {packages.length === 0 ? (
+          <div className="text-center py-12">
+            <h2 className="text-lg font-medium mb-2">Nenhum pacote encontrado</h2>
+            <p className="text-muted-foreground mb-6">Você ainda não criou nenhum pacote de mimo</p>
+            <Button asChild>
+              <Link to="/dashboard/pacotes/novo" className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Criar Primeiro Pacote
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {packages.map((pkg) => (
+              <PackageCard 
+                key={pkg.id} 
+                package={pkg}
+                onToggle={() => togglePackageStatus(pkg.id!)}
+                onEdit={() => editPackage(pkg.id!)}
+                onDelete={() => handleDeletePackage(pkg.id!)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+interface PackageCardProps {
+  package: any;
+  onToggle: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+const PackageCard: React.FC<PackageCardProps> = ({
+  package: pkg,
+  onToggle,
+  onEdit,
+  onDelete
+}) => {
+  return (
+    <Card className={`border-l-4 ${pkg.highlighted ? 'border-l-primary' : 'border-l-muted'}`}>
+      <CardContent className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex-grow">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-medium">{pkg.title}</h3>
+            {pkg.highlighted && (
+              <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded">Destacado</span>
+            )}
+            {!pkg.isActive && (
+              <span className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded">Inativo</span>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-1 mb-2">
+            <strong className="text-lg">R$ {pkg.price}</strong>
+            <span className="text-muted-foreground text-sm">/mimo</span>
+          </div>
+          
+          <div className="hidden md:block">
+            <ul className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              {pkg.features.slice(0, 3).map((feature: string, idx: number) => (
+                <li key={idx} className="flex items-center">
+                  <span className="text-primary mr-1">•</span> {feature}
+                </li>
+              ))}
+              {pkg.features.length > 3 && (
+                <li className="text-muted-foreground">+{pkg.features.length - 3} mais</li>
+              )}
+            </ul>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3 md:flex-shrink-0">
+          <div className="flex items-center space-x-2">
+            <Switch 
+              id={`package-status-${pkg.id}`}
+              checked={pkg.isActive}
+              onCheckedChange={onToggle}
+            />
+            <Label htmlFor={`package-status-${pkg.id}`} className="cursor-pointer">
+              {pkg.isActive ? 'Ativo' : 'Inativo'}
+            </Label>
+          </div>
+          
+          <div className="flex items-center">
+            <Button variant="ghost" size="sm" onClick={onEdit}>
+              <Edit className="h-4 w-4" />
+              <span className="sr-only md:not-sr-only md:ml-2">Editar</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="text-destructive" onClick={onDelete}>
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only md:not-sr-only md:ml-2">Excluir</span>
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default PackagesPage;
