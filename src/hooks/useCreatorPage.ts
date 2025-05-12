@@ -80,7 +80,7 @@ export const useCreatorPage = () => {
       const customPackage: MimoPackage = {
         id: 'custom',
         title: 'Mimo Personalizado',
-        price: amount, // Amount is explicitly a number parameter
+        price: amount, // Ensure this is a number type
         creator_id: creator.id || '',
         features: ['Valor personalizado'],
         highlighted: false,
