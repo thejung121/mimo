@@ -4,7 +4,6 @@ import Index from "@/pages/Index";
 import AboutUs from "@/pages/AboutUs";
 import Contact from "@/pages/Contact";
 import CreatorPage from "@/pages/CreatorPage";
-import EditCreatorPage from "@/pages/EditCreatorPage";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
@@ -39,11 +38,6 @@ function App() {
       
       {/* Creator Pages */}
       <Route path="/criador/:username" element={<CreatorPage />} />
-      <Route path="/editar-pagina" element={
-        <PrivateRoute>
-          <EditCreatorPage />
-        </PrivateRoute>
-      } />
       
       {/* Protected Routes */}
       <Route path="/dashboard" element={

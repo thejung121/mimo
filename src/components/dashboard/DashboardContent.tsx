@@ -7,7 +7,7 @@ import PagePreview from '@/components/PagePreview';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Copy, ExternalLink, Edit } from 'lucide-react';
+import { Copy, ExternalLink } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface DashboardContentProps {
@@ -109,9 +109,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
               className="flex items-center gap-2 mimo-button" 
               asChild
             >
-              <Link to="/editar-pagina">
-                <Edit className="h-4 w-4" />
-                Editar Página
+              <Link to="/dashboard/minha-pagina">
+                Gerenciar Minha Página
               </Link>
             </Button>
           </div>

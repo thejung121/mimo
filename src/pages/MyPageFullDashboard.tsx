@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, ExternalLink, Eye, Loader2 } from 'lucide-react';
+import { Copy, ExternalLink, Loader2, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMimoPackages } from '@/hooks/useMimoPackages';
@@ -14,6 +14,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileEditor from '@/components/profile/ProfileEditor';
 import { useCreatorProfile } from '@/hooks/useCreatorProfile';
 import { saveMimoPackages, getMimoPackages } from '@/services/creator/packageService';
+import { saveCreatorData } from '@/services/creator/profileService';
+import { updateCreatorProfile } from '@/services/supabase/creatorService';
+import PagePreview from '@/components/PagePreview';
 
 const MyPageFullDashboard = () => {
   const { user, updateUserProfile } = useAuth();
@@ -23,6 +26,7 @@ const MyPageFullDashboard = () => {
   const [packageSaving, setPackageSaving] = useState(false);
   const { mimoPackages, setMimoPackages } = useMimoPackages();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [previewRefreshKey, setPreviewRefreshKey] = useState(Date.now());
 
   // Creator profile hooks
   const {
@@ -95,6 +99,8 @@ const MyPageFullDashboard = () => {
     
     setTimeout(() => {
       setPackageSaving(false);
+      // Refresh preview after updating package visibility
+      setPreviewRefreshKey(Date.now());
     }, 500);
   };
 
@@ -121,23 +127,34 @@ const MyPageFullDashboard = () => {
         }
       }
       
-      // Then save the creator profile data
-      const success = await handleSaveProfile();
-      
-      if (success) {
+      // Then save the creator profile data both to Supabase and localStorage
+      try {
+        // Save to Supabase first if user has an ID
+        if (creator.id) {
+          console.log("Attempting to save creator to Supabase:", creator);
+          await updateCreatorProfile(creator);
+        }
+        
+        // Always save to localStorage to ensure data is available
+        saveCreatorData(creator, true);
+        
+        // Save any package changes as well
+        saveMimoPackages(mimoPackages);
+        
+        // Success toast
         toast({
           title: "Perfil salvo com sucesso",
           description: "Todas as alterações foram salvas."
         });
         
-        // Force hard reload of the page to ensure we load fresh data from storage/API
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else {
+        // Refresh preview after saving
+        setPreviewRefreshKey(Date.now());
+        
+      } catch (error) {
+        console.error("Error saving profile:", error);
         toast({
-          title: "Erro ao salvar",
-          description: "Ocorreu um problema ao salvar seu perfil.",
+          title: "Erro ao salvar no banco de dados",
+          description: "Suas informações foram salvas localmente, mas não foi possível salvá-las no banco de dados.",
           variant: "destructive"
         });
       }
@@ -190,12 +207,21 @@ const MyPageFullDashboard = () => {
             </Button>
           )}
           <Button 
-            className="flex items-center gap-2" 
-            variant="outline"
-            onClick={() => setActiveTab("profile")}
+            className="flex items-center gap-2 mimo-button"
+            onClick={handleSubmit}
+            disabled={isSaving}
           >
-            <Eye className="h-4 w-4" />
-            Editar Perfil
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Salvar Todas Alterações
+              </>
+            )}
           </Button>
         </div>
         
@@ -203,6 +229,7 @@ const MyPageFullDashboard = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="profile">Perfil</TabsTrigger>
             <TabsTrigger value="packages">Pacotes</TabsTrigger>
+            <TabsTrigger value="preview">Pré-visualização</TabsTrigger>
           </TabsList>
           
           <TabsContent value="profile">
@@ -237,7 +264,12 @@ const MyPageFullDashboard = () => {
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         Salvando...
                       </>
-                    ) : "Salvar Alterações"}
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvar Perfil
+                      </>
+                    )}
                   </Button>
                 </div>
               </>
@@ -246,8 +278,11 @@ const MyPageFullDashboard = () => {
           
           <TabsContent value="packages">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Pacotes Disponíveis</CardTitle>
+                <Button asChild>
+                  <Link to="/dashboard/pacotes/novo">Criar Novo Pacote</Link>
+                </Button>
               </CardHeader>
               <CardContent>
                 {!isLoaded ? (
@@ -300,8 +335,75 @@ const MyPageFullDashboard = () => {
                 )}
               </CardContent>
             </Card>
+            
+            <div className="flex justify-end mt-6">
+              <Button 
+                onClick={handleSubmit} 
+                className="mimo-button"
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar Alterações
+                  </>
+                )}
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="preview">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pré-visualização</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="border rounded-lg shadow-sm overflow-hidden">
+                  {user?.username ? (
+                    <PagePreview key={previewRefreshKey} username={user.username} />
+                  ) : (
+                    <div className="p-8 text-center">
+                      <p>Configure um nome de usuário para visualizar sua página</p>
+                      <Button 
+                        className="mt-4" 
+                        onClick={() => setActiveTab("profile")}
+                      >
+                        Configurar Nome de Usuário
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
+        
+        {/* Bottom save button for all tabs */}
+        <div className="mt-8 pt-4 border-t flex justify-center">
+          <Button 
+            className="mimo-button w-full max-w-md" 
+            onClick={handleSubmit}
+            size="lg"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Salvar Todas as Alterações
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </DashboardLayout>
   );

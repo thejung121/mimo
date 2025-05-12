@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Creator, MimoPackage } from '@/types/creator';
 import { getCreatorData } from '@/services/creator/profileService';
 import { getMimoPackages } from '@/services/creator/packageService';
-import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 import MimoTabContent from '@/components/MimoTabContent';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, Loader2 } from 'lucide-react';
