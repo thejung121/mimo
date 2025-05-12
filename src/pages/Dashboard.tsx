@@ -123,18 +123,15 @@ const Dashboard = () => {
           setRewardMessage={setRewardMessage}
           rewardFiles={rewardFiles}
           setRewardFiles={setRewardFiles}
-          onSendReward={handleSendReward}
           withdrawalDialogOpen={withdrawalDialogOpen}
           setWithdrawalDialogOpen={setWithdrawalDialogOpen}
           withdrawalAmount={withdrawalAmount}
           setWithdrawalAmount={setWithdrawalAmount}
           availableBalance={availableBalance}
           onRequestWithdrawal={handleRequestWithdrawal}
-        />
-        
-        <ProfileDialog
-          open={profileDialogOpen}
-          onOpenChange={setProfileDialogOpen}
+          onSendReward={handleSendReward}
+          profileDialogOpen={profileDialogOpen}
+          setProfileDialogOpen={setProfileDialogOpen}
           userProfile={userProfile}
           setUserProfile={setUserProfile}
           onUpdateProfile={handleProfileUpdate}

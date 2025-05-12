@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateUserProfile = async (userData: { name?: string; document?: string }) => {
+  const updateUserProfile = async (userData: { name?: string; document?: string; username?: string }) => {
     try {
       // Update user metadata in Supabase
       const { error } = await supabase.auth.updateUser({
