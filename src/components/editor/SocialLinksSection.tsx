@@ -23,7 +23,8 @@ const SocialLinksSection = ({ socialLinks, onSocialLinkChange }: SocialLinksSect
             <div className="flex-shrink-0 p-2 rounded-md bg-muted">
               {link.type === 'instagram' && <Instagram className="h-5 w-5" />}
               {link.type === 'twitter' && <Twitter className="h-5 w-5" />}
-              {link.type === 'website' && <Globe className="h-5 w-5" />}
+              {link.type === 'twitch' && <Globe className="h-5 w-5" />}
+              {link.type === 'onlyfans' && <Globe className="h-5 w-5" />}
               {link.type === 'privacy' && <Lock className="h-5 w-5" />}
             </div>
             
@@ -31,7 +32,8 @@ const SocialLinksSection = ({ socialLinks, onSocialLinkChange }: SocialLinksSect
               <label className="text-sm text-muted-foreground mb-1 block">
                 {link.type === 'instagram' ? 'Instagram' : 
                  link.type === 'twitter' ? 'Twitter' : 
-                 link.type === 'website' ? 'OnlyFans' : 
+                 link.type === 'twitch' ? 'Twitch' :
+                 link.type === 'onlyfans' ? 'OnlyFans' :
                  link.type === 'privacy' ? 'Privacy' : 'Link'}
               </label>
               <Input

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase';
@@ -79,7 +80,7 @@ export const useCreatorPage = () => {
     const customPackage: MimoPackage = {
       id: 9999, // Special ID for custom packages
       title: "Valor personalizado",
-      price: amount, // Now using number directly
+      price: amount, // Using number directly
       features: ["Mimo com valor personalizado"],
       highlighted: false,
       media: []

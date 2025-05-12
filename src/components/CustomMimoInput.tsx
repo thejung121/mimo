@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlusCircle } from 'lucide-react';
 
 interface CustomMimoInputProps {
   onSubmit: (amount: number) => void;
@@ -41,55 +43,61 @@ const CustomMimoInput: React.FC<CustomMimoInputProps> = ({
   };
 
   return (
-    <div className="mimo-card p-4">
-      <h3 className="text-lg font-medium mb-3">Valor personalizado</h3>
-      
-      <div className="space-y-3">
-        <div className="flex flex-wrap gap-2 mb-3">
-          {suggestedPrices.map(price => (
-            <Button
-              key={price}
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => selectSuggestedPrice(price)}
-              className={`px-4 ${amount === price.toString() ? 'border-mimo-primary bg-mimo-primary/10' : ''}`}
-            >
-              R$ {price}
-            </Button>
-          ))}
+    <Card className="border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40 transition-colors">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Valor personalizado</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <Label htmlFor="suggested-prices" className="block mb-2">Valores sugeridos:</Label>
+          <div className="flex flex-wrap gap-2 mb-4" id="suggested-prices">
+            {suggestedPrices.map(price => (
+              <Button
+                key={price}
+                type="button"
+                variant={amount === price.toString() ? "default" : "outline"}
+                size="sm"
+                onClick={() => selectSuggestedPrice(price)}
+                className={`px-4 ${amount === price.toString() ? 'bg-mimo-primary hover:bg-mimo-primary/90' : ''}`}
+              >
+                R$ {price}
+              </Button>
+            ))}
+          </div>
         </div>
 
         <div>
-          <Label htmlFor="custom-amount">Quanto você quer enviar?</Label>
-          <div className="flex items-center mt-1">
-            <span className="bg-muted rounded-l-md border border-r-0 border-input px-3 py-2 text-muted-foreground">R$</span>
-            <Input
-              id="custom-amount"
-              type="number"
-              min={minimumAmount}
-              step="0.01"
-              placeholder="0.00" 
-              className="rounded-l-none"
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value);
-                if (error) setError(null);
-              }}
-            />
+          <Label htmlFor="custom-amount" className="block mb-2">Ou digite um valor personalizado:</Label>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 flex items-center">
+              <span className="bg-muted rounded-l-md border border-r-0 border-input px-3 py-2 text-muted-foreground">R$</span>
+              <Input
+                id="custom-amount"
+                type="number"
+                min={minimumAmount}
+                step="0.01"
+                placeholder="0.00" 
+                className="rounded-l-none"
+                value={amount}
+                onChange={(e) => {
+                  setAmount(e.target.value);
+                  if (error) setError(null);
+                }}
+              />
+            </div>
+            <Button
+              onClick={handleSubmit}
+              className="bg-gradient-to-r from-mimo-primary to-mimo-secondary"
+              disabled={!amount}
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Enviar Mimo
+            </Button>
           </div>
           {error && <p className="text-destructive text-sm mt-1">{error}</p>}
         </div>
-        
-        <Button
-          onClick={handleSubmit}
-          className="w-full bg-gradient-to-r from-mimo-primary to-mimo-secondary"
-          disabled={!amount}
-        >
-          Enviar Mimo
-        </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

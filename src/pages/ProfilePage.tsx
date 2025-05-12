@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Instagram, Twitter, Globe } from 'lucide-react';
+import { Instagram, Twitter, Globe, Lock } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const ProfilePage = () => {
@@ -46,6 +46,22 @@ const ProfilePage = () => {
       title: "Perfil atualizado",
       description: "Seu perfil foi atualizado com sucesso."
     });
+  };
+
+  // Get social links by type
+  const getSocialLink = (type: string) => {
+    return creator.socialLinks.find(link => link.type === type) || { type, url: '' };
+  };
+
+  const instagramLink = getSocialLink('instagram');
+  const twitterLink = getSocialLink('twitter');
+  const twitchLink = getSocialLink('twitch');
+  const onlyfansLink = getSocialLink('onlyfans');
+  const privacyLink = getSocialLink('privacy');
+
+  // Get index of each social link
+  const getIndexOfSocialLink = (type: string) => {
+    return creator.socialLinks.findIndex(link => link.type === type);
   };
 
   return (
@@ -170,8 +186,8 @@ const ProfilePage = () => {
                   Instagram
                 </label>
                 <Input
-                  value={creator.socialLinks[0]?.url || ''}
-                  onChange={(e) => handleSocialLinkChange(0, 'url', e.target.value)}
+                  value={instagramLink.url}
+                  onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('instagram'), 'url', e.target.value)}
                   className="mimo-input"
                   placeholder="https://instagram.com/seuusuario"
                 />
@@ -183,8 +199,8 @@ const ProfilePage = () => {
                   Twitter
                 </label>
                 <Input
-                  value={creator.socialLinks[1]?.url || ''}
-                  onChange={(e) => handleSocialLinkChange(1, 'url', e.target.value)}
+                  value={twitterLink.url}
+                  onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('twitter'), 'url', e.target.value)}
                   className="mimo-input"
                   placeholder="https://twitter.com/seuusuario"
                 />
@@ -193,13 +209,39 @@ const ProfilePage = () => {
               <div>
                 <label className="flex items-center text-sm font-medium mb-1">
                   <Globe className="h-4 w-4 mr-2" />
-                  Website
+                  Twitch
                 </label>
                 <Input
-                  value={creator.socialLinks[2]?.url || ''}
-                  onChange={(e) => handleSocialLinkChange(2, 'url', e.target.value)}
+                  value={twitchLink.url}
+                  onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('twitch'), 'url', e.target.value)}
                   className="mimo-input"
-                  placeholder="https://seusite.com"
+                  placeholder="https://twitch.tv/seuusuario"
+                />
+              </div>
+              
+              <div>
+                <label className="flex items-center text-sm font-medium mb-1">
+                  <Globe className="h-4 w-4 mr-2" />
+                  OnlyFans
+                </label>
+                <Input
+                  value={onlyfansLink.url}
+                  onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('onlyfans'), 'url', e.target.value)}
+                  className="mimo-input"
+                  placeholder="https://onlyfans.com/seuusuario"
+                />
+              </div>
+              
+              <div>
+                <label className="flex items-center text-sm font-medium mb-1">
+                  <Lock className="h-4 w-4 mr-2" />
+                  Privacy
+                </label>
+                <Input
+                  value={privacyLink.url}
+                  onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('privacy'), 'url', e.target.value)}
+                  className="mimo-input"
+                  placeholder="https://privacy.app/seuusuario"
                 />
               </div>
             </CardContent>
@@ -207,7 +249,7 @@ const ProfilePage = () => {
           
           <div className="flex justify-between items-center pt-4">
             <p className="text-sm text-muted-foreground">
-              Todas as alterações são salvas automaticamente
+              Atualize suas informações de perfil
             </p>
             <Button onClick={handleSubmit} className="mimo-button">
               Salvar Alterações

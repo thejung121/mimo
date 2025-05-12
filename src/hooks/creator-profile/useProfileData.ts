@@ -18,7 +18,13 @@ export const useProfileData = () => {
     avatar: '/placeholder.svg',
     cover: '/placeholder.svg',
     description: '',
-    socialLinks: []
+    socialLinks: [
+      { type: 'instagram', url: '' },
+      { type: 'twitter', url: '' },
+      { type: 'twitch', url: '' },
+      { type: 'onlyfans', url: '' },
+      { type: 'privacy', url: '' }
+    ]
   });
   
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +38,25 @@ export const useProfileData = () => {
         
         if (creatorData) {
           console.log('Loaded creator data:', creatorData);
-          setCreator(creatorData);
+          
+          // Ensure we have all required social links
+          const requiredTypes = ['instagram', 'twitter', 'twitch', 'onlyfans', 'privacy'];
+          const socialLinks = [...(creatorData.socialLinks || [])];
+          
+          // Add missing social link types
+          requiredTypes.forEach(type => {
+            if (!socialLinks.some(link => link.type === type)) {
+              socialLinks.push({ 
+                type: type as 'instagram' | 'twitter' | 'twitch' | 'onlyfans' | 'privacy', 
+                url: '' 
+              });
+            }
+          });
+          
+          setCreator({
+            ...creatorData,
+            socialLinks
+          });
         } else {
           console.error('No creator data found');
           toast({
@@ -71,10 +95,16 @@ export const useProfileData = () => {
         ...updatedSocialLinks[index], 
         url: value 
       };
-    } else if (field === 'type' && (value === 'instagram' || value === 'twitter' || value === 'youtube' || value === 'website' || value === 'privacy')) {
+    } else if (field === 'type' && (
+      value === 'instagram' || 
+      value === 'twitter' || 
+      value === 'twitch' || 
+      value === 'onlyfans' || 
+      value === 'privacy'
+    )) {
       updatedSocialLinks[index] = { 
         ...updatedSocialLinks[index], 
-        type: value as 'instagram' | 'twitter' | 'youtube' | 'website' | 'privacy'
+        type: value as 'instagram' | 'twitter' | 'twitch' | 'onlyfans' | 'privacy'
       };
     }
     
