@@ -15,26 +15,34 @@ export const useProfileMedia = () => {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${folder}/${Date.now()}.${fileExt}`;
+      
+      console.log(`Uploading ${folder} file with extension ${fileExt}`);
   
       const { data, error } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
   
       if (error) {
         console.error(`Error uploading ${folder}:`, error);
         toast({
-          title: `Error uploading ${folder}`,
+          title: `Erro ao fazer upload`,
           description: error.message,
           variant: "destructive"
         });
         return null;
       }
+      
+      console.log(`${folder} uploaded successfully:`, data);
   
       // Get public URL
       const { data: urlData } = supabase.storage
         .from(bucket)
         .getPublicUrl(data.path);
   
+      console.log(`Public URL for ${folder}:`, urlData.publicUrl);
       return urlData.publicUrl;
     } catch (error) {
       console.error(`Error in uploadFile:`, error);
@@ -46,6 +54,7 @@ export const useProfileMedia = () => {
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      console.log('Cover file selected:', file.name, file.type, file.size);
       setCoverFile(file);
       
       // Preview of the image
@@ -53,6 +62,7 @@ export const useProfileMedia = () => {
       reader.onload = () => {
         const result = reader.result as string;
         setCoverPreview(result);
+        console.log('Cover preview set');
       };
       reader.readAsDataURL(file);
     }
@@ -62,6 +72,7 @@ export const useProfileMedia = () => {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      console.log('Avatar file selected:', file.name, file.type, file.size);
       setAvatarFile(file);
       
       // Preview of the image
@@ -69,6 +80,7 @@ export const useProfileMedia = () => {
       reader.onload = () => {
         const result = reader.result as string;
         setAvatarPreview(result);
+        console.log('Avatar preview set');
       };
       reader.readAsDataURL(file);
     }
@@ -76,8 +88,13 @@ export const useProfileMedia = () => {
 
   // Initialize preview images when creator data is loaded
   const initializeImagePreviews = (cover: string, avatar: string) => {
-    setCoverPreview(cover);
-    setAvatarPreview(avatar);
+    if (cover && cover !== '/placeholder.svg') {
+      setCoverPreview(cover);
+    }
+    if (avatar && avatar !== '/placeholder.svg') {
+      setAvatarPreview(avatar);
+    }
+    console.log('Previews initialized:', { cover, avatar });
   };
 
   return {

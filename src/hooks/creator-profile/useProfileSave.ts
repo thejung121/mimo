@@ -1,7 +1,6 @@
 
 import { Creator } from '@/types/creator';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
-import { useToast } from '@/components/ui/use-toast';
 import { saveCreatorData } from '@/services/creator/profileService';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -20,7 +19,6 @@ export const useProfileSave = ({
   coverFile,
   avatarFile
 }: UseProfileSaveProps) => {
-  const { toast } = useToast();
   const { user, updateUserProfile } = useAuth();
 
   // Handler to save the creator's profile
@@ -31,8 +29,10 @@ export const useProfileSave = ({
       // Attempt to upload files if they exist, but handle errors gracefully
       if (coverFile) {
         try {
+          console.log('Uploading cover file:', coverFile);
           const coverUrl = await uploadFile(coverFile, 'user_uploads', 'covers');
           if (coverUrl) {
+            console.log('Cover uploaded successfully:', coverUrl);
             updatedCreator.cover = coverUrl;
           }
         } catch (error) {
@@ -43,8 +43,10 @@ export const useProfileSave = ({
       
       if (avatarFile) {
         try {
+          console.log('Uploading avatar file:', avatarFile);
           const avatarUrl = await uploadFile(avatarFile, 'user_uploads', 'avatars');
           if (avatarUrl) {
+            console.log('Avatar uploaded successfully:', avatarUrl);
             updatedCreator.avatar = avatarUrl;
           }
         } catch (error) {
@@ -92,11 +94,6 @@ export const useProfileSave = ({
       return true;
     } catch (error) {
       console.error("Error saving profile:", error);
-      toast({
-        title: "Erro ao salvar perfil",
-        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
-        variant: "destructive"
-      });
       return false;
     }
   };

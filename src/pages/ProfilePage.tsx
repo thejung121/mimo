@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import ProfileEditor from '@/components/profile/ProfileEditor';
+import PagePreview from '@/components/PagePreview';
 
 const ProfilePage = () => {
   const {
@@ -16,7 +17,8 @@ const ProfilePage = () => {
     handleSocialLinkChange,
     handleCoverChange,
     handleAvatarChange,
-    handleSaveProfile
+    handleSaveProfile,
+    isLoading
   } = useCreatorProfile();
   
   const { toast } = useToast();
@@ -44,6 +46,12 @@ const ProfilePage = () => {
         });
       } catch (error) {
         console.error('Error updating auth profile:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao atualizar perfil no sistema de autenticação.",
+          variant: "destructive"
+        });
+        return;
       }
     }
     
@@ -55,31 +63,57 @@ const ProfilePage = () => {
         title: "Perfil atualizado",
         description: "Seu perfil foi atualizado com sucesso."
       });
+      
+      // Force refresh of the page preview
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar seu perfil.",
+        variant: "destructive"
+      });
     }
   };
 
   return (
     <DashboardLayout>
-      <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6">
-        <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 bg-background rounded-lg border shadow-sm p-4 sm:p-6">
+          <h1 className="text-2xl font-bold mb-6">Meu Perfil</h1>
+          
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">Carregando perfil...</p>
+            </div>
+          ) : (
+            <>
+              <ProfileEditor
+                creator={creator}
+                coverPreview={coverPreview}
+                avatarPreview={avatarPreview}
+                handleCreatorChange={handleCreatorChange}
+                handleSocialLinkChange={handleSocialLinkChange}
+                handleCoverChange={handleCoverChange}
+                handleAvatarChange={handleAvatarChange}
+              />
+              
+              <div className="flex justify-between items-center pt-4 mt-6 border-t">
+                <p className="text-sm text-muted-foreground">
+                  Atualize suas informações de perfil
+                </p>
+                <Button onClick={handleSubmit} className="mimo-button">
+                  Salvar Alterações
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
         
-        <ProfileEditor
-          creator={creator}
-          coverPreview={coverPreview}
-          avatarPreview={avatarPreview}
-          handleCreatorChange={handleCreatorChange}
-          handleSocialLinkChange={handleSocialLinkChange}
-          handleCoverChange={handleCoverChange}
-          handleAvatarChange={handleAvatarChange}
-        />
-        
-        <div className="flex justify-between items-center pt-4">
-          <p className="text-sm text-muted-foreground">
-            Atualize suas informações de perfil
-          </p>
-          <Button onClick={handleSubmit} className="mimo-button">
-            Salvar Alterações
-          </Button>
+        <div className="md:col-span-1 bg-background rounded-lg border shadow-sm p-4">
+          <h2 className="text-lg font-semibold mb-4">Prévia da página</h2>
+          <PagePreview username={creator.username || ''} />
         </div>
       </div>
     </DashboardLayout>
