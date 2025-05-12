@@ -8,7 +8,7 @@ import {
   DialogFooter 
 } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 // Import the smaller component parts
@@ -16,8 +16,7 @@ import PersonalInfoForm from './profile/PersonalInfoForm';
 import DocumentForm from './profile/DocumentForm';
 import PasswordForm from './profile/PasswordForm';
 import DialogFooterActions from './profile/DialogFooterActions';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import UsernameField from './profile/UsernameField';
 
 interface ProfileDialogProps {
   open: boolean;
@@ -27,7 +26,7 @@ interface ProfileDialogProps {
     email: string;
     phone: string;
     document: string;
-    username: string; // Added username field
+    username: string;
     currentPassword: string;
     newPassword: string;
     confirmPassword: string;
@@ -37,7 +36,7 @@ interface ProfileDialogProps {
     email: string;
     phone: string;
     document: string;
-    username: string; // Added username field
+    username: string;
     currentPassword: string;
     newPassword: string;
     confirmPassword: string;
@@ -71,7 +70,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
         const success = await updateUserProfile({
           name: userProfile.name,
           document: isDocumentSet ? user?.document : userProfile.document,
-          username: formattedUsername, // Add username to update
+          username: formattedUsername,
         });
 
         if (!success) {
@@ -83,7 +82,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
           data: { 
             name: userProfile.name,
             document: isDocumentSet ? user?.document : userProfile.document,
-            username: formattedUsername, // Add username to update
+            username: formattedUsername,
           }
         });
 
@@ -148,9 +147,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
   };
 
   const handleUsernameChange = (value: string) => {
-    // Format username as user types - replace spaces with dashes
-    const formattedValue = value.replace(/\s+/g, '-');
-    setUserProfile(prev => ({ ...prev, username: formattedValue }));
+    setUserProfile(prev => ({ ...prev, username: value }));
   };
 
   const handlePhoneChange = (value: string) => {
@@ -184,21 +181,12 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
         </DialogHeader>
         
         <div className="space-y-4">
-          {/* Username Field - Added */}
-          <div className="space-y-2">
-            <Label htmlFor="username">Nome de usuário (URL da sua página)</Label>
-            <Input
-              id="username"
-              value={userProfile.username}
-              onChange={(e) => handleUsernameChange(e.target.value)}
-              placeholder="seu-nome-de-usuario"
-              disabled={isUpdating}
-              className="w-full"
-            />
-            <p className="text-xs text-muted-foreground">
-              Este será o link da sua página: mimo.app/criador/<strong>{userProfile.username}</strong>
-            </p>
-          </div>
+          {/* Username Field */}
+          <UsernameField
+            username={userProfile.username}
+            onUsernameChange={handleUsernameChange}
+            isUpdating={isUpdating}
+          />
           
           {/* Personal Information Section */}
           <PersonalInfoForm 
