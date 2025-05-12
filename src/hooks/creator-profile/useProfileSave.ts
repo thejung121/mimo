@@ -70,20 +70,23 @@ export const useProfileSave = ({
         }
       }
       
-      // Update local state with the updated URLs (if any)
-      setCreator(updatedCreator);
-      
-      // Save to localStorage with force refresh to ensure data is updated
-      saveCreatorData(updatedCreator, true);
-      console.log('Creator data saved to localStorage with force refresh:', updatedCreator);
-      
-      // Try to save to Supabase
+      // Save to Supabase first
       let supabaseSuccess = false;
       
       try {
         if (updatedCreator.id) {
+          console.log("Attempting to save creator to Supabase:", updatedCreator);
           supabaseSuccess = await updateCreatorProfile(updatedCreator);
           console.log('Creator profile saved to Supabase:', supabaseSuccess);
+          
+          if (!supabaseSuccess) {
+            console.error("Failed to save to Supabase");
+            toast({
+              title: "Erro ao salvar no banco de dados",
+              description: "Não foi possível salvar suas informações no banco de dados.",
+              variant: "destructive"
+            });
+          }
         }
       } catch (error) {
         console.error("Error saving to Supabase:", error);
@@ -92,8 +95,14 @@ export const useProfileSave = ({
           description: "Suas informações foram salvas localmente, mas não foi possível salvá-las no banco de dados.",
           variant: "destructive"
         });
-        return true; // Return true since we saved to localStorage successfully
       }
+      
+      // Always update local state with the updated URLs (if any)
+      setCreator(updatedCreator);
+      
+      // Even if Supabase fails, save to localStorage to ensure data is available
+      saveCreatorData(updatedCreator, true);
+      console.log('Creator data saved to localStorage with force refresh:', updatedCreator);
       
       // Show success toast
       if (uploadSuccessful || supabaseSuccess) {

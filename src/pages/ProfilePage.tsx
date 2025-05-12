@@ -69,11 +69,10 @@ const ProfilePage = () => {
           description: "Todas as alterações foram salvas."
         });
         
-        // Force refresh of the page after a short delay
-        // This ensures we reload from storage and see the changes
+        // Force hard reload of the page to ensure we load fresh data from storage/API
         setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+          window.location.href = window.location.href;
+        }, 1500);
       } else {
         toast({
           title: "Erro ao salvar",

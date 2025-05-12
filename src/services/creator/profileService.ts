@@ -127,7 +127,24 @@ export const saveCreatorData = (creator: Creator, forceRefresh = false): void =>
     console.log('Removed existing creator data for refresh');
   }
   
+  // Make sure to preserve the ID
+  const creatorWithId = {
+    ...creator,
+    id: creator.id || user.id
+  };
+  
+  // Ensure avatar and cover don't get overwritten with empty values
+  if (!creatorWithId.avatar || creatorWithId.avatar === '') {
+    const existingCreator = getCreatorData();
+    creatorWithId.avatar = existingCreator.avatar;
+  }
+  
+  if (!creatorWithId.cover || creatorWithId.cover === '') {
+    const existingCreator = getCreatorData();
+    creatorWithId.cover = existingCreator.cover;
+  }
+  
   // Save the new data
-  localStorage.setItem(creatorKey, JSON.stringify(creator));
-  console.log('Saved creator data to localStorage:', creator);
+  localStorage.setItem(creatorKey, JSON.stringify(creatorWithId));
+  console.log('Saved creator data to localStorage:', creatorWithId);
 };
