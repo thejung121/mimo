@@ -1,37 +1,73 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMimoPackages } from '@/hooks/useMimoPackages';
+import { useToast } from '@/components/ui/use-toast';
+import { saveMimoPackages } from '@/services/creator/packageService';
 
 const PackagesPage = () => {
   const {
     mimoPackages,
+    setMimoPackages,
     handleDeletePackage,
   } = useMimoPackages();
   
   const navigate = useNavigate();
-  const [packages, setPackages] = useState(mimoPackages.map(pkg => ({
+  const { toast } = useToast();
+  const [packagesState, setPackagesState] = useState(mimoPackages.map(pkg => ({
     ...pkg,
     isActive: pkg.isHidden !== true
   })));
+  
+  // Update local state when mimoPackages changes
+  useEffect(() => {
+    setPackagesState(mimoPackages.map(pkg => ({
+      ...pkg,
+      isActive: pkg.isHidden !== true
+    })));
+  }, [mimoPackages]);
 
   const togglePackageStatus = (id: number) => {
-    setPackages(prev => prev.map(pkg => {
+    // Update local state
+    const updatedPackagesState = packagesState.map(pkg => {
       if (pkg.id === id) {
         return { ...pkg, isActive: !pkg.isActive };
       }
       return pkg;
-    }));
+    });
+    setPackagesState(updatedPackagesState);
+    
+    // Update global state with isHidden property
+    const updatedGlobalPackages = mimoPackages.map(pkg => {
+      if (pkg.id === id) {
+        return { ...pkg, isHidden: !updatedPackagesState.find(p => p.id === id)?.isActive };
+      }
+      return pkg;
+    });
+    
+    setMimoPackages(updatedGlobalPackages);
+    saveMimoPackages(updatedGlobalPackages);
+    
+    toast({
+      title: "Configuração salva",
+      description: "Visibilidade do pacote atualizada com sucesso.",
+    });
   };
 
   const editPackage = (id: number) => {
     navigate(`/dashboard/pacotes/editar/${id}`);
+  };
+
+  const handleDeletePackageWithConfirmation = (id: number) => {
+    if (window.confirm("Tem certeza que deseja excluir este pacote?")) {
+      handleDeletePackage(id);
+    }
   };
 
   return (
@@ -47,7 +83,7 @@ const PackagesPage = () => {
           </Button>
         </div>
         
-        {packages.length === 0 ? (
+        {packagesState.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-lg font-medium mb-2">Nenhum pacote encontrado</h2>
             <p className="text-muted-foreground mb-6">Você ainda não criou nenhum pacote de mimo</p>
@@ -60,13 +96,13 @@ const PackagesPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {packages.map((pkg) => (
+            {packagesState.map((pkg) => (
               <PackageCard 
                 key={pkg.id} 
                 package={pkg}
                 onToggle={() => togglePackageStatus(pkg.id!)}
                 onEdit={() => editPackage(pkg.id!)}
-                onDelete={() => handleDeletePackage(pkg.id!)}
+                onDelete={() => handleDeletePackageWithConfirmation(pkg.id!)}
               />
             ))}
           </div>

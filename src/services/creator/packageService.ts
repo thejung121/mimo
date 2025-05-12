@@ -65,7 +65,9 @@ export const getMimoPackages = (): MimoPackage[] => {
   
   if (storedPackages) {
     try {
-      return JSON.parse(storedPackages);
+      const parsed = JSON.parse(storedPackages);
+      console.log("Loaded packages from local storage:", parsed);
+      return parsed;
     } catch (e) {
       console.error("Failed to parse packages data", e);
       // Return empty array instead of demo packages for authenticated users
@@ -89,4 +91,5 @@ export const saveMimoPackages = (packages: MimoPackage[]): void => {
   
   const packagesKey = `mimo:packages:${user.id}`;
   localStorage.setItem(packagesKey, JSON.stringify(packages));
+  console.log("Saving packages to storage:", packages);
 };

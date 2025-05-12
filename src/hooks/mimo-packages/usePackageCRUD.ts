@@ -77,18 +77,34 @@ export const usePackageCRUD = (
       title: "Pacote adicionado com sucesso!",
       description: `O pacote "${packageToAdd.title}" foi adicionado à sua lista.`,
     });
+    
+    // Force refresh by saving to localStorage (critical to fix the persistence issue)
+    setTimeout(() => {
+      saveMimoPackages(updatedPackages);
+    }, 100);
+    
+    return true;
   };
 
   // Handler to delete an existing package
   const handleDeletePackage = (id: number) => {
     const updatedPackages = mimoPackages.filter(p => p.id !== id);
     setMimoPackages(updatedPackages);
+    
+    // Save the updated list to localStorage
     saveMimoPackages(updatedPackages);
     
     toast({
       title: "Pacote excluído",
       description: "O pacote foi removido da sua lista.",
     });
+    
+    // Force refresh by saving to localStorage (critical to fix the persistence issue)
+    setTimeout(() => {
+      saveMimoPackages(updatedPackages);
+    }, 100);
+    
+    return true;
   };
 
   // Handler to edit an existing package
@@ -101,6 +117,8 @@ export const usePackageCRUD = (
       // Remove the package from the list while it's being edited
       const updatedPackages = mimoPackages.filter(p => p.id !== id);
       setMimoPackages(updatedPackages);
+      
+      // Save the updated list to localStorage
       saveMimoPackages(updatedPackages);
     }
   };
