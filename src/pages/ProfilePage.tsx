@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import ProfileEditor from '@/components/profile/ProfileEditor';
 import PagePreview from '@/components/PagePreview';
+import { Loader2 } from 'lucide-react';
 
 const ProfilePage = () => {
   const {
@@ -23,6 +24,7 @@ const ProfilePage = () => {
   
   const { toast } = useToast();
   const { user, updateUserProfile } = useAuth();
+  const [isSaving, setIsSaving] = React.useState(false);
 
   // Sync creator username with auth user username
   React.useEffect(() => {
@@ -37,6 +39,8 @@ const ProfilePage = () => {
   }, [user, creator, handleCreatorChange]);
 
   const handleSubmit = async () => {
+    setIsSaving(true);
+    
     // First update the user profile in auth context
     if (updateUserProfile && creator.username) {
       try {
@@ -51,6 +55,7 @@ const ProfilePage = () => {
           description: "Erro ao atualizar perfil no sistema de autenticação.",
           variant: "destructive"
         });
+        setIsSaving(false);
         return;
       }
     }
@@ -58,22 +63,13 @@ const ProfilePage = () => {
     // Then save the creator profile data
     const success = await handleSaveProfile();
     
+    setIsSaving(false);
+    
     if (success) {
-      toast({
-        title: "Perfil atualizado",
-        description: "Seu perfil foi atualizado com sucesso."
-      });
-      
       // Force refresh of the page preview
       setTimeout(() => {
         window.location.reload();
-      }, 2000);
-    } else {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar seu perfil.",
-        variant: "destructive"
-      });
+      }, 1500);
     }
   };
 
@@ -85,7 +81,8 @@ const ProfilePage = () => {
           
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
-              <p className="text-muted-foreground">Carregando perfil...</p>
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="ml-2 text-muted-foreground">Carregando perfil...</p>
             </div>
           ) : (
             <>
@@ -103,8 +100,17 @@ const ProfilePage = () => {
                 <p className="text-sm text-muted-foreground">
                   Atualize suas informações de perfil
                 </p>
-                <Button onClick={handleSubmit} className="mimo-button">
-                  Salvar Alterações
+                <Button 
+                  onClick={handleSubmit} 
+                  className="mimo-button"
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Salvando...
+                    </>
+                  ) : "Salvar Alterações"}
                 </Button>
               </div>
             </>

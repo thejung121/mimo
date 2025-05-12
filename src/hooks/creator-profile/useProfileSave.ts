@@ -3,6 +3,7 @@ import { Creator } from '@/types/creator';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
 import { saveCreatorData } from '@/services/creator/profileService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 interface UseProfileSaveProps {
   creator: Creator;
@@ -20,11 +21,13 @@ export const useProfileSave = ({
   avatarFile
 }: UseProfileSaveProps) => {
   const { user, updateUserProfile } = useAuth();
+  const { toast } = useToast();
 
   // Handler to save the creator's profile
   const handleSaveProfile = async () => {
     try {
       let updatedCreator = {...creator};
+      let uploadSuccessful = false;
       
       // Attempt to upload files if they exist, but handle errors gracefully
       if (coverFile) {
@@ -34,10 +37,15 @@ export const useProfileSave = ({
           if (coverUrl) {
             console.log('Cover uploaded successfully:', coverUrl);
             updatedCreator.cover = coverUrl;
+            uploadSuccessful = true;
           }
         } catch (error) {
           console.error("Error uploading cover:", error);
-          // Don't fail the entire save operation, just log the error
+          toast({
+            title: "Erro ao fazer upload da capa",
+            description: "Ocorreu um erro ao fazer upload da imagem de capa.",
+            variant: "destructive"
+          });
         }
       }
       
@@ -48,10 +56,15 @@ export const useProfileSave = ({
           if (avatarUrl) {
             console.log('Avatar uploaded successfully:', avatarUrl);
             updatedCreator.avatar = avatarUrl;
+            uploadSuccessful = true;
           }
         } catch (error) {
           console.error("Error uploading avatar:", error);
-          // Don't fail the entire save operation, just log the error
+          toast({
+            title: "Erro ao fazer upload do avatar",
+            description: "Ocorreu um erro ao fazer upload da imagem de perfil.",
+            variant: "destructive"
+          });
         }
       }
       
@@ -69,7 +82,11 @@ export const useProfileSave = ({
           console.log('Updated username in auth context');
         } catch (error) {
           console.error('Error updating username in auth context:', error);
-          // Continue with the save operation even if this fails
+          toast({
+            title: "Erro ao atualizar perfil",
+            description: "Não foi possível atualizar suas informações básicas.",
+            variant: "destructive"
+          });
         }
       }
       
@@ -78,22 +95,34 @@ export const useProfileSave = ({
       console.log('Creator data saved to localStorage:', updatedCreator);
       
       // Try to save to Supabase
-      let success = true;
+      let supabaseSuccess = false;
       
       try {
         if (updatedCreator.id) {
-          success = await updateCreatorProfile(updatedCreator);
-          console.log('Creator profile saved to Supabase:', success);
+          supabaseSuccess = await updateCreatorProfile(updatedCreator);
+          console.log('Creator profile saved to Supabase:', supabaseSuccess);
         }
       } catch (error) {
         console.error("Error saving to Supabase:", error);
         // Even if Supabase fails, we've already saved to localStorage
-        // so we consider this a success but log the error
+      }
+      
+      // Show success toast
+      if (uploadSuccessful || supabaseSuccess) {
+        toast({
+          title: "Perfil atualizado com sucesso!",
+          description: "Suas informações foram atualizadas e salvas."
+        });
       }
       
       return true;
     } catch (error) {
       console.error("Error saving profile:", error);
+      toast({
+        title: "Erro ao salvar perfil",
+        description: "Ocorreu um erro inesperado ao salvar seu perfil.",
+        variant: "destructive"
+      });
       return false;
     }
   };

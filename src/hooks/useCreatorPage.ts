@@ -47,6 +47,24 @@ export const useCreatorPage = () => {
                 console.error("Error parsing localStorage creator data:", e);
               }
             }
+          } else {
+            // If it's not the current user, try to find the user in localStorage
+            // Iterate through all localStorage items to find the user by username
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key?.startsWith('mimo:creator:')) {
+                try {
+                  const data = JSON.parse(localStorage.getItem(key) || '{}');
+                  if (data.username === username) {
+                    creatorData = data;
+                    console.log("Found creator in localStorage by username search:", creatorData);
+                    break;
+                  }
+                } catch (e) {
+                  console.error("Error parsing localStorage item:", e);
+                }
+              }
+            }
           }
         }
         
@@ -70,7 +88,22 @@ export const useCreatorPage = () => {
           if (!packages || packages.length === 0) {
             try {
               packages = getPackagesByUsername(username);
-              console.log("Packages from localStorage:", packages);
+              console.log("Packages from localStorage by username:", packages);
+              
+              // If still empty and this is the current user, try direct lookup
+              if ((!packages || packages.length === 0) && user?.id && user?.username === username) {
+                const packagesKey = `mimo:packages:${user.id}`;
+                const storedPackages = localStorage.getItem(packagesKey);
+                
+                if (storedPackages) {
+                  try {
+                    packages = JSON.parse(storedPackages);
+                    console.log("Packages from direct localStorage lookup:", packages);
+                  } catch (e) {
+                    console.error("Error parsing localStorage packages:", e);
+                  }
+                }
+              }
             } catch (e) {
               console.error("Error fetching from localStorage:", e);
             }
@@ -78,7 +111,7 @@ export const useCreatorPage = () => {
           
           // Only show non-hidden packages
           const visiblePackages = packages.filter(pkg => !pkg.isHidden);
-          console.log("Visible packages:", visiblePackages);
+          console.log("Visible packages for display:", visiblePackages);
           setMimoPackages(visiblePackages);
         } else {
           console.error('No creator data found for username:', username);

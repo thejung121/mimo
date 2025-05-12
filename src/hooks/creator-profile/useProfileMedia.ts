@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -9,15 +9,48 @@ export const useProfileMedia = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState('/placeholder.svg');
   const [avatarPreview, setAvatarPreview] = useState('/placeholder.svg');
+  const [isUploading, setIsUploading] = useState(false);
 
   // Upload file to Supabase Storage
   const uploadFile = async (file: File, bucket: string, folder: string): Promise<string | null> => {
     try {
+      setIsUploading(true);
       const fileExt = file.name.split('.').pop();
       const fileName = `${folder}/${Date.now()}.${fileExt}`;
       
       console.log(`Uploading ${folder} file with extension ${fileExt}`);
   
+      // Check if storage bucket exists, if not create it
+      const { data: bucketData, error: bucketError } = await supabase.storage
+        .listBuckets();
+        
+      if (bucketError) {
+        console.error('Error checking buckets:', bucketError);
+      } else {
+        const bucketExists = bucketData.find(b => b.name === bucket);
+        if (!bucketExists) {
+          // Try to create the bucket
+          const { error: createError } = await supabase.storage.createBucket(bucket, {
+            public: true,
+            fileSizeLimit: 10485760 // 10MB
+          });
+          
+          if (createError) {
+            console.error(`Error creating bucket ${bucket}:`, createError);
+            toast({
+              title: `Erro ao criar bucket de storage`,
+              description: createError.message,
+              variant: "destructive"
+            });
+            setIsUploading(false);
+            return null;
+          }
+          
+          console.log(`Created storage bucket: ${bucket}`);
+        }
+      }
+      
+      // Proceed with upload
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(fileName, file, {
@@ -32,6 +65,7 @@ export const useProfileMedia = () => {
           description: error.message,
           variant: "destructive"
         });
+        setIsUploading(false);
         return null;
       }
       
@@ -43,9 +77,11 @@ export const useProfileMedia = () => {
         .getPublicUrl(data.path);
   
       console.log(`Public URL for ${folder}:`, urlData.publicUrl);
+      setIsUploading(false);
       return urlData.publicUrl;
     } catch (error) {
       console.error(`Error in uploadFile:`, error);
+      setIsUploading(false);
       return null;
     }
   };
@@ -105,6 +141,7 @@ export const useProfileMedia = () => {
     uploadFile,
     handleCoverChange,
     handleAvatarChange,
-    initializeImagePreviews
+    initializeImagePreviews,
+    isUploading
   };
 };

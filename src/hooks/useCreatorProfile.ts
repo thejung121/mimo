@@ -21,7 +21,8 @@ export const useCreatorProfile = () => {
     uploadFile, 
     handleCoverChange, 
     handleAvatarChange, 
-    initializeImagePreviews 
+    initializeImagePreviews,
+    isUploading
   } = useProfileMedia();
 
   const { handleSaveProfile } = useProfileSave({
@@ -43,7 +44,7 @@ export const useCreatorProfile = () => {
     creator,
     coverPreview,
     avatarPreview,
-    isLoading,
+    isLoading: isLoading || isUploading,
     handleCreatorChange,
     handleSocialLinkChange,
     handleCoverChange,

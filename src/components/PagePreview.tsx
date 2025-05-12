@@ -6,7 +6,7 @@ import { getMimoPackages } from '@/services/creator/packageService';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 import MimoTabContent from '@/components/MimoTabContent';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 
 interface PagePreviewProps {
   username: string;
@@ -60,12 +60,18 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
       }
     };
     
-    loadCreatorForPreview();
+    // Add a small delay to ensure all data is loaded
+    const timer = setTimeout(() => {
+      loadCreatorForPreview();
+    }, 300);
+    
+    return () => clearTimeout(timer);
   }, [username]);
 
   if (isLoading) {
     return (
-      <div className="w-full h-[300px] flex items-center justify-center">
+      <div className="w-full h-[300px] flex flex-col items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
         <p>Carregando prévia...</p>
       </div>
     );
@@ -132,10 +138,18 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
             </div>
             
             <TabsContent value="mimos">
-              <MimoTabContent 
-                mimoPackages={mimoPackages} 
-                onSelectPackage={() => {}} 
-              />
+              {mimoPackages && mimoPackages.length > 0 ? (
+                <MimoTabContent 
+                  mimoPackages={mimoPackages} 
+                  onSelectPackage={() => {}} 
+                />
+              ) : (
+                <div className="text-center p-6 bg-muted/30 rounded-lg">
+                  <p className="text-muted-foreground">
+                    Este criador ainda não configurou nenhum pacote de mimo.
+                  </p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
