@@ -40,27 +40,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   </NavItem>
                   
                   <NavItem 
-                    to="/dashboard/pacotes" 
-                    icon={<Package className="h-4 w-4" />}
-                    isActive={pathname.includes('/dashboard/pacotes')}
-                  >
-                    Pacotes
-                  </NavItem>
-                  
-                  <NavItem 
-                    to="/dashboard/perfil" 
-                    icon={<User className="h-4 w-4" />}
-                    isActive={pathname.includes('/dashboard/perfil')}
-                  >
-                    Meu Perfil
-                  </NavItem>
-                  
-                  <NavItem 
                     to="/dashboard/minha-pagina" 
                     icon={<Eye className="h-4 w-4" />}
                     isActive={pathname.includes('/dashboard/minha-pagina')}
                   >
                     Minha Página
+                  </NavItem>
+                  
+                  <NavItem 
+                    to="/dashboard/pacotes" 
+                    icon={<Package className="h-4 w-4" />}
+                    isActive={pathname.includes('/dashboard/pacotes')}
+                  >
+                    Pacotes
                   </NavItem>
                   
                   <NavItem 
@@ -88,18 +80,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               
               {/* Dashboard Quick Actions */}
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-3">
-                <Link to="/dashboard/pacotes" className="block">
+                <Link to="/dashboard/minha-pagina" className="block">
                   <div className="bg-background p-4 rounded-lg border hover:border-primary/50 hover:bg-accent/5 transition-colors">
-                    <Package className="h-8 w-8 text-primary mb-2" />
-                    <h3 className="font-medium">Gerenciar Pacotes</h3>
-                    <p className="text-sm text-muted-foreground">Edite seus pacotes de mimo</p>
+                    <Eye className="h-8 w-8 text-primary mb-2" />
+                    <h3 className="font-medium">Gerenciar Página</h3>
+                    <p className="text-sm text-muted-foreground">Atualize seu perfil e pacotes</p>
                   </div>
                 </Link>
-                <Link to="/dashboard/perfil" className="block">
+                <Link to="/dashboard/pacotes/novo" className="block">
                   <div className="bg-background p-4 rounded-lg border hover:border-primary/50 hover:bg-accent/5 transition-colors">
-                    <User className="h-8 w-8 text-primary mb-2" />
-                    <h3 className="font-medium">Gerenciar Perfil</h3>
-                    <p className="text-sm text-muted-foreground">Atualize suas informações</p>
+                    <Package className="h-8 w-8 text-primary mb-2" />
+                    <h3 className="font-medium">Novo Pacote</h3>
+                    <p className="text-sm text-muted-foreground">Crie um novo pacote de mimo</p>
                   </div>
                 </Link>
               </div>

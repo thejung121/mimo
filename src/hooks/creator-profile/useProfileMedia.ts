@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -123,8 +123,8 @@ export const useProfileMedia = () => {
     }
   };
 
-  // Initialize preview images when creator data is loaded
-  const initializeImagePreviews = (cover: string, avatar: string) => {
+  // Initialize preview images when creator data is loaded (memoized)
+  const initializeImagePreviews = useCallback((cover: string, avatar: string) => {
     if (cover && cover !== '/placeholder.svg') {
       setCoverPreview(cover);
       console.log('Cover preview initialized:', cover);
@@ -134,7 +134,7 @@ export const useProfileMedia = () => {
       console.log('Avatar preview initialized:', avatar);
     }
     console.log('Previews initialized:', { cover, avatar });
-  };
+  }, []);
 
   return {
     coverFile,

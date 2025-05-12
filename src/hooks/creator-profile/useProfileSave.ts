@@ -20,16 +20,23 @@ export const useProfileSave = ({
   coverFile,
   avatarFile
 }: UseProfileSaveProps) => {
-  const { user, updateUserProfile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   // Handler to save the creator's profile
   const handleSaveProfile = async () => {
     try {
       let updatedCreator = {...creator};
+      
+      // Ensure the creator has an ID
+      if (!updatedCreator.id && user) {
+        updatedCreator.id = user.id;
+        console.log('Added user ID to creator profile:', updatedCreator.id);
+      }
+      
       let uploadSuccessful = false;
       
-      // Attempt to upload files if they exist, but handle errors gracefully
+      // Upload cover image if available
       if (coverFile) {
         try {
           console.log('Uploading cover file:', coverFile);
@@ -50,6 +57,7 @@ export const useProfileSave = ({
         }
       }
       
+      // Upload avatar image if available
       if (avatarFile) {
         try {
           console.log('Uploading avatar file:', avatarFile);
@@ -100,7 +108,8 @@ export const useProfileSave = ({
       // Always update local state with the updated URLs (if any)
       setCreator(updatedCreator);
       
-      // Even if Supabase fails, save to localStorage to ensure data is available
+      // Always save to localStorage to ensure data is available locally
+      // Force refresh to ensure clean data
       saveCreatorData(updatedCreator, true);
       console.log('Creator data saved to localStorage with force refresh:', updatedCreator);
       

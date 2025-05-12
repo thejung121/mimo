@@ -19,7 +19,7 @@ import PackagesPage from "@/pages/PackagesPage";
 import PackageFormPage from "@/pages/PackageFormPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SettingsPage from "@/pages/SettingsPage";
-import MyPageDashboard from "@/pages/MyPageDashboard";
+import MyPageFullDashboard from "@/pages/MyPageFullDashboard";
 
 // Import for auth-protected routes
 import PrivateRoute from "@/components/PrivateRoute";
@@ -78,7 +78,7 @@ function App() {
       } />
       <Route path="/dashboard/minha-pagina" element={
         <PrivateRoute>
-          <MyPageDashboard />
+          <MyPageFullDashboard />
         </PrivateRoute>
       } />
       <Route path="/dashboard/configuracoes" element={
