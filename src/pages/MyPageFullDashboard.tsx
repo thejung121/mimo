@@ -17,6 +17,7 @@ import { saveMimoPackages, getMimoPackages } from '@/services/creator/packageSer
 import { saveCreatorData } from '@/services/creator/profileService';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
 import PagePreview from '@/components/PagePreview';
+import { supabase } from '@/integrations/supabase/client';
 
 const MyPageFullDashboard = () => {
   const { user, updateUserProfile } = useAuth();
@@ -108,13 +109,16 @@ const MyPageFullDashboard = () => {
     setIsSaving(true);
     
     try {
-      // First update the user profile in auth context
+      console.log("Starting save process with creator:", creator);
+      
+      // First update the user profile in auth context if username is provided
       if (updateUserProfile && creator.username) {
         try {
           await updateUserProfile({
             name: creator.name,
             username: creator.username
           });
+          console.log("Auth profile updated successfully");
         } catch (error) {
           console.error('Error updating auth profile:', error);
           toast({
@@ -127,19 +131,37 @@ const MyPageFullDashboard = () => {
         }
       }
       
-      // Then save the creator profile data both to Supabase and localStorage
+      // Then try to use the handleSaveProfile function from useCreatorProfile
+      // This will handle uploading avatar and cover images and save to Supabase
       try {
-        // Save to Supabase first if user has an ID
+        const profileSaved = await handleSaveProfile();
+        console.log("Profile save result:", profileSaved);
+        
+        if (!profileSaved) {
+          console.error("Failed to save profile through handleSaveProfile");
+          // Continue with fallback approach
+        }
+      } catch (profileError) {
+        console.error("Error in handleSaveProfile:", profileError);
+        // Continue with fallback approach
+      }
+      
+      // Fallback: Save directly to Supabase and localStorage
+      try {
+        // Save to Supabase if user has an ID
         if (creator.id) {
           console.log("Attempting to save creator to Supabase:", creator);
-          await updateCreatorProfile(creator);
+          const result = await updateCreatorProfile(creator);
+          console.log("Supabase update result:", result);
         }
         
         // Always save to localStorage to ensure data is available
         saveCreatorData(creator, true);
+        console.log("Saved creator data to localStorage");
         
         // Save any package changes as well
         saveMimoPackages(mimoPackages);
+        console.log("Saved package data to localStorage");
         
         // Success toast
         toast({
@@ -147,14 +169,19 @@ const MyPageFullDashboard = () => {
           description: "Todas as alterações foram salvas."
         });
         
-        // Refresh preview after saving
+        // Force refresh preview
         setPreviewRefreshKey(Date.now());
         
+        // Force page reload after short delay to ensure fresh data
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        
       } catch (error) {
-        console.error("Error saving profile:", error);
+        console.error("Error in fallback save method:", error);
         toast({
           title: "Erro ao salvar no banco de dados",
-          description: "Suas informações foram salvas localmente, mas não foi possível salvá-las no banco de dados.",
+          description: "Suas informações foram salvas localmente, mas pode haver problemas com o banco de dados.",
           variant: "destructive"
         });
       }

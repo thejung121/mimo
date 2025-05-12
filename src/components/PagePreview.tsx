@@ -59,7 +59,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
       }
     };
     
-    // Load immediately without delay to make sure data is refreshed
+    // Load immediately to make sure data is refreshed
     loadCreatorForPreview();
     
   }, [username]);
