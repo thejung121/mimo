@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Creator } from '@/types/creator';
-import { Heart, ChevronDown, Instagram, Twitter, Globe, Lock } from 'lucide-react';
+import { Heart, ChevronDown, Instagram, Twitter, Globe, Lock, Twitch } from 'lucide-react';
 
 interface CreatorHeroProps {
   creator: Creator;
@@ -10,13 +9,17 @@ interface CreatorHeroProps {
 }
 
 const CreatorHero = ({ creator, onMimoClick }: CreatorHeroProps) => {
-  const getSocialIcon = (type: 'instagram' | 'twitter' | 'youtube' | 'website' | 'privacy') => {
+  const getSocialIcon = (type: 'instagram' | 'twitter' | 'twitch' | 'onlyfans' | 'privacy' | 'youtube' | 'website') => {
     switch (type) {
       case 'instagram':
         return <Instagram className="h-4 w-4" />;
       case 'twitter':
         return <Twitter className="h-4 w-4" />;
+      case 'twitch':
+        return <Twitch className="h-4 w-4" />;
       case 'website':
+      case 'youtube':
+      case 'onlyfans':
         return <Globe className="h-4 w-4" />;
       case 'privacy':
         return <Lock className="h-4 w-4" />;

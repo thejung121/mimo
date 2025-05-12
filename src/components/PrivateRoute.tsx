@@ -5,10 +5,11 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
+  adminOnly?: boolean;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, adminOnly = false }) => {
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   // Show nothing while checking auth status
@@ -20,6 +21,11 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   if (!isAuthenticated) {
     // Remember the current location so we can redirect back after login
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Check for admin routes
+  if (adminOnly && user?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   // If authenticated, render the protected content
