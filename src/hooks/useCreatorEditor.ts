@@ -1,3 +1,4 @@
+
 import { useCreatorProfile } from './useCreatorProfile';
 import { useMimoPackages } from './useMimoPackages';
 
@@ -37,6 +38,7 @@ export const useCreatorEditor = () => {
     
     // Mimo packages states and handlers
     mimoPackages: packagesHook.mimoPackages,
+    setMimoPackages: packagesHook.setMimoPackages, // Expose setMimoPackages
     showNewPackageForm: packagesHook.showNewPackageForm,
     newPackage: packagesHook.newPackage,
     handleAddFeature: packagesHook.handleAddFeature,

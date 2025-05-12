@@ -21,6 +21,7 @@ const EditCreatorPage = () => {
   const {
     creator,
     mimoPackages,
+    setMimoPackages,
     coverPreview,
     avatarPreview,
     newPackage,
@@ -40,8 +41,7 @@ const EditCreatorPage = () => {
     handleDeletePackage,
     handleEditPackage,
     handleSaveProfile,
-    setShowNewPackageForm,
-    setMimoPackages
+    setShowNewPackageForm
   } = useCreatorEditor();
 
   // Enhanced save function that explicitly updates the profile and packages
@@ -71,7 +71,7 @@ const EditCreatorPage = () => {
           toast({
             title: "Nome de usuário não definido",
             description: "Configure seu nome de usuário no perfil para ver sua página.",
-            variant: "warning"
+            variant: "destructive"  // Changed from "warning" to "destructive"
           });
         }
       }
