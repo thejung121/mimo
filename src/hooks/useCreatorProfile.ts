@@ -36,6 +36,7 @@ export const useCreatorProfile = () => {
   // Initialize image previews whenever creator data changes
   useEffect(() => {
     if (creator) {
+      console.log("Initializing image previews with:", creator.cover, creator.avatar);
       initializeImagePreviews(creator.cover, creator.avatar);
     }
   }, [creator]);

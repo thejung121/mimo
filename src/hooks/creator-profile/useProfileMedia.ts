@@ -26,6 +26,7 @@ export const useProfileMedia = () => {
         
       if (bucketError) {
         console.error('Error checking buckets:', bucketError);
+        throw bucketError;
       } else {
         const bucketExists = bucketData.find(b => b.name === bucket);
         if (!bucketExists) {
@@ -43,7 +44,7 @@ export const useProfileMedia = () => {
               variant: "destructive"
             });
             setIsUploading(false);
-            return null;
+            throw createError;
           }
           
           console.log(`Created storage bucket: ${bucket}`);
@@ -66,7 +67,7 @@ export const useProfileMedia = () => {
           variant: "destructive"
         });
         setIsUploading(false);
-        return null;
+        throw error;
       }
       
       console.log(`${folder} uploaded successfully:`, data);
@@ -82,7 +83,7 @@ export const useProfileMedia = () => {
     } catch (error) {
       console.error(`Error in uploadFile:`, error);
       setIsUploading(false);
-      return null;
+      throw error;
     }
   };
 
@@ -126,9 +127,11 @@ export const useProfileMedia = () => {
   const initializeImagePreviews = (cover: string, avatar: string) => {
     if (cover && cover !== '/placeholder.svg') {
       setCoverPreview(cover);
+      console.log('Cover preview initialized:', cover);
     }
     if (avatar && avatar !== '/placeholder.svg') {
       setAvatarPreview(avatar);
+      console.log('Avatar preview initialized:', avatar);
     }
     console.log('Previews initialized:', { cover, avatar });
   };

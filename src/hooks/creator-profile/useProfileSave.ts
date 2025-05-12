@@ -46,6 +46,7 @@ export const useProfileSave = ({
             description: "Ocorreu um erro ao fazer upload da imagem de capa.",
             variant: "destructive"
           });
+          return false;
         }
       }
       
@@ -65,30 +66,12 @@ export const useProfileSave = ({
             description: "Ocorreu um erro ao fazer upload da imagem de perfil.",
             variant: "destructive"
           });
+          return false;
         }
       }
       
       // Update local state with the updated URLs (if any)
       setCreator(updatedCreator);
-      
-      // Also update the username in auth context if changed
-      if (user && updateUserProfile && updatedCreator.username) {
-        try {
-          await updateUserProfile({ 
-            name: updatedCreator.name, 
-            username: updatedCreator.username,
-            document: user.document
-          });
-          console.log('Updated username in auth context');
-        } catch (error) {
-          console.error('Error updating username in auth context:', error);
-          toast({
-            title: "Erro ao atualizar perfil",
-            description: "Não foi possível atualizar suas informações básicas.",
-            variant: "destructive"
-          });
-        }
-      }
       
       // Save to localStorage first (this will always work)
       saveCreatorData(updatedCreator);
@@ -104,7 +87,13 @@ export const useProfileSave = ({
         }
       } catch (error) {
         console.error("Error saving to Supabase:", error);
+        toast({
+          title: "Erro ao salvar no banco de dados",
+          description: "Suas informações foram salvas localmente, mas não foi possível salvá-las no banco de dados.",
+          variant: "destructive"
+        });
         // Even if Supabase fails, we've already saved to localStorage
+        return true; // Return true since we saved to localStorage successfully
       }
       
       // Show success toast

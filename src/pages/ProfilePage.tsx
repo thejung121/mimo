@@ -41,35 +41,56 @@ const ProfilePage = () => {
   const handleSubmit = async () => {
     setIsSaving(true);
     
-    // First update the user profile in auth context
-    if (updateUserProfile && creator.username) {
-      try {
-        await updateUserProfile({
-          name: creator.name,
-          username: creator.username
-        });
-      } catch (error) {
-        console.error('Error updating auth profile:', error);
+    try {
+      // First update the user profile in auth context
+      if (updateUserProfile && creator.username) {
+        try {
+          await updateUserProfile({
+            name: creator.name,
+            username: creator.username
+          });
+        } catch (error) {
+          console.error('Error updating auth profile:', error);
+          toast({
+            title: "Erro",
+            description: "Erro ao atualizar perfil no sistema de autenticação.",
+            variant: "destructive"
+          });
+          setIsSaving(false);
+          return;
+        }
+      }
+      
+      // Then save the creator profile data
+      const success = await handleSaveProfile();
+      
+      if (success) {
         toast({
-          title: "Erro",
-          description: "Erro ao atualizar perfil no sistema de autenticação.",
+          title: "Perfil salvo com sucesso",
+          description: "Todas as alterações foram salvas."
+        });
+        
+        // Force refresh of the page after a short delay
+        // This ensures we reload from storage and see the changes
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        toast({
+          title: "Erro ao salvar",
+          description: "Ocorreu um problema ao salvar seu perfil.",
           variant: "destructive"
         });
-        setIsSaving(false);
-        return;
       }
-    }
-    
-    // Then save the creator profile data
-    const success = await handleSaveProfile();
-    
-    setIsSaving(false);
-    
-    if (success) {
-      // Force refresh of the page preview
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+    } catch (error) {
+      console.error('Error in submit handler:', error);
+      toast({
+        title: "Erro inesperado",
+        description: "Ocorreu um erro inesperado ao processar sua solicitação.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 

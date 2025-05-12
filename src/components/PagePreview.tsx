@@ -60,12 +60,9 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
       }
     };
     
-    // Add a small delay to ensure all data is loaded
-    const timer = setTimeout(() => {
-      loadCreatorForPreview();
-    }, 300);
+    // Load immediately without delay to make sure data is refreshed
+    loadCreatorForPreview();
     
-    return () => clearTimeout(timer);
   }, [username]);
 
   if (isLoading) {
