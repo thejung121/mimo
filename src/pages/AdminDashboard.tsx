@@ -50,6 +50,25 @@ interface Withdrawal {
   }
 }
 
+// Define an interface to match what's in the donations table
+interface DonationData {
+  id: string;
+  created_at: string;
+  creator_id: string;
+  fan_username: string;
+  package_id: string;
+  amount: number;
+  status: string;
+  access_token: string;
+  expires_at: string;
+  message?: string;
+  updated_at?: string;
+  creators?: {
+    name: string;
+    username: string;
+  }
+}
+
 const AdminDashboard = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -102,7 +121,7 @@ const AdminDashboard = () => {
         
         // Fetch transactions (use donations table if transactions doesn't exist)
         try {
-          const { data: transactionData, error: transactionError } = await supabase
+          const { data: donationData, error: transactionError } = await supabase
             .from('donations')
             .select(`
               *,
@@ -111,7 +130,21 @@ const AdminDashboard = () => {
             .order('created_at', { ascending: false });
           
           if (transactionError) throw transactionError;
-          setTransactions(transactionData as Transaction[] || []);
+          
+          // Convert donation data to transaction format
+          const transformedTransactions: Transaction[] = (donationData || []).map((donation: DonationData) => ({
+            id: donation.id,
+            created_at: donation.created_at,
+            creator_id: donation.creator_id,
+            buyer_alias: donation.fan_username || 'Anônimo',
+            package_name: 'Mimo personalizado', // We don't have package name in donations, use default
+            amount: Number(donation.amount),
+            platform_fee: Number(donation.amount) * 0.1, // Assuming 10% platform fee
+            status: donation.status,
+            creators: donation.creators
+          }));
+          
+          setTransactions(transformedTransactions);
         } catch (error) {
           console.error('Error fetching transactions:', error);
           setTransactions([]);
@@ -119,7 +152,7 @@ const AdminDashboard = () => {
         
         // Use the demo mode since withdrawals table may not exist yet
         try {
-          const { data: withdrawalData, error: withdrawalError } = await supabase
+          const { data: donationData, error: withdrawalError } = await supabase
             .from('donations')  // Use donations table as fallback
             .select(`
               *,
@@ -129,18 +162,19 @@ const AdminDashboard = () => {
             .order('created_at', { ascending: false });
           
           if (withdrawalError) throw withdrawalError;
+          
           // Transform data to match withdrawal structure for demo purposes
-          const transformedData = (withdrawalData || []).map(item => ({
+          const transformedWithdrawals: Withdrawal[] = (donationData || []).map((item: DonationData) => ({
             id: item.id,
             creator_id: item.creator_id,
-            amount: item.amount * 0.9, // Simulating 90% of donation amount
+            amount: Number(item.amount) * 0.9, // Simulating 90% of donation amount
             status: 'pending', // Default status
             pix_key: 'pix@example.com', // Example PIX key
             created_at: item.created_at,
             creators: item.creators
           }));
           
-          setWithdrawals(transformedData as Withdrawal[]);
+          setWithdrawals(transformedWithdrawals);
         } catch (error) {
           console.error('Error fetching withdrawals:', error);
           setWithdrawals([]);
