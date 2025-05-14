@@ -5,6 +5,7 @@ import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase/cr
 import { Creator, MimoPackage } from '@/types/creator';
 import { getPackagesByUsername } from '@/services/creator/packageService';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useCreatorPage = () => {
   const [creator, setCreator] = useState<Creator | null>(null);
@@ -13,8 +14,7 @@ export const useCreatorPage = () => {
   const [headerVisible, setHeaderVisible] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<MimoPackage | null>(null);
   const [purchaseFlowOpen, setPurchaseFlowOpen] = useState(false);
-  const [customAmount, setCustomAmount] = useState<number | null>(null);
-  const [suggestedPrices] = useState<number[]>([10, 15, 25, 50]);
+  const [suggestedPrices] = useState<number[]>([7, 15, 50]);
   
   const { username } = useParams<{ username: string }>();
   const mimoSectionRef = useRef<HTMLElement | null>(null);
@@ -96,6 +96,7 @@ export const useCreatorPage = () => {
           
           // Filter out hidden packages for display
           packages = packages.filter(pkg => !pkg.isHidden);
+          console.log("Filtered visible packages:", packages);
           setMimoPackages(packages);
         } else {
           console.log("Creator not found");
@@ -127,12 +128,14 @@ export const useCreatorPage = () => {
   }, [username, user]);
   
   const handleSelectPackage = (pkg: MimoPackage) => {
+    console.log("Selected package:", pkg);
     setSelectedPackage(pkg);
     setCustomAmount(null);
     setPurchaseFlowOpen(true);
   };
   
   const handleCustomAmount = (amount: number) => {
+    console.log("Custom amount selected:", amount);
     setCustomAmount(amount);
     setSelectedPackage({
       id: 0,

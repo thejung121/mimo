@@ -1,17 +1,12 @@
 
 import React, { useEffect } from 'react';
-import CreatorNavBar from '@/components/CreatorNavBar';
-import CreatorFooter from '@/components/CreatorFooter';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart } from 'lucide-react';
+import { Heart, Image, Video, CheckCircle2, CheckCircle, ArrowRight } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
-import CreatorHero from '@/components/CreatorHero';
-import CreatorStickyHeader from '@/components/CreatorStickyHeader';
-import MimoTabContent from '@/components/MimoTabContent';
 import LoadingState from '@/components/creator/LoadingState';
 import NotFoundState from '@/components/creator/NotFoundState';
 import AdminBanner from '@/components/creator/AdminBanner';
 import { useCreatorPage } from '@/hooks/useCreatorPage';
+import { cn } from '@/lib/utils';
 
 const CreatorPage = () => {
   const {
@@ -41,7 +36,10 @@ const CreatorPage = () => {
         socialLinks: creator.socialLinks
       });
     }
-  }, [creator]);
+    if (mimoPackages) {
+      console.log('CreatorPage loaded packages:', mimoPackages);
+    }
+  }, [creator, mimoPackages]);
 
   // Show loading state
   if (isLoading) {
@@ -53,78 +51,200 @@ const CreatorPage = () => {
     return <NotFoundState />;
   }
 
+  // Count media items
+  const countMediaByType = (packages, type) => {
+    return packages.reduce((count, pkg) => {
+      return count + pkg.media.filter(media => media.type === type).length;
+    }, 0);
+  };
+
+  const videoCount = countMediaByType(mimoPackages, 'video');
+  const imageCount = countMediaByType(mimoPackages, 'image');
+  const subscriberCount = 525; // Placeholder - you would need to implement this with real data
+
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <CreatorNavBar />
+    <div className="min-h-screen flex flex-col bg-slate-900 text-white">
+      {/* Admin banner if this is the user's own page */}
+      {isOwnPage && <AdminBanner />}
       
-      <CreatorStickyHeader 
-        visible={headerVisible}
-        avatar={creator.avatar}
-        name={creator.name}
-        username={creator.username}
-        onMimoClick={scrollToMimoSection}
-      />
+      {/* Hero Section */}
+      <div className="relative">
+        {/* Cover Image */}
+        <div className="w-full h-48 overflow-hidden">
+          <img 
+            src={creator.cover || '/placeholder.svg'} 
+            alt="" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Profile Info */}
+        <div className="relative px-5 pt-16 pb-6 text-center">
+          {/* Avatar */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 -top-12">
+            <div className="rounded-full border-4 border-slate-900 overflow-hidden bg-slate-800 w-24 h-24">
+              <img 
+                src={creator.avatar || '/placeholder.svg'} 
+                alt={creator.name} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+
+          <h1 className="text-xl font-bold flex items-center justify-center">
+            {creator.name}
+            <CheckCircle2 className="w-4 h-4 text-blue-500 ml-1" />
+          </h1>
+          
+          <p className="text-slate-400 text-sm mt-1 mb-3 max-w-sm mx-auto">
+            {creator.description || creator.about || 'Um perfil exclusivo com conteúdos especiais'}
+          </p>
+
+          {/* Stats */}
+          <div className="flex justify-center gap-6 text-sm border-b border-slate-800 pb-4 mb-4">
+            <div>
+              <span className="font-bold">{videoCount}</span> Vídeos
+            </div>
+            <div>
+              <span className="font-bold">{imageCount}</span> Fotos
+            </div>
+            <div>
+              <span className="font-bold">{subscriberCount}</span> assinantes
+            </div>
+          </div>
+          
+          <h2 className="text-center mb-4">Explore meus conteúdos</h2>
+        </div>
+      </div>
       
-      <main className="flex-grow">
-        {/* Admin banner if this is the user's own page */}
-        {isOwnPage && <AdminBanner />}
-        
-        {/* Hero Section */}
-        <CreatorHero 
-          creator={creator} 
-          onMimoClick={scrollToMimoSection} 
-        />
-        
-        {/* Mimos Section */}
-        <section id="mimo-section" className="py-8 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-semibold mb-2 text-gray-900">
-                Envie um Mimo
+      {/* Packages Section */}
+      <div className="flex-grow px-4 pb-8">
+        <div className="max-w-md mx-auto space-y-6">
+          {mimoPackages && mimoPackages.length > 0 ? (
+            mimoPackages.map((pkg) => (
+              <div 
+                key={pkg.id} 
+                className="bg-slate-800 rounded-lg overflow-hidden"
+              >
+                {/* Package Preview Image */}
+                <div className="flex">
+                  {pkg.media && pkg.media.length > 0 && pkg.media.some(m => m.isPreview) ? (
+                    <div className="w-1/3">
+                      <img 
+                        src={pkg.media.find(m => m.isPreview)?.url || pkg.media[0]?.url || '/placeholder.svg'} 
+                        alt={pkg.title}
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-1/3 h-32 bg-slate-700 flex items-center justify-center">
+                      <Image className="w-8 h-8 text-slate-500" />
+                    </div>
+                  )}
+                  
+                  <div className="w-2/3 p-3">
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-lg font-bold">{pkg.title}</h3>
+                      <div className="flex gap-1 text-xs text-slate-400">
+                        <div className="flex items-center">
+                          <Image className="w-3 h-3 mr-1" />
+                          {pkg.media?.filter(m => m.type === 'image').length || 0} fotos
+                        </div>
+                        <div className="flex items-center ml-2">
+                          <Video className="w-3 h-3 mr-1" />
+                          {pkg.media?.filter(m => m.type === 'video').length || 0} vídeos
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs text-slate-400 mt-1 mb-2">
+                      {pkg.features?.[0] || 'Conteúdo exclusivo e personalizado'}
+                    </p>
+                    
+                    {/* Features */}
+                    <div className="space-y-1">
+                      {pkg.features?.slice(0, 4).map((feature, idx) => (
+                        <div key={idx} className="flex items-center text-xs">
+                          <CheckCircle className="w-3 h-3 text-red-500 mr-2" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Price and Action Button */}
+                <div className="bg-slate-800 px-3 py-2 flex items-center justify-between">
+                  <div className="text-blue-400 font-medium">
+                    R$ {pkg.price.toFixed(2)} - Acesso Vitalício
+                  </div>
+                  <button 
+                    onClick={() => handleSelectPackage(pkg)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4 py-1 flex items-center text-sm"
+                  >
+                    Acessar Agora
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center p-6 bg-slate-800/50 rounded-lg">
+              <p className="text-slate-400">
+                Ainda não há pacotes disponíveis.
+              </p>
+            </div>
+          )}
+
+          {/* Mimo section */}
+          <div className="mt-8 pt-4 border-t border-slate-800">
+            <div className="text-center mb-4">
+              <h2 className="font-medium flex items-center justify-center">
+                <Heart className="text-red-500 w-5 h-5 mr-2" fill="currentColor" />
+                Manda um Mimo
               </h2>
-              <p className="text-gray-600 text-sm">
-                Escolha um dos pacotes abaixo ou digite um valor personalizado
+              <p className="text-xs text-slate-400 mt-1">
+                Você manda um mimo e ganha uma recompensa quente e exclusiva
               </p>
             </div>
             
-            <Tabs defaultValue="mimos" className="mb-6">
-              <div className="flex justify-center">
-                <TabsList className="w-[200px] mb-6">
-                  <TabsTrigger value="mimos" className="w-full">
-                    <Heart className="mr-2 h-4 w-4" /> Mimos
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              
-              <TabsContent value="mimos">
-                <MimoTabContent 
-                  mimoPackages={mimoPackages} 
-                  onSelectPackage={handleSelectPackage}
-                  onCustomAmount={handleCustomAmount}
-                  suggestedPrices={suggestedPrices}
-                />
-              </TabsContent>
-            </Tabs>
+            <div className="space-y-3">
+              {suggestedPrices.map((price) => (
+                <button
+                  key={price}
+                  onClick={() => handleCustomAmount(price)}
+                  className={cn(
+                    "w-full rounded-full border border-blue-400 py-2 flex items-center justify-center gap-2",
+                    price === 50 ? "bg-blue-600 border-blue-600" : "bg-transparent"
+                  )}
+                >
+                  <Heart className="w-5 h-5" fill={price === 50 ? "currentColor" : "none"} />
+                  Mimar com R$ {price.toFixed(2)}
+                </button>
+              ))}
+            </div>
           </div>
-        </section>
-        
-        {/* Purchase Flow Component */}
-        {selectedPackage && creator && (
-          <PurchaseFlow
-            open={purchaseFlowOpen}
-            onClose={() => {
-              setPurchaseFlowOpen(false);
-            }}
-            packageId={selectedPackage.id?.toString() || ''}
-            packageTitle={selectedPackage.title}
-            packagePrice={selectedPackage.price}
-            creatorId={creator.id || ''}
-            creatorName={creator.name}
-          />
-        )}
-      </main>
+          
+          <div className="text-center text-xs text-slate-500 mt-8">
+            Feito com amor pela Mimo ❤️
+          </div>
+        </div>
+      </div>
       
-      <CreatorFooter />
+      {/* Purchase Flow Component */}
+      {selectedPackage && creator && (
+        <PurchaseFlow
+          open={purchaseFlowOpen}
+          onClose={() => {
+            setPurchaseFlowOpen(false);
+          }}
+          packageId={selectedPackage.id?.toString() || ''}
+          packageTitle={selectedPackage.title}
+          packagePrice={selectedPackage.price}
+          creatorId={creator.id || ''}
+          creatorName={creator.name}
+        />
+      )}
     </div>
   );
 };
