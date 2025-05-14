@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -126,65 +125,29 @@ const MyPageFullDashboard = () => {
             description: "Erro ao atualizar perfil no sistema de autenticação.",
             variant: "destructive"
           });
-          setIsSaving(false);
-          return;
         }
       }
       
-      // Then try to use the handleSaveProfile function from useCreatorProfile
-      // This will handle uploading avatar and cover images and save to Supabase
-      try {
-        const profileSaved = await handleSaveProfile();
-        console.log("Profile save result:", profileSaved);
-        
-        if (!profileSaved) {
-          console.error("Failed to save profile through handleSaveProfile");
-          // Continue with fallback approach
-        }
-      } catch (profileError) {
-        console.error("Error in handleSaveProfile:", profileError);
-        // Continue with fallback approach
-      }
+      // Then save the creator profile using handleSaveProfile from useCreatorProfile
+      const profileSaved = await handleSaveProfile();
+      console.log("Profile save result:", profileSaved);
       
-      // Fallback: Save directly to Supabase and localStorage
-      try {
-        // Save to Supabase if user has an ID
-        if (creator.id) {
-          console.log("Attempting to save creator to Supabase:", creator);
-          const result = await updateCreatorProfile(creator);
-          console.log("Supabase update result:", result);
-        }
-        
-        // Always save to localStorage to ensure data is available
-        saveCreatorData(creator, true);
-        console.log("Saved creator data to localStorage");
-        
-        // Save any package changes as well
-        saveMimoPackages(mimoPackages);
-        console.log("Saved package data to localStorage");
-        
-        // Success toast
-        toast({
-          title: "Perfil salvo com sucesso",
-          description: "Todas as alterações foram salvas."
-        });
-        
-        // Force refresh preview
-        setPreviewRefreshKey(Date.now());
-        
-        // Force page reload after short delay to ensure fresh data
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-        
-      } catch (error) {
-        console.error("Error in fallback save method:", error);
-        toast({
-          title: "Erro ao salvar no banco de dados",
-          description: "Suas informações foram salvas localmente, mas pode haver problemas com o banco de dados.",
-          variant: "destructive"
-        });
-      }
+      // Always save packages to ensure they're updated
+      saveMimoPackages(mimoPackages);
+      console.log("Saved package data to localStorage");
+      
+      // Force refresh preview
+      setPreviewRefreshKey(Date.now());
+      
+      toast({
+        title: "Página salva com sucesso",
+        description: "Todas as alterações foram salvas."
+      });
+      
+      // Force reload to ensure fresh data after short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error) {
       console.error('Error in submit handler:', error);
       toast({

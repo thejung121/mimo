@@ -35,6 +35,9 @@ export const useProfileSave = ({
         console.log('Added user ID to creator profile:', updatedCreator.id);
       }
       
+      // Track if any uploads succeeded to determine if we need to show success message
+      let uploadSuccess = false;
+      
       // Upload cover image if available
       if (coverFile) {
         try {
@@ -43,11 +46,12 @@ export const useProfileSave = ({
           if (coverUrl) {
             console.log('Cover uploaded successfully:', coverUrl);
             updatedCreator.cover = coverUrl;
+            uploadSuccess = true;
           } else {
             console.error("Failed to upload cover image");
             toast({
               title: "Aviso",
-              description: "Não foi possível fazer upload da imagem de capa. Verifique sua conexão e tente novamente.",
+              description: "Não foi possível fazer upload da imagem de capa. Tente novamente.",
               variant: "destructive"
             });
           }
@@ -69,11 +73,12 @@ export const useProfileSave = ({
           if (avatarUrl) {
             console.log('Avatar uploaded successfully:', avatarUrl);
             updatedCreator.avatar = avatarUrl;
+            uploadSuccess = true;
           } else {
             console.error("Failed to upload avatar image");
             toast({
               title: "Aviso",
-              description: "Não foi possível fazer upload da imagem de perfil. Verifique sua conexão e tente novamente.",
+              description: "Não foi possível fazer upload da imagem de perfil. Tente novamente.",
               variant: "destructive"
             });
           }
@@ -99,7 +104,17 @@ export const useProfileSave = ({
           supabaseSuccess = await updateCreatorProfile(updatedCreator);
           console.log('Creator profile saved to Supabase:', supabaseSuccess);
           
-          if (!supabaseSuccess) {
+          if (supabaseSuccess) {
+            console.log("Successfully saved to Supabase");
+            // Only show success toast when either upload succeeded or if there were no files to upload
+            if (uploadSuccess || (!coverFile && !avatarFile)) {
+              toast({
+                title: "Perfil salvo com sucesso",
+                description: "Suas informações foram salvas com sucesso.",
+                variant: "default"
+              });
+            }
+          } else {
             console.error("Failed to save to Supabase");
             toast({
               title: "Erro ao salvar no banco de dados",
@@ -121,7 +136,7 @@ export const useProfileSave = ({
       saveCreatorData(updatedCreator, true);
       console.log('Creator data saved to localStorage with force refresh:', updatedCreator);
       
-      return true;
+      return uploadSuccess || supabaseSuccess;
     } catch (error) {
       console.error("Error saving profile:", error);
       toast({

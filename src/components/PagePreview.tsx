@@ -27,12 +27,6 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
         
         if (creatorData) {
           console.log('PagePreview loaded creator data:', creatorData);
-          
-          // Verify the username matches what we expect
-          if (creatorData.username && creatorData.username !== username && username) {
-            console.warn(`Username mismatch: ${creatorData.username} vs ${username}`);
-          }
-          
           setCreator(creatorData);
           setError(null);
           
@@ -62,6 +56,8 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
     // Load immediately to make sure data is refreshed
     loadCreatorForPreview();
     
+    // Add username as a dependency to refresh when it changes
+    // Also add a refresh trigger on component mount
   }, [username]);
 
   if (isLoading) {

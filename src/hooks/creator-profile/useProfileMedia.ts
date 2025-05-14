@@ -18,38 +18,11 @@ export const useProfileMedia = () => {
     try {
       setIsUploading(true);
       const fileExt = file.name.split('.').pop();
-      const fileName = `${folder}/${Date.now()}.${fileExt}`;
+      const fileName = `${folder}/${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       
       console.log(`Starting upload to ${bucket}/${fileName}`);
       
-      // Verify bucket exists before upload
-      const { data: bucketsList, error: listError } = await supabase.storage
-        .listBuckets();
-      
-      if (listError) {
-        console.error('Error checking buckets:', listError);
-        toast({
-          title: "Erro ao verificar buckets",
-          description: listError.message,
-          variant: "destructive"
-        });
-        setIsUploading(false);
-        return null;
-      }
-      
-      const bucketExists = bucketsList.some(b => b.name === bucket);
-      if (!bucketExists) {
-        toast({
-          title: "Bucket não encontrado",
-          description: `O bucket ${bucket} não existe no storage.`,
-          variant: "destructive"
-        });
-        console.error(`Bucket ${bucket} doesn't exist`);
-        setIsUploading(false);
-        return null;
-      }
-      
-      // Proceed with upload to existing bucket
+      // Upload directly to the known bucket
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(fileName, file, {
@@ -80,6 +53,11 @@ export const useProfileMedia = () => {
       return urlData.publicUrl;
     } catch (error) {
       console.error(`Error in uploadFile:`, error);
+      toast({
+        title: "Erro no upload",
+        description: "Não foi possível fazer upload da imagem. Tente novamente.",
+        variant: "destructive"
+      });
       setIsUploading(false);
       return null;
     }

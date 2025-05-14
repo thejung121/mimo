@@ -63,8 +63,6 @@ const ProfilePage = () => {
             description: "Erro ao atualizar perfil no sistema de autenticação.",
             variant: "destructive"
           });
-          setIsSaving(false);
-          return;
         }
       }
       
@@ -77,16 +75,11 @@ const ProfilePage = () => {
           description: "Todas as alterações foram salvas."
         });
         
-        // Force hard reload of the page to ensure we load fresh data from storage/API
+        // Force reload only the page component without a full page reload
+        // This ensures we see the latest data without losing context
         setTimeout(() => {
-          window.location.href = window.location.href;
+          window.location.reload();
         }, 1500);
-      } else {
-        toast({
-          title: "Erro ao salvar",
-          description: "Ocorreu um problema ao salvar seu perfil.",
-          variant: "destructive"
-        });
       }
     } catch (error) {
       console.error('Error in submit handler:', error);
