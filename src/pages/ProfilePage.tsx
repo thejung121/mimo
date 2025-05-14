@@ -41,13 +41,21 @@ const ProfilePage = () => {
     setIsSaving(true);
     
     try {
+      console.log("Starting save process...");
+      
       // First update the user profile in auth context
       if (updateUserProfile && creator.username) {
         try {
+          console.log("Updating auth profile with:", {
+            name: creator.name,
+            username: creator.username
+          });
+          
           await updateUserProfile({
             name: creator.name,
             username: creator.username
           });
+          console.log("Auth profile updated successfully");
         } catch (error) {
           console.error('Error updating auth profile:', error);
           toast({

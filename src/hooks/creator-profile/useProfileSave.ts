@@ -4,7 +4,6 @@ import { updateCreatorProfile } from '@/services/supabase/creatorService';
 import { saveCreatorData } from '@/services/creator/profileService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface UseProfileSaveProps {
   creator: Creator;
@@ -24,39 +23,6 @@ export const useProfileSave = ({
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Make sure storage bucket exists
-  const ensureStorageBucketExists = async (bucketName: string) => {
-    try {
-      const { data: buckets, error } = await supabase.storage.listBuckets();
-      
-      if (error) {
-        console.error('Error checking buckets:', error);
-        return false;
-      }
-      
-      const bucketExists = buckets.some(bucket => bucket.name === bucketName);
-      
-      if (!bucketExists) {
-        const { error: createError } = await supabase.storage.createBucket(
-          bucketName,
-          { public: true }
-        );
-        
-        if (createError) {
-          console.error(`Error creating bucket ${bucketName}:`, createError);
-          return false;
-        }
-        
-        console.log(`Created storage bucket: ${bucketName}`);
-      }
-      
-      return true;
-    } catch (e) {
-      console.error('Error in ensureStorageBucketExists:', e);
-      return false;
-    }
-  };
-
   // Handler to save the creator's profile
   const handleSaveProfile = async () => {
     try {
@@ -69,9 +35,6 @@ export const useProfileSave = ({
         console.log('Added user ID to creator profile:', updatedCreator.id);
       }
       
-      // Make sure user_uploads bucket exists
-      await ensureStorageBucketExists('user_uploads');
-      
       // Upload cover image if available
       if (coverFile) {
         try {
@@ -80,6 +43,13 @@ export const useProfileSave = ({
           if (coverUrl) {
             console.log('Cover uploaded successfully:', coverUrl);
             updatedCreator.cover = coverUrl;
+          } else {
+            console.error("Failed to upload cover image");
+            toast({
+              title: "Aviso",
+              description: "Não foi possível fazer upload da imagem de capa. Verifique sua conexão e tente novamente.",
+              variant: "destructive"
+            });
           }
         } catch (error) {
           console.error("Error uploading cover:", error);
@@ -99,6 +69,13 @@ export const useProfileSave = ({
           if (avatarUrl) {
             console.log('Avatar uploaded successfully:', avatarUrl);
             updatedCreator.avatar = avatarUrl;
+          } else {
+            console.error("Failed to upload avatar image");
+            toast({
+              title: "Aviso",
+              description: "Não foi possível fazer upload da imagem de perfil. Verifique sua conexão e tente novamente.",
+              variant: "destructive"
+            });
           }
         } catch (error) {
           console.error("Error uploading avatar:", error);
@@ -109,6 +86,9 @@ export const useProfileSave = ({
           });
         }
       }
+      
+      // Always update local state with the updated URLs (if any)
+      setCreator(updatedCreator);
       
       // Save to Supabase first
       let supabaseSuccess = false;
@@ -137,18 +117,9 @@ export const useProfileSave = ({
         });
       }
       
-      // Always update local state with the updated URLs (if any)
-      setCreator(updatedCreator);
-      
       // Save to localStorage with force refresh flag 
       saveCreatorData(updatedCreator, true);
       console.log('Creator data saved to localStorage with force refresh:', updatedCreator);
-      
-      // Show success toast
-      toast({
-        title: "Perfil atualizado com sucesso!",
-        description: "Suas informações foram atualizadas e salvas."
-      });
       
       return true;
     } catch (error) {
