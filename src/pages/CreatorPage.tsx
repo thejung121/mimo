@@ -1,12 +1,13 @@
 
 import React, { useEffect } from 'react';
-import { Heart, Image, Video, CheckCircle2, CheckCircle, ArrowRight } from 'lucide-react';
+import { Heart, CheckCircle2, CheckCircle, ArrowRight } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
 import LoadingState from '@/components/creator/LoadingState';
 import NotFoundState from '@/components/creator/NotFoundState';
 import AdminBanner from '@/components/creator/AdminBanner';
 import { useCreatorPage } from '@/hooks/useCreatorPage';
 import { cn } from '@/lib/utils';
+import CustomMimoInput from '@/components/CustomMimoInput';
 
 const CreatorPage = () => {
   const {
@@ -24,7 +25,6 @@ const CreatorPage = () => {
     setPurchaseFlowOpen
   } = useCreatorPage();
 
-  // Add more debug logging to trace any issues
   useEffect(() => {
     if (creator) {
       console.log('CreatorPage loaded with creator data:', {
@@ -51,16 +51,10 @@ const CreatorPage = () => {
     return <NotFoundState />;
   }
 
-  // Count media items
-  const countMediaByType = (packages, type) => {
-    return packages.reduce((count, pkg) => {
-      return count + pkg.media.filter(media => media.type === type).length;
-    }, 0);
-  };
-
-  const videoCount = countMediaByType(mimoPackages, 'video');
-  const imageCount = countMediaByType(mimoPackages, 'image');
-  const subscriberCount = 525; // Placeholder - you would need to implement this with real data
+  // Filter to get only filled social links
+  const filledSocialLinks = creator.socialLinks?.filter(link => 
+    link.url && link.url.trim() !== ''
+  ) || [];
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-900 text-white">
@@ -100,18 +94,25 @@ const CreatorPage = () => {
             {creator.description || creator.about || 'Um perfil exclusivo com conteúdos especiais'}
           </p>
 
-          {/* Stats */}
-          <div className="flex justify-center gap-6 text-sm border-b border-slate-800 pb-4 mb-4">
-            <div>
-              <span className="font-bold">{videoCount}</span> Vídeos
+          {/* Social Links */}
+          {filledSocialLinks.length > 0 && (
+            <div className="flex justify-center gap-4 border-b border-slate-800 pb-4 mb-4">
+              {filledSocialLinks.map((link, index) => (
+                <a 
+                  key={index} 
+                  href={link.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  {link.type === 'instagram' && <span className="text-lg">Instagram</span>}
+                  {link.type === 'twitter' && <span className="text-lg">Twitter</span>}
+                  {link.type === 'website' && <span className="text-lg">Website</span>}
+                  {link.type === 'youtube' && <span className="text-lg">Youtube</span>}
+                </a>
+              ))}
             </div>
-            <div>
-              <span className="font-bold">{imageCount}</span> Fotos
-            </div>
-            <div>
-              <span className="font-bold">{subscriberCount}</span> assinantes
-            </div>
-          </div>
+          )}
           
           <h2 className="text-center mb-4">Explore meus conteúdos</h2>
         </div>
@@ -138,23 +139,13 @@ const CreatorPage = () => {
                     </div>
                   ) : (
                     <div className="w-1/3 h-32 bg-slate-700 flex items-center justify-center">
-                      <Image className="w-8 h-8 text-slate-500" />
+                      <span className="text-slate-500">Sem prévia</span>
                     </div>
                   )}
                   
                   <div className="w-2/3 p-3">
                     <div className="flex items-start justify-between">
                       <h3 className="text-lg font-bold">{pkg.title}</h3>
-                      <div className="flex gap-1 text-xs text-slate-400">
-                        <div className="flex items-center">
-                          <Image className="w-3 h-3 mr-1" />
-                          {pkg.media?.filter(m => m.type === 'image').length || 0} fotos
-                        </div>
-                        <div className="flex items-center ml-2">
-                          <Video className="w-3 h-3 mr-1" />
-                          {pkg.media?.filter(m => m.type === 'video').length || 0} vídeos
-                        </div>
-                      </div>
                     </div>
                     
                     <p className="text-xs text-slate-400 mt-1 mb-2">
@@ -196,7 +187,7 @@ const CreatorPage = () => {
             </div>
           )}
 
-          {/* Mimo section */}
+          {/* Mimo section using CustomMimoInput component */}
           <div className="mt-8 pt-4 border-t border-slate-800">
             <div className="text-center mb-4">
               <h2 className="font-medium flex items-center justify-center">
@@ -208,21 +199,11 @@ const CreatorPage = () => {
               </p>
             </div>
             
-            <div className="space-y-3">
-              {suggestedPrices.map((price) => (
-                <button
-                  key={price}
-                  onClick={() => handleCustomAmount(price)}
-                  className={cn(
-                    "w-full rounded-full border border-blue-400 py-2 flex items-center justify-center gap-2",
-                    price === 50 ? "bg-blue-600 border-blue-600" : "bg-transparent"
-                  )}
-                >
-                  <Heart className="w-5 h-5" fill={price === 50 ? "currentColor" : "none"} />
-                  Mimar com R$ {price.toFixed(2)}
-                </button>
-              ))}
-            </div>
+            <CustomMimoInput 
+              onSubmit={handleCustomAmount} 
+              suggestedPrices={suggestedPrices} 
+              minimumAmount={5}
+            />
           </div>
           
           <div className="text-center text-xs text-slate-500 mt-8">

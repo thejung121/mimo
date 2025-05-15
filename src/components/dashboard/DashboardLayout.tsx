@@ -1,122 +1,146 @@
+import { useState } from "react"
+import { useDashboard } from "@/hooks/useDashboard"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { ModeToggle } from "@/components/ModeToggle"
+import { Link, Outlet, useNavigate } from "react-router-dom"
+import { Home, Users, Coins, Plus, Settings, Power, MessageSquare, User } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
+import { Skeleton } from "@/components/ui/skeleton"
 
-import React, { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import NavBar from '@/components/NavBar';
-import Footer from '@/components/Footer';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Package, User, Settings, ExternalLink, Eye } from 'lucide-react';
+const sidebarNavItems = [
+  {
+    title: "Visão geral",
+    href: "/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Mimos",
+    href: "/dashboard/mimos",
+    icon: Coins,
+  },
+  {
+    title: "Fãs",
+    href: "/dashboard/fans",
+    icon: Users,
+  },
+  {
+    title: "Conteúdo",
+    href: "/dashboard/conteudo",
+    icon: MessageSquare,
+  },
+  {
+    title: "Configurações",
+    href: "/dashboard/configuracoes",
+    icon: Settings,
+  },
+]
 
-interface DashboardLayoutProps {
-  children: ReactNode;
-}
+export function DashboardLayout() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { creator } = useDashboard()
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user } = useAuth();
-  const { pathname } = useLocation();
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <NavBar />
-      
-      <main className="flex-grow bg-gradient-to-b from-background to-accent/10 py-4 sm:py-8">
-        <div className="mimo-container px-3 sm:px-4">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Sidebar Navigation */}
-            <div className="w-full md:w-64 flex-shrink-0">
-              <nav className="bg-background rounded-lg border shadow-sm overflow-hidden">
-                <div className="p-4 border-b bg-muted/30">
-                  <h2 className="font-medium">Olá, {user?.name}</h2>
-                  <p className="text-sm text-muted-foreground">Painel de controle</p>
-                </div>
-                
-                <div className="p-2">
-                  <NavItem 
-                    to="/dashboard" 
-                    icon={<LayoutDashboard className="h-4 w-4" />}
-                    isActive={pathname === '/dashboard'}
-                  >
-                    Dashboard
-                  </NavItem>
-                  
-                  <NavItem 
-                    to="/dashboard/minha-pagina" 
-                    icon={<Eye className="h-4 w-4" />}
-                    isActive={pathname.includes('/dashboard/minha-pagina')}
-                  >
-                    Minha Página
-                  </NavItem>
-                  
-                  <NavItem 
-                    to="/dashboard/pacotes" 
-                    icon={<Package className="h-4 w-4" />}
-                    isActive={pathname.includes('/dashboard/pacotes')}
-                  >
-                    Pacotes
-                  </NavItem>
-                  
-                  <NavItem 
-                    to="/dashboard/configuracoes" 
-                    icon={<Settings className="h-4 w-4" />}
-                    isActive={pathname.includes('/dashboard/configuracoes')}
-                  >
-                    Configurações
-                  </NavItem>
-                  
-                  <div className="mt-2 px-2">
-                    <Button
-                      className="w-full flex items-center gap-2 justify-start"
-                      variant="outline"
-                      asChild
-                    >
-                      <Link to={`/criador/${user?.username || ''}`} target="_blank">
-                        <ExternalLink className="h-4 w-4" />
-                        <span>Ver Página</span>
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </nav>
-            </div>
-            
-            {/* Main Content */}
-            <div className="flex-grow">
-              {children}
-            </div>
+    <div className="min-h-screen flex">
+      {/* Sidebar */}
+      <aside
+        className={`bg-card border-r border-border w-64 flex-none py-4 px-2 md:px-4 transition-transform duration-300 transform ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
+      >
+        <ScrollArea className="h-[calc(100vh-8rem)]">
+          <div className="flex flex-col space-y-2">
+            <Link to="/" className="px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-secondary">
+              <Home className="h-4 w-4" />
+              <span>Início</span>
+            </Link>
+            <Separator />
+            {sidebarNavItems.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-secondary"
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.title}</span>
+              </Link>
+            ))}
+            <Separator />
+            <Link
+              to="/dashboard/mimos/novo"
+              className="group px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-secondary transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Novo pacote</span>
+            </Link>
           </div>
-        </div>
-      </main>
-      
-      <Footer />
+        </ScrollArea>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="bg-background border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 md:px-8">
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+            <span className="sr-only">Toggle Menu</span>
+          </Button>
+          <div className="flex items-center space-x-4">
+            <ModeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0 rounded-full aspect-square">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={creator?.avatar || user?.avatar || "/placeholder.svg"} alt={user?.name} />
+                    <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => navigate('/dashboard/configuracoes')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Perfil</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout}>
+                  <Power className="mr-2 h-4 w-4" />
+                  <span>Sair</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+
+        {/* Main */}
+        <main className="flex-1 py-6 px-4 sm:px-6 md:px-8">
+          <Outlet />
+        </main>
+      </div>
     </div>
-  );
-};
-
-// Navigation item component
-const NavItem = ({ 
-  to, 
-  icon, 
-  children, 
-  isActive 
-}: { 
-  to: string; 
-  icon: React.ReactNode; 
-  children: React.ReactNode;
-  isActive: boolean;
-}) => {
-  return (
-    <Link 
-      to={to} 
-      className={`flex items-center gap-2 p-2 rounded-md mb-1 text-sm ${
-        isActive 
-          ? 'bg-primary/10 text-primary font-medium' 
-          : 'hover:bg-accent/10'
-      }`}
-    >
-      {icon}
-      <span>{children}</span>
-    </Link>
-  );
-};
-
-export default DashboardLayout;
+  )
+}

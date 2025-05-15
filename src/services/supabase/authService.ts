@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 // Function to get current authenticated user
 export const getCurrentUser = async () => {
@@ -54,6 +54,8 @@ export const useAuthService = () => {
 
   const register = async (name: string, email: string, password: string, username: string, document?: string): Promise<boolean> => {
     try {
+      console.log("Registering user with data:", { name, email, username, document });
+      
       // Use regular signUp method with data parameter to store user metadata
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -63,13 +65,12 @@ export const useAuthService = () => {
             name,
             username,
             document: document || '' // Store CPF/CNPJ in user metadata
-          },
-          // Skip email confirmation by not requiring emailRedirectTo
-          emailRedirectTo: undefined
+          }
         }
       });
       
       if (error) {
+        console.error("Registration error from Supabase:", error);
         toast({
           title: "Erro ao criar conta",
           description: error.message,
@@ -80,7 +81,8 @@ export const useAuthService = () => {
       
       // Check if the user was created successfully
       if (data.user) {
-        // In Supabase, by default this will create a session immediately without email verification
+        console.log("User created successfully:", data.user);
+        
         toast({
           title: "Conta criada com sucesso!",
           description: "Bem-vindo(a) ao Mimo!",
@@ -88,6 +90,7 @@ export const useAuthService = () => {
         
         return true;
       } else {
+        console.error("User creation failed - no user returned");
         toast({
           title: "Erro ao criar conta",
           description: "Não foi possível criar sua conta. Por favor, tente novamente.",

@@ -15,6 +15,7 @@ export const useCreatorPage = () => {
   const [selectedPackage, setSelectedPackage] = useState<MimoPackage | null>(null);
   const [purchaseFlowOpen, setPurchaseFlowOpen] = useState(false);
   const [suggestedPrices] = useState<number[]>([7, 15, 50]);
+  const [customAmount, setCustomAmount] = useState<number | null>(null);
   
   const { username } = useParams<{ username: string }>();
   const mimoSectionRef = useRef<HTMLElement | null>(null);
@@ -166,6 +167,7 @@ export const useCreatorPage = () => {
     selectedPackage,
     purchaseFlowOpen,
     suggestedPrices,
+    customAmount,
     handleSelectPackage,
     handleCustomAmount,
     scrollToMimoSection,
