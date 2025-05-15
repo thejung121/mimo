@@ -10,37 +10,37 @@ import { ModeToggle } from "@/components/ModeToggle"
 import { Link, Outlet, useNavigate } from "react-router-dom"
 import { Home, Users, Coins, Plus, Settings, Power, MessageSquare, User } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import { Skeleton } from "@/components/ui/skeleton"
 
 const sidebarNavItems = [
   {
     title: "Visão geral",
     href: "/dashboard",
-    icon: Home,
+    icon: Home
   },
   {
     title: "Mimos",
     href: "/dashboard/mimos",
-    icon: Coins,
+    icon: Coins
   },
   {
     title: "Fãs",
     href: "/dashboard/fans",
-    icon: Users,
+    icon: Users
   },
   {
     title: "Conteúdo",
     href: "/dashboard/conteudo",
-    icon: MessageSquare,
+    icon: MessageSquare
   },
   {
     title: "Configurações",
     href: "/dashboard/configuracoes",
-    icon: Settings,
+    icon: Settings
   },
 ]
 
-function DashboardLayout() {
+// Export the component directly instead of using default export
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -104,9 +104,9 @@ function DashboardLayout() {
               strokeLinejoin="round"
               className="h-6 w-6"
             >
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
             <span className="sr-only">Toggle Menu</span>
           </Button>
@@ -137,13 +137,11 @@ function DashboardLayout() {
           </div>
         </header>
 
-        {/* Main */}
+        {/* Main Content Area */}
         <main className="flex-1 py-6 px-4 sm:px-6 md:px-8">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>
   )
 }
-
-export default DashboardLayout;

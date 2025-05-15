@@ -1,10 +1,10 @@
 
-import { toast as sonnerToast, type Toast } from "sonner"
+import { toast as sonnerToast } from "sonner"
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
 
-type ToasterToast = Toast & {
+type ToasterToast = {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
@@ -63,5 +63,6 @@ export function useToast() {
         sonnerToast.dismiss(toastId)
       }
     },
+    toasts: [...toasts], // Export toasts array
   }
 }
