@@ -3,14 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, ExternalLink, Edit, Eye, CheckCircle } from 'lucide-react';
+import { Copy, ExternalLink, Edit, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMimoPackages } from '@/hooks/useMimoPackages';
 import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import PagePreview from '@/components/PagePreview';
 import { saveMimoPackages, getMimoPackages } from '@/services/creator/packageService';
 
 const MyPageDashboard = () => {
@@ -169,29 +168,6 @@ const MyPageDashboard = () => {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Pré-visualização</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="border rounded-lg shadow-sm overflow-hidden">
-                {user?.username ? (
-                  <PagePreview username={user.username} />
-                ) : (
-                  <div className="p-8 text-center">
-                    <p>Configure um nome de usuário para visualizar sua página</p>
-                    <Button 
-                      className="mt-4" 
-                      onClick={() => document.getElementById('open-profile-dialog')?.click()}
-                    >
-                      Configurar Nome de Usuário
-                    </Button>
-                  </div>
-                )}
-              </div>
             </CardContent>
           </Card>
         </div>

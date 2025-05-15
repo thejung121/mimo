@@ -53,7 +53,7 @@ const CustomMimoInput: React.FC<CustomMimoInputProps> = ({
               variant={amount === price.toString() ? "default" : "outline"}
               size="sm"
               onClick={() => selectSuggestedPrice(price)}
-              className={`px-4 ${amount === price.toString() ? 'bg-mimo-primary hover:bg-mimo-primary/90 text-white' : 'text-white border-white/50 hover:text-white hover:bg-mimo-primary/20'}`}
+              className={`px-4 ${amount === price.toString() ? 'bg-[#F54040] hover:bg-[#F54040]/90 text-white' : 'text-white border-white/50 hover:text-white hover:bg-[#F54040]/20'}`}
             >
               R$ {price}
             </Button>
@@ -62,7 +62,6 @@ const CustomMimoInput: React.FC<CustomMimoInputProps> = ({
       </div>
 
       <div>
-        <Label htmlFor="custom-amount" className="block mb-2 text-white">Ou digite um valor personalizado:</Label>
         <div className="flex items-center gap-2">
           <div className="flex-1 flex items-center">
             <span className="bg-slate-800 rounded-l-md border border-r-0 border-white/20 px-3 py-2 text-white">R$</span>
@@ -82,7 +81,7 @@ const CustomMimoInput: React.FC<CustomMimoInputProps> = ({
           </div>
           <Button
             onClick={handleSubmit}
-            className="bg-gradient-to-r from-mimo-primary to-mimo-secondary text-white"
+            className="bg-[#F54040] hover:bg-[#F54040]/90 text-white"
             disabled={!amount}
           >
             <PlusCircle className="h-4 w-4 mr-2" />

@@ -31,7 +31,7 @@ const MimoTabContent = ({
     <div className="space-y-8">
       {sortedPackages.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-white">
             Este criador ainda não configurou nenhum pacote de mimo.
           </p>
         </div>
@@ -55,7 +55,16 @@ const MimoTabContent = ({
       
       {/* Add custom amount input only if the handler exists */}
       {onCustomAmount && (
-        <div className={sortedPackages.length > 0 ? "col-span-1 md:col-span-2 lg:col-span-3" : ""}>
+        <div className="mt-8">
+          <div className="text-center mb-4">
+            <h2 className="font-medium flex items-center justify-center text-white">
+              <span className="text-red-500 mr-2">❤</span>
+              Manda um Mimo
+            </h2>
+            <p className="text-xs text-white/70 mt-1">
+              Você manda um mimo e ganha uma recompensa quente e exclusiva
+            </p>
+          </div>
           <CustomMimoInput 
             onSubmit={onCustomAmount}
             minimumAmount={10}

@@ -14,10 +14,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileEditor from '@/components/profile/ProfileEditor';
 import { useCreatorProfile } from '@/hooks/useCreatorProfile';
 import { saveMimoPackages, getMimoPackages } from '@/services/creator/packageService';
-import { saveCreatorData } from '@/services/creator/profileService';
-import { updateCreatorProfile } from '@/services/supabase/creatorService';
-import PagePreview from '@/components/PagePreview';
-import { supabase } from '@/integrations/supabase/client';
 
 const MyPageFullDashboard = () => {
   const { user, updateUserProfile } = useAuth();
@@ -27,7 +23,6 @@ const MyPageFullDashboard = () => {
   const [packageSaving, setPackageSaving] = useState(false);
   const { mimoPackages, setMimoPackages } = useMimoPackages();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [previewRefreshKey, setPreviewRefreshKey] = useState(Date.now());
 
   // Creator profile hooks
   const {
@@ -100,8 +95,6 @@ const MyPageFullDashboard = () => {
     
     setTimeout(() => {
       setPackageSaving(false);
-      // Refresh preview after updating package visibility
-      setPreviewRefreshKey(Date.now());
     }, 500);
   };
 
@@ -136,9 +129,6 @@ const MyPageFullDashboard = () => {
       // Always save packages to ensure they're updated
       saveMimoPackages(mimoPackages);
       console.log("Saved package data to localStorage");
-      
-      // Force refresh preview
-      setPreviewRefreshKey(Date.now());
       
       toast({
         title: "Página salva com sucesso",
@@ -220,7 +210,6 @@ const MyPageFullDashboard = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="profile">Perfil</TabsTrigger>
             <TabsTrigger value="packages">Pacotes</TabsTrigger>
-            <TabsTrigger value="preview">Pré-visualização</TabsTrigger>
           </TabsList>
           
           <TabsContent value="profile">
@@ -346,31 +335,6 @@ const MyPageFullDashboard = () => {
                 )}
               </Button>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="preview">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pré-visualização</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-lg shadow-sm overflow-hidden">
-                  {user?.username ? (
-                    <PagePreview key={previewRefreshKey} username={user.username} />
-                  ) : (
-                    <div className="p-8 text-center">
-                      <p>Configure um nome de usuário para visualizar sua página</p>
-                      <Button 
-                        className="mt-4" 
-                        onClick={() => setActiveTab("profile")}
-                      >
-                        Configurar Nome de Usuário
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
         

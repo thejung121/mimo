@@ -171,7 +171,7 @@ const CreatorPage = () => {
                   </div>
                   <button 
                     onClick={() => handleSelectPackage(pkg)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4 py-1 flex items-center text-sm"
+                    className="bg-[#F54040] hover:bg-[#F54040]/90 text-white rounded-full px-4 py-1 flex items-center text-sm"
                   >
                     Acessar Agora
                     <ArrowRight className="w-4 h-4 ml-1" />
@@ -191,7 +191,7 @@ const CreatorPage = () => {
           <div className="mt-8 pt-4 border-t border-slate-800">
             <div className="text-center mb-4">
               <h2 className="font-medium flex items-center justify-center text-white">
-                <Heart className="text-red-500 w-5 h-5 mr-2" fill="currentColor" />
+                <Heart className="text-[#F54040] w-5 h-5 mr-2" fill="currentColor" />
                 Manda um Mimo
               </h2>
               <p className="text-xs text-slate-400 mt-1">
