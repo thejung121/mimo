@@ -190,7 +190,7 @@ const CreatorPage = () => {
           {/* Mimo section using CustomMimoInput component */}
           <div className="mt-8 pt-4 border-t border-slate-800">
             <div className="text-center mb-4">
-              <h2 className="font-medium flex items-center justify-center">
+              <h2 className="font-medium flex items-center justify-center text-white">
                 <Heart className="text-red-500 w-5 h-5 mr-2" fill="currentColor" />
                 Manda um Mimo
               </h2>

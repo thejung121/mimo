@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle } from 'lucide-react';
 
 interface CustomMimoInputProps {
@@ -43,61 +42,56 @@ const CustomMimoInput: React.FC<CustomMimoInputProps> = ({
   };
 
   return (
-    <Card className="border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40 transition-colors">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Valor personalizado</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="suggested-prices" className="block mb-2">Valores sugeridos:</Label>
-          <div className="flex flex-wrap gap-2 mb-4" id="suggested-prices">
-            {suggestedPrices.map(price => (
-              <Button
-                key={price}
-                type="button"
-                variant={amount === price.toString() ? "default" : "outline"}
-                size="sm"
-                onClick={() => selectSuggestedPrice(price)}
-                className={`px-4 ${amount === price.toString() ? 'bg-mimo-primary hover:bg-mimo-primary/90' : ''}`}
-              >
-                R$ {price}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="custom-amount" className="block mb-2">Ou digite um valor personalizado:</Label>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center">
-              <span className="bg-muted rounded-l-md border border-r-0 border-input px-3 py-2 text-muted-foreground">R$</span>
-              <Input
-                id="custom-amount"
-                type="number"
-                min={minimumAmount}
-                step="0.01"
-                placeholder="0.00" 
-                className="rounded-l-none"
-                value={amount}
-                onChange={(e) => {
-                  setAmount(e.target.value);
-                  if (error) setError(null);
-                }}
-              />
-            </div>
+    <div className="space-y-4 text-white">
+      <div>
+        <Label htmlFor="suggested-prices" className="block mb-2 text-white">Valores sugeridos:</Label>
+        <div className="flex flex-wrap gap-2 mb-4" id="suggested-prices">
+          {suggestedPrices.map(price => (
             <Button
-              onClick={handleSubmit}
-              className="bg-gradient-to-r from-mimo-primary to-mimo-secondary"
-              disabled={!amount}
+              key={price}
+              type="button"
+              variant={amount === price.toString() ? "default" : "outline"}
+              size="sm"
+              onClick={() => selectSuggestedPrice(price)}
+              className={`px-4 ${amount === price.toString() ? 'bg-mimo-primary hover:bg-mimo-primary/90 text-white' : 'text-white border-white/50 hover:text-white hover:bg-mimo-primary/20'}`}
             >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Enviar Mimo
+              R$ {price}
             </Button>
-          </div>
-          {error && <p className="text-destructive text-sm mt-1">{error}</p>}
+          ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div>
+        <Label htmlFor="custom-amount" className="block mb-2 text-white">Ou digite um valor personalizado:</Label>
+        <div className="flex items-center gap-2">
+          <div className="flex-1 flex items-center">
+            <span className="bg-slate-800 rounded-l-md border border-r-0 border-white/20 px-3 py-2 text-white">R$</span>
+            <Input
+              id="custom-amount"
+              type="number"
+              min={minimumAmount}
+              step="0.01"
+              placeholder="0.00" 
+              className="rounded-l-none bg-slate-800 border-white/20 text-white"
+              value={amount}
+              onChange={(e) => {
+                setAmount(e.target.value);
+                if (error) setError(null);
+              }}
+            />
+          </div>
+          <Button
+            onClick={handleSubmit}
+            className="bg-gradient-to-r from-mimo-primary to-mimo-secondary text-white"
+            disabled={!amount}
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Enviar Mimo
+          </Button>
+        </div>
+        {error && <p className="text-red-300 text-sm mt-1">{error}</p>}
+      </div>
+    </div>
   );
 };
 
