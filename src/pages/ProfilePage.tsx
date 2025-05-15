@@ -1,6 +1,6 @@
 
 import React from 'react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useCreatorProfile } from '@/hooks/useCreatorProfile';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';

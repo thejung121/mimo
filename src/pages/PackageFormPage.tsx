@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMimoPackages } from '@/hooks/useMimoPackages';
 import { Button } from '@/components/ui/button';

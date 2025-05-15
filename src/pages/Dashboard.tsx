@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatCards from '@/components/dashboard/StatCards';
 import DashboardContent from '@/components/dashboard/DashboardContent';
