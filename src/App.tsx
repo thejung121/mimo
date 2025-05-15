@@ -19,6 +19,10 @@ import PackageFormPage from "@/pages/PackageFormPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SettingsPage from "@/pages/SettingsPage";
 import MyPageFullDashboard from "@/pages/MyPageFullDashboard";
+import MyPageDashboard from "@/pages/MyPageDashboard";
+import MimosPage from "@/pages/MimosPage";
+import FansPage from "@/pages/FansPage";
+import ContentPage from "@/pages/ContentPage";
 
 // Import for auth-protected routes
 import PrivateRoute from "@/components/PrivateRoute";
@@ -43,6 +47,21 @@ function App() {
       <Route path="/dashboard" element={
         <PrivateRoute>
           <Dashboard />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/mimos" element={
+        <PrivateRoute>
+          <MimosPage />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/fans" element={
+        <PrivateRoute>
+          <FansPage />
+        </PrivateRoute>
+      } />
+      <Route path="/dashboard/conteudo" element={
+        <PrivateRoute>
+          <ContentPage />
         </PrivateRoute>
       } />
       <Route path="/dashboard/pacotes" element={

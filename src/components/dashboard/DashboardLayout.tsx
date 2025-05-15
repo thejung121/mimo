@@ -7,9 +7,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ModeToggle } from "@/components/ModeToggle"
-import { Link, Outlet, useNavigate } from "react-router-dom"
-import { Home, Users, Coins, Plus, Settings, Power, MessageSquare, User } from "lucide-react"
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom"
+import { Home, Users, Coins, Plus, Settings, Power, MessageSquare, User, Layout } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
+import { cn } from "@/lib/utils"
 
 const sidebarNavItems = [
   {
@@ -33,6 +34,11 @@ const sidebarNavItems = [
     icon: MessageSquare
   },
   {
+    title: "Minha Página",
+    href: "/dashboard/minha-pagina",
+    icon: Layout
+  },
+  {
     title: "Configurações",
     href: "/dashboard/configuracoes",
     icon: Settings
@@ -42,6 +48,7 @@ const sidebarNavItems = [
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const { creator } = useDashboard()
 
@@ -68,7 +75,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 to={item.href}
-                className="px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-accent"
+                className={cn(
+                  "px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-accent",
+                  location.pathname === item.href && "bg-accent"
+                )}
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.title}</span>
@@ -76,7 +86,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             ))}
             <Separator />
             <Link
-              to="/dashboard/mimos/novo"
+              to="/dashboard/pacotes/novo"
               className="group px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-accent transition-colors"
             >
               <Plus className="h-4 w-4 text-[#F54040]" />
