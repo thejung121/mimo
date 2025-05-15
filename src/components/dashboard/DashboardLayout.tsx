@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { useDashboard } from "@/hooks/useDashboard"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -39,7 +40,7 @@ const sidebarNavItems = [
   },
 ]
 
-export function DashboardLayout() {
+function DashboardLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -89,7 +90,7 @@ export function DashboardLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="bg-background border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 md:px-8">
+        <header className="bg-background border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 md:px-8" style={{backgroundColor: "#F54040"}}>
           <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -144,3 +145,5 @@ export function DashboardLayout() {
     </div>
   )
 }
+
+export default DashboardLayout;
