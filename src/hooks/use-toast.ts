@@ -1,5 +1,5 @@
 
-import { toast as sonnerToast, Toast } from "sonner";
+import { toast as sonnerToast } from "sonner";
 import { ReactNode } from "react";
 
 type ToastProps = {
