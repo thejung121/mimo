@@ -39,7 +39,6 @@ const sidebarNavItems = [
   },
 ]
 
-// Export the component directly instead of using default export
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -54,13 +53,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex">
       {/* Sidebar */}
       <aside
-        className={`bg-card border-r border-border w-64 flex-none py-4 px-2 md:px-4 transition-transform duration-300 transform ${
+        className={`bg-white border-r border-border w-64 flex-none py-4 px-2 md:px-4 transition-transform duration-300 transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
         <ScrollArea className="h-[calc(100vh-8rem)]">
           <div className="flex flex-col space-y-2">
-            <Link to="/" className="px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-secondary">
+            <Link to="/" className="px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-accent">
               <Home className="h-4 w-4" />
               <span>Início</span>
             </Link>
@@ -69,7 +68,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 to={item.href}
-                className="px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-secondary"
+                className="px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-accent"
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.title}</span>
@@ -78,9 +77,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Separator />
             <Link
               to="/dashboard/mimos/novo"
-              className="group px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-secondary transition-colors"
+              className="group px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-accent transition-colors"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-[#F54040]" />
               <span>Novo pacote</span>
             </Link>
           </div>
@@ -90,7 +89,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="bg-background border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 md:px-8" style={{backgroundColor: "#F54040"}}>
+        <header className="bg-white border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 md:px-8">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -138,7 +137,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 py-6 px-4 sm:px-6 md:px-8">
+        <main className="flex-1 py-6 px-4 sm:px-6 md:px-8 bg-white">
           {children}
         </main>
       </div>

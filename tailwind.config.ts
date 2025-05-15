@@ -54,11 +54,11 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				mimo: {
-					primary: '#9b87f5',
-					secondary: '#7E69AB',
-					tertiary: '#6E59A5',
+					primary: '#F54040',
+					secondary: '#E03030',
+					tertiary: '#D02020',
 					dark: '#1A1F2C',
-					light: '#D6BCFA',
+					light: '#FFEDED',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',

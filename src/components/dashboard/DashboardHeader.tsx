@@ -55,7 +55,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenProfileDialog }
           </Button>
         )}
         <Button 
-          className="mimo-button text-xs md:text-sm flex-1 md:flex-initial justify-center" 
+          className="bg-[#F54040] text-white hover:bg-[#E03030] text-xs md:text-sm flex-1 md:flex-initial justify-center" 
           asChild
           size="sm"
         >

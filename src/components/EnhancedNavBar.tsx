@@ -8,7 +8,7 @@ const EnhancedNavBar: React.FC = () => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <header className="bg-background border-b border-accent/10 py-4">
+    <header className="bg-white border-b border-accent/10 py-4">
       <div className="mimo-container flex justify-between items-center">
         <MimoLogo />
         
@@ -21,7 +21,7 @@ const EnhancedNavBar: React.FC = () => {
           </Link>
           
           {isAuthenticated ? (
-            <Link to="/dashboard" className="mimo-button-outline">
+            <Link to="/dashboard" className="text-[#F54040] border border-[#F54040] px-4 py-2 rounded-lg hover:bg-[#F54040]/10 transition-colors">
               Meu Painel
             </Link>
           ) : (
@@ -29,7 +29,7 @@ const EnhancedNavBar: React.FC = () => {
               <Link to="/login" className="text-foreground/70 hover:text-foreground transition-colors">
                 Login
               </Link>
-              <Link to="/cadastro" className="mimo-button">
+              <Link to="/cadastro" className="bg-[#F54040] text-white px-4 py-2 rounded-lg hover:bg-[#E03030] transition-colors">
                 Criar Página
               </Link>
             </div>

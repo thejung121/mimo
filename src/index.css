@@ -1,11 +1,10 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 250 33% 98%;
+    --background: 0 0% 100%;
     --foreground: 260 25% 20%;
 
     --card: 0 0% 100%;
@@ -14,74 +13,35 @@
     --popover: 0 0% 100%;
     --popover-foreground: 260 25% 20%;
 
-    --primary: 255 83% 75%;
+    --primary: 0 89% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 262 27% 54%;
+    --secondary: 0 89% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 264 19% 95%;
+    --muted: 0 0% 95%;
     --muted-foreground: 260 12% 50%;
 
-    --accent: 264 55% 95%;
-    --accent-foreground: 262 27% 54%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 89% 60%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 264 19% 88%;
-    --input: 264 19% 88%;
-    --ring: 255 83% 75%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 0 89% 60%;
 
     --radius: 0.8rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 0 89% 60%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 260 25% 15%;
-    --foreground: 0 0% 95%;
-
-    --card: 260 25% 18%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 260 25% 18%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 255 83% 75%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 262 27% 54%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 264 25% 25%;
-    --muted-foreground: 260 12% 75%;
-
-    --accent: 264 25% 30%;
-    --accent-foreground: 0 0% 95%;
-
-    --destructive: 0 62.8% 50.6%;
-    --destructive-foreground: 0 0% 95%;
-
-    --border: 264 25% 30%;
-    --input: 264 25% 30%;
-    --ring: 255 83% 75%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 89% 60%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 0 89% 60%;
   }
 }
 
@@ -105,7 +65,7 @@
   }
   
   .mimo-button {
-    @apply bg-mimo-primary text-white py-3 px-6 rounded-lg font-medium shadow-md hover:bg-mimo-secondary transition-colors;
+    @apply bg-[#F54040] text-white py-3 px-6 rounded-lg font-medium shadow-md hover:bg-[#E03030] transition-colors;
   }
 
   .mimo-input {
@@ -121,7 +81,7 @@
   }
   
   .mimo-gradient {
-    @apply bg-gradient-to-r from-mimo-primary to-mimo-secondary;
+    @apply bg-gradient-to-r from-[#F54040] to-[#E03030];
   }
 }
 

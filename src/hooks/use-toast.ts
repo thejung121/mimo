@@ -1,68 +1,50 @@
 
-import { toast as sonnerToast } from "sonner"
+import { toast as sonnerToast, Toast } from "sonner";
+import { ReactNode } from "react";
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+type ToastProps = {
+  title?: ReactNode;
+  description?: ReactNode;
+  variant?: "default" | "destructive";
+  [key: string]: any;
+};
 
-type ToasterToast = {
-  id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: React.ReactNode
-  variant?: "default" | "destructive"
-}
+export const toasts: Array<{
+  id: string | number;
+  title?: ReactNode;
+  description?: ReactNode;
+  variant?: "default" | "destructive";
+}> = [];
 
-const toasts: ToasterToast[] = []
+export function toast({ title, description, variant = "default", ...props }: ToastProps) {
+  const id = sonnerToast(title as string, {
+    description,
+    ...props,
+  });
 
-function generateId() {
-  return Math.random().toString(36).substring(2, 9)
-}
-
-export function toast({
-  title,
-  description,
-  variant,
-  ...props
-}: {
-  title?: React.ReactNode
-  description?: React.ReactNode
-  variant?: "default" | "destructive"
-} & Omit<ToasterToast, "id">) {
-  const id = generateId()
-  const toast: ToasterToast = {
+  toasts.push({
     id,
     title,
     description,
     variant,
-    ...props,
-  }
+  });
 
-  toasts.push(toast)
-
-  if (toasts.length > TOAST_LIMIT) {
-    toasts.shift()
-  }
-  
-  const options: any = { id }
-  
-  if (variant === "destructive") {
-    options.style = { backgroundColor: "hsl(var(--destructive))", color: "hsl(var(--destructive-foreground))" }
-  }
-
-  return sonnerToast(title as string, {
-    description: description as string,
-    ...options
-  })
+  return id;
 }
 
-export function useToast() {
+export function dismiss(toastId?: string) {
+  sonnerToast.dismiss(toastId);
+  
+  const index = toasts.findIndex((t) => t.id === toastId);
+  if (index !== -1) {
+    toasts.splice(index, 1);
+  }
+}
+
+export const useToast = () => {
   return {
     toast,
-    dismiss: (toastId?: string) => {
-      if (toastId) {
-        sonnerToast.dismiss(toastId)
-      }
-    },
-    toasts: [...toasts], // Export toasts array
-  }
-}
+    dismiss,
+    toasts,
+  };
+};
