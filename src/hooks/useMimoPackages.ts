@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { MimoPackage } from '@/types/creator';
 import { supabase } from '@/services/supabase';
@@ -17,6 +18,38 @@ export const useMimoPackages = (creatorId?: string) => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Feature methods implementation
+  const handleAddFeature = () => {
+    console.log('Feature add requested');
+    // Implementation will be provided in usePackageFeatures
+  };
+
+  const handleFeatureChange = (index: number, value: string) => {
+    console.log('Feature change requested', index, value);
+    // Implementation will be provided in usePackageFeatures
+  };
+
+  const handleRemoveFeature = (index: number) => {
+    console.log('Feature remove requested', index);
+    // Implementation will be provided in usePackageFeatures
+  };
+
+  // Media methods implementation
+  const handleAddMedia = (packageId: number | string | null, media: any) => {
+    console.log('Media add requested', packageId, media);
+    // Implementation will be provided in usePackageMedia  
+  };
+
+  const handleRemoveMedia = (packageId: number | string | null, mediaId: number) => {
+    console.log('Media remove requested', packageId, mediaId);
+    // Implementation will be provided in usePackageMedia
+  };
+
+  const handleTogglePreview = (packageId: number | string | null, mediaId: number) => {
+    console.log('Toggle preview requested', packageId, mediaId);
+    // Implementation will be provided in usePackageMedia
+  };
 
   const fetchPackages = async () => {
     setLoading(true);
@@ -49,13 +82,20 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   };
 
-  const savePackage = async (packageData: MimoPackage) => {
-    const newPackage = await savePackageToSupabase(packageData);
-    if (newPackage) {
-      setPackages(prevPackages => [...prevPackages, newPackage]);
-      toast({
-        title: 'Pacote salvo com sucesso!',
-      });
+  const savePackage = async (packageData: MimoPackage): Promise<boolean> => {
+    try {
+      const newPackage = await savePackageToSupabase(packageData);
+      if (newPackage) {
+        setPackages(prevPackages => [...prevPackages, newPackage]);
+        toast({
+          title: 'Pacote salvo com sucesso!',
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error in savePackage:", error);
+      return false;
     }
   };
 
@@ -86,6 +126,7 @@ export const useMimoPackages = (creatorId?: string) => {
       toast({
         title: 'Pacote removido com sucesso!',
       });
+      return true;
     } catch (error: any) {
       console.error('Error deleting package:', error.message);
       toast({
@@ -93,6 +134,7 @@ export const useMimoPackages = (creatorId?: string) => {
         description: error.message,
         variant: 'destructive',
       });
+      return false;
     }
   };
 
@@ -116,6 +158,7 @@ export const useMimoPackages = (creatorId?: string) => {
       toast({
         title: 'Pacote destacado atualizado!',
       });
+      return true;
     } catch (error: any) {
       console.error('Error toggling featured status:', error.message);
       toast({
@@ -123,6 +166,7 @@ export const useMimoPackages = (creatorId?: string) => {
         description: error.message,
         variant: 'destructive',
       });
+      return false;
     }
   };
 
@@ -187,49 +231,30 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   }, [creatorId, user?.id]);
 
-  // Add these methods for package feature and media management
-  const handleAddFeature = () => {
-    // Implementation will be delegated to usePackageFeatures
-    console.log('Feature add requested');
+  // Package editing methods
+  const handleEditPackage = (id: number | string) => {
+    console.log('Edit package requested', id);
+    // Find the package and return it
+    const packageToEdit = packages.find(p => String(p.id) === String(id));
+    return packageToEdit ? true : false;
   };
 
-  const handleFeatureChange = (index: number, value: string) => {
-    // Implementation will be delegated to usePackageFeatures
-    console.log('Feature change requested', index, value);
+  const setShowNewPackageForm = (show: boolean) => {
+    console.log('Show new package form', show);
+    // This would be implemented in a parent component
   };
 
-  const handleRemoveFeature = (index: number) => {
-    // Implementation will be delegated to usePackageFeatures
-    console.log('Feature remove requested', index);
+  // Handle package changes
+  const handlePackageChange = (field: string, value: any) => {
+    console.log('Package change requested', field, value);
+    // Implementation will be provided in usePackageForm
   };
 
-  const handleAddMedia = (packageId: number | null, media: any) => {
-    // Implementation will be delegated to usePackageMedia
-    console.log('Media add requested', packageId, media);
-  };
-
-  const handleRemoveMedia = (packageId: number | null, mediaId: number) => {
-    // Implementation will be delegated to usePackageMedia
-    console.log('Media remove requested', packageId, mediaId);
-  };
-
-  const handleTogglePreview = (packageId: number | null, mediaId: number) => {
-    // Implementation will be delegated to usePackageMedia
-    console.log('Toggle preview requested', packageId, mediaId);
-  };
-
-  // Aliases to keep compatibility with existing code
+  // Aliases for backward compatibility
   const mimoPackages = packages;
   const setMimoPackages = setPackages;
   const handleDeletePackage = deletePackage;
   const handleSavePackage = savePackage;
-  const handleEditPackage = (id: number) => {
-    console.log('Edit package requested', id);
-    return true;
-  };
-  const setShowNewPackageForm = (show: boolean) => {
-    console.log('Show new package form', show);
-  };
 
   return {
     packages,
@@ -242,19 +267,26 @@ export const useMimoPackages = (creatorId?: string) => {
     sortOrder,
     toggleFeatured,
     setPackages,
+    
     // Feature methods
     handleAddFeature,
     handleFeatureChange,
     handleRemoveFeature,
+    
     // Media methods
     handleAddMedia,
     handleRemoveMedia,
     handleTogglePreview,
+    
+    // Package handling
+    handlePackageChange,
+    
     // Extra methods
     handleSavePackage,
     handleEditPackage,
     handleDeletePackage,
     setShowNewPackageForm,
+    
     // Compatibility aliases
     mimoPackages,
     setMimoPackages

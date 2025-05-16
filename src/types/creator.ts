@@ -26,13 +26,14 @@ export interface MediaItem {
 }
 
 export interface MimoPackage {
-  id?: number;
+  id: number | string;
   title: string;
   price: number;
   features: string[];
   highlighted: boolean;
   media: MediaItem[];
-  isHidden?: boolean; // Adding the missing property
+  isHidden: boolean;
+  description?: string; // Add description as an optional field
 }
 
 // Interface for form data

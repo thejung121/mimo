@@ -1,6 +1,7 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '@/services/supabase';
-import { UserData } from '@/types/auth';
+import { AuthUser, UserData } from '@/types/auth';
 
 export interface AuthContextType {
   user: UserData | null;
@@ -9,6 +10,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string, username: string, document: string) => Promise<boolean>;
+  updateUserProfile?: (userData: { name?: string; document?: string; username?: string; phone?: string }) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,7 +19,8 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   login: async () => false,
   logout: async () => {},
-  register: async () => false
+  register: async () => false,
+  updateUserProfile: async () => false
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -28,9 +31,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Initialize auth state
   useEffect(() => {
-    const session = supabase.auth.getSession()
-    
-    supabase.auth.onAuthStateChange((_event, session) => {
+    // First set up the auth state listener to react to changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser({
           id: session.user.id,
@@ -39,26 +41,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           username: session.user.user_metadata.username || '',
           document: session.user.user_metadata.document || '',
           avatar_url: session.user.user_metadata.avatar_url || '',
+          phone: session.user.user_metadata.phone || '',
         });
       } else {
         setUser(null);
       }
       setIsLoading(false);
-    })
+    });
 
-    if (session) {
-      if (session?.session?.user) {
+    // Then fetch the current session
+    const getSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error fetching session:', error);
+        setIsLoading(false);
+        return;
+      }
+      
+      if (data && data.session && data.session.user) {
         setUser({
-          id: session.session.user.id,
-          email: session.session.user.email || '',
-          name: session.session.user.user_metadata.name || '',
-          username: session.session.user.user_metadata.username || '',
-          document: session.session.user.user_metadata.document || '',
-          avatar_url: session.session.user.user_metadata.avatar_url || '',
+          id: data.session.user.id,
+          email: data.session.user.email || '',
+          name: data.session.user.user_metadata.name || '',
+          username: data.session.user.user_metadata.username || '',
+          document: data.session.user.user_metadata.document || '',
+          avatar_url: data.session.user.user_metadata.avatar_url || '',
+          phone: data.session.user.user_metadata.phone || '',
         });
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    };
+    
+    getSession();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Login function
@@ -83,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           username: data.user.user_metadata.username || '',
           document: data.user.user_metadata.document || '',
           avatar_url: data.user.user_metadata.avatar_url || '',
+          phone: data.user.user_metadata.phone || '',
         });
         return true;
       }
@@ -142,6 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           username: data.user.user_metadata.username || '',
           document: data.user.user_metadata.document || '',
           avatar_url: data.user.user_metadata.avatar_url || '',
+          phone: data.user.user_metadata.phone || '',
         });
         return true;
       }
@@ -155,6 +176,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Add updateUserProfile function
+  const updateUserProfile = async (userData: { 
+    name?: string; 
+    document?: string; 
+    username?: string;
+    phone?: string;
+  }): Promise<boolean> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: userData
+      });
+
+      if (error) {
+        console.error('Profile update error:', error.message);
+        return false;
+      }
+
+      // Update local user state
+      setUser(currentUser => {
+        if (!currentUser) return null;
+        return {
+          ...currentUser,
+          ...userData
+        };
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -163,7 +217,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading, 
         login,
         logout,
-        register
+        register,
+        updateUserProfile
       }}
     >
       {children}

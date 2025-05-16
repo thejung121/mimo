@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Check, FileImage } from 'lucide-react';
 
-interface MimoPackageProps {
+export interface MimoPackageProps {
   title: string;
   price: number;
   features: string[];
