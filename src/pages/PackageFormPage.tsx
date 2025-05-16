@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -11,8 +10,10 @@ import MediaUploader from '@/components/MediaUploader';
 import MediaItemDisplay from '@/components/MediaItemDisplay';
 import { useToast } from '@/components/ui/use-toast';
 import { saveMimoPackages } from '@/services/creator/packageService';
-import { MimoPackage } from '@/types/creator';
+import { MimoPackage, MediaItem } from '@/types/creator';
 import { emptyPackage } from '@/hooks/mimo-packages/packageData';
+import { usePackageFeatures } from '@/hooks/mimo-packages/usePackageFeatures';
+import { usePackageMedia } from '@/hooks/mimo-packages/usePackageMedia';
 
 const PackageFormPage = () => {
   const { id } = useParams();
@@ -21,24 +22,31 @@ const PackageFormPage = () => {
   const isEditing = id !== 'novo';
   
   const {
-    mimoPackages,
-    setMimoPackages,
-    handleAddFeature,
-    handleFeatureChange,
-    handleRemoveFeature,
-    handleAddMedia,
-    handleRemoveMedia,
-    handleTogglePreview,
+    packages,
+    setPackages
   } = useMimoPackages();
 
   // Local state for form data to prevent modifying the global state directly
   const [packageData, setPackageData] = useState<MimoPackage>({...emptyPackage});
   
+  // Custom hooks for features and media management
+  const { 
+    handleAddFeature, 
+    handleFeatureChange, 
+    handleRemoveFeature 
+  } = usePackageFeatures(packageData, setPackageData);
+  
+  const { 
+    handleAddMedia, 
+    handleRemoveMedia, 
+    handleTogglePreview 
+  } = usePackageMedia(packages, setPackages, packageData, setPackageData);
+  
   // If we're editing, load the package data
   useEffect(() => {
     if (isEditing && id) {
       const packageId = parseInt(id);
-      const packageToEdit = mimoPackages.find(p => p.id === packageId);
+      const packageToEdit = packages.find(p => p.id === packageId);
       
       if (packageToEdit) {
         setPackageData({...packageToEdit});
@@ -52,7 +60,7 @@ const PackageFormPage = () => {
         navigate('/dashboard/pacotes');
       }
     }
-  }, [isEditing, id, mimoPackages, navigate, toast]);
+  }, [isEditing, id, packages, navigate, toast]);
 
   const handlePackageChange = (field: string, value: any) => {
     setPackageData(prev => ({
@@ -93,7 +101,7 @@ const PackageFormPage = () => {
     }
 
     // Create a new package with a unique ID or use existing ID if editing
-    const packageId = isEditing && id ? parseInt(id) : Math.max(0, ...mimoPackages.map(p => p.id || 0)) + 1;
+    const packageId = isEditing && id ? parseInt(id) : Math.max(0, ...packages.map(p => p.id || 0)) + 1;
     
     const packageToSave = {
       ...packageData,
@@ -102,11 +110,11 @@ const PackageFormPage = () => {
     };
 
     // Remove existing package with same ID if it exists (should only happen when editing)
-    const filteredPackages = mimoPackages.filter(p => p.id !== packageId);
+    const filteredPackages = packages.filter(p => p.id !== packageId);
     
     // Update the packages list
     const updatedPackages = [...filteredPackages, packageToSave];
-    setMimoPackages(updatedPackages);
+    setPackages(updatedPackages);
     
     // Save to localStorage
     saveMimoPackages(updatedPackages);

@@ -63,7 +63,7 @@ export const useMimoPackages = (creatorId?: string) => {
     const updatedPackage = await updatePackageInSupabase(packageData);
     if (updatedPackage) {
       setPackages(prevPackages =>
-        prevPackages.map(pkg => (pkg.id === packageData.id ? { ...pkg, ...updatedPackage } : pkg))
+        prevPackages.map(pkg => (String(pkg.id) === String(packageData.id) ? { ...pkg, ...updatedPackage } : pkg))
       );
       toast({
         title: 'Pacote atualizado com sucesso!',
@@ -132,7 +132,7 @@ export const useMimoPackages = (creatorId?: string) => {
         .from('packages')
         .insert([{ 
           ...packageData,
-          description: packageData.description || '', // Add default description
+          description: packageData.description || '', 
           creator_id: creatorId || user?.id 
         }])
         .select();
@@ -158,7 +158,7 @@ export const useMimoPackages = (creatorId?: string) => {
         .update({ 
           title: packageData.title,
           price: packageData.price,
-          description: packageData.description || '', // Add default description
+          description: packageData.description || '', 
           features: packageData.features,
           highlighted: packageData.highlighted,
           isHidden: packageData.isHidden,
@@ -187,10 +187,49 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   }, [creatorId, user?.id]);
 
+  // Add these methods for package feature and media management
+  const handleAddFeature = () => {
+    // Implementation will be delegated to usePackageFeatures
+    console.log('Feature add requested');
+  };
+
+  const handleFeatureChange = (index: number, value: string) => {
+    // Implementation will be delegated to usePackageFeatures
+    console.log('Feature change requested', index, value);
+  };
+
+  const handleRemoveFeature = (index: number) => {
+    // Implementation will be delegated to usePackageFeatures
+    console.log('Feature remove requested', index);
+  };
+
+  const handleAddMedia = (packageId: number | null, media: any) => {
+    // Implementation will be delegated to usePackageMedia
+    console.log('Media add requested', packageId, media);
+  };
+
+  const handleRemoveMedia = (packageId: number | null, mediaId: number) => {
+    // Implementation will be delegated to usePackageMedia
+    console.log('Media remove requested', packageId, mediaId);
+  };
+
+  const handleTogglePreview = (packageId: number | null, mediaId: number) => {
+    // Implementation will be delegated to usePackageMedia
+    console.log('Toggle preview requested', packageId, mediaId);
+  };
+
   // Aliases to keep compatibility with existing code
   const mimoPackages = packages;
   const setMimoPackages = setPackages;
   const handleDeletePackage = deletePackage;
+  const handleSavePackage = savePackage;
+  const handleEditPackage = (id: number) => {
+    console.log('Edit package requested', id);
+    return true;
+  };
+  const setShowNewPackageForm = (show: boolean) => {
+    console.log('Show new package form', show);
+  };
 
   return {
     packages,
@@ -202,10 +241,23 @@ export const useMimoPackages = (creatorId?: string) => {
     setSortOrder,
     sortOrder,
     toggleFeatured,
+    setPackages,
+    // Feature methods
+    handleAddFeature,
+    handleFeatureChange,
+    handleRemoveFeature,
+    // Media methods
+    handleAddMedia,
+    handleRemoveMedia,
+    handleTogglePreview,
+    // Extra methods
+    handleSavePackage,
+    handleEditPackage,
+    handleDeletePackage,
+    setShowNewPackageForm,
     // Compatibility aliases
     mimoPackages,
-    setMimoPackages,
-    handleDeletePackage
+    setMimoPackages
   };
 };
 

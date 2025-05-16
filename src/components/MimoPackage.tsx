@@ -7,16 +7,16 @@ interface MimoPackageProps {
   title: string;
   price: number;
   features: string[];
-  highlighed?: boolean;
+  highlighted?: boolean;
   previewImageUrl?: string;
   onClick: () => void;
 }
 
-const MimoPackage = ({ title, price, features, highlighed = false, previewImageUrl, onClick }: MimoPackageProps) => {
+const MimoPackage = ({ title, price, features, highlighted = false, previewImageUrl, onClick }: MimoPackageProps) => {
   return (
     <div 
       className={`mimo-card ${
-        highlighed 
+        highlighted 
           ? 'border-mimo-primary shadow-lg shadow-mimo-primary/20 scale-105' 
           : 'hover:border-mimo-primary/50'
       }`}
@@ -50,7 +50,7 @@ const MimoPackage = ({ title, price, features, highlighed = false, previewImageU
         
         <Button 
           onClick={onClick}
-          className={highlighed ? "w-full mimo-button" : "w-full bg-card text-foreground border border-border hover:border-mimo-primary hover:text-mimo-primary"}
+          className={highlighted ? "w-full mimo-button" : "w-full bg-card text-foreground border border-border hover:border-mimo-primary hover:text-mimo-primary"}
         >
           Enviar R${price} de Mimo
         </Button>

@@ -115,13 +115,15 @@ export const useCreatorEditor = () => {
 
   // Save package handler
   const handleSavePackage = async () => {
-    const result = await packagesHook.savePackage(newPackage);
-    if (result) {
+    try {
+      await packagesHook.savePackage(newPackage);
       setNewPackage({...defaultPackage});
       setShowNewPackageForm(false);
       return true;
+    } catch (error) {
+      console.error("Error saving package:", error);
+      return false;
     }
-    return false;
   };
 
   // Edit package handler

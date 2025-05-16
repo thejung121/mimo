@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ const MyPageDashboard = () => {
     packagesHook.setPackages(loadedPackages);
     setIsLoaded(true);
     console.log("MyPageDashboard loaded packages:", loadedPackages);
-  }, [packagesHook.setPackages]);
+  }, []);
 
   const copyShareLink = () => {
     if (user?.username) {

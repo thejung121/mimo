@@ -1,253 +1,172 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
-import { LOCAL_STORAGE_KEY } from '@/utils/storage';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { supabase } from '@/services/supabase';
+import { UserData } from '@/types/auth';
 
-// Add phone to user interface
-interface UserData {
-  id: string;
-  name?: string;
-  email?: string;
-  username?: string;
-  document?: string;
-  avatar?: string;
-  phone?: string;
-  role?: string; // Add role field for admin check
-}
-
-interface AuthContextType {
+export interface AuthContextType {
   user: UserData | null;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, userData?: { name?: string; username?: string }) => Promise<{ error: Error | null, data: any | null }>;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  login: (email: string, password: string) => Promise<boolean>; // Adding login method
-  loading: boolean;
-  isAuthenticated: boolean; // Adding isAuthenticated property
-  isLoading: boolean; // Adding isLoading property
-  updateUserProfile?: (userData: { name?: string; username?: string; document?: string; phone?: string }) => Promise<boolean>;
+  register: (name: string, email: string, password: string, username: string, document: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  signIn: async () => ({ error: null }),
-  signUp: async () => ({ error: null, data: null }),
-  logout: async () => { },
-  login: async () => false, // Default implementation
-  loading: false,
-  isAuthenticated: false, // Default value
-  isLoading: false, // Default value
-  updateUserProfile: async () => true,
+  isAuthenticated: false,
+  isLoading: true,
+  login: async () => false,
+  logout: async () => {},
+  register: async () => false
 });
 
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
+export const useAuth = () => useContext(AuthContext);
 
-const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Add isAuthenticated and isLoading computed properties
-  const isAuthenticated = Boolean(user);
-  const isLoading = loading;
-
+  // Initialize auth state
   useEffect(() => {
-    const loadUserFromLocalStorage = () => {
-      const storedAuth = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (storedAuth) {
-        try {
-          const authData = JSON.parse(storedAuth);
-          setUser(authData);
-        } catch (error) {
-          console.error('Failed to parse auth data from localStorage', error);
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
-        }
-      }
-      setLoading(false);
-    };
-
-    loadUserFromLocalStorage();
-
-    // Listen for auth state changes from Supabase
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        const supabaseUser = session?.user;
-        if (supabaseUser) {
-          const convertedUser = convertSupabaseUser(supabaseUser);
-          setUser(convertedUser);
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(convertedUser));
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
-      }
-    });
-  }, []);
-
-  const convertSupabaseUser = (user: any): UserData | null => {
-    if (!user) return null;
+    const session = supabase.auth.getSession()
     
-    return {
-      id: user.id,
-      name: user.user_metadata?.name || null,
-      email: user.email,
-      username: user.user_metadata?.username || null,
-      document: user.user_metadata?.document || null,
-      avatar: user.user_metadata?.avatar || null,
-      phone: user.user_metadata?.phone || null,
-      role: user.user_metadata?.role || null,
-    };
-  };
-
-  const signIn = async (email: string, password: string): Promise<{ error: Error | null }> => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        console.error('Sign-in error:', error);
-        return { error };
-      }
-
-      const convertedUser = convertSupabaseUser(data.user);
-      setUser(convertedUser);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(convertedUser));
-      return { error: null };
-    } catch (error: any) {
-      console.error('Unexpected sign-in error:', error);
-      return { error: new Error(error.message || 'An unexpected error occurred') };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signUp = async (email: string, password: string, userData?: { name?: string; username?: string }): Promise<{ error: Error | null, data: any | null }> => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            ...userData,
-          },
-        },
-      });
-
-      if (error) {
-        console.error('Sign-up error:', error);
-        return { error, data: null };
-      }
-      
-      const convertedUser = convertSupabaseUser(data.user);
-      setUser(convertedUser);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(convertedUser));
-      return { error: null, data };
-    } catch (error: any) {
-      console.error('Unexpected sign-up error:', error);
-      return { error: new Error(error.message || 'An unexpected error occurred'), data: null };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = async (): Promise<void> => {
-    setLoading(true);
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Add login method that matches the expected interface
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setLoading(true);
-    try {
-      const { error } = await signIn(email, password);
-      if (error) {
-        console.error('Login error:', error);
-        return false;
-      }
-      return true;
-    } catch (error: any) {
-      console.error('Unexpected login error:', error);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Update the updateUserProfile function to include phone
-  const updateUserProfile = async (userData: { name?: string; username?: string; document?: string; phone?: string }): Promise<boolean> => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          name: userData.name,
-          username: userData.username,
-          document: userData.document,
-          phone: userData.phone,
-        }
-      });
-
-      if (error) {
-        console.error('Error updating user profile:', error);
-        return false;
-      }
-
-      // Update local user state with new information
-      if (user) {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
         setUser({
-          ...user,
-          name: userData.name !== undefined ? userData.name : user.name,
-          username: userData.username !== undefined ? userData.username : user.username,
-          document: userData.document !== undefined ? userData.document : user.document,
-          phone: userData.phone !== undefined ? userData.phone : user.phone,
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata.name || '',
+          username: session.user.user_metadata.username || '',
+          document: session.user.user_metadata.document || '',
+          avatar_url: session.user.user_metadata.avatar_url || '',
+        });
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    })
+
+    if (session) {
+      if (session?.session?.user) {
+        setUser({
+          id: session.session.user.id,
+          email: session.session.user.email || '',
+          name: session.session.user.user_metadata.name || '',
+          username: session.session.user.user_metadata.username || '',
+          document: session.session.user.user_metadata.document || '',
+          avatar_url: session.session.user.user_metadata.avatar_url || '',
         });
       }
+    }
+    setIsLoading(false);
+  }, []);
 
-      // Update auth state in local storage
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
-        ...JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}'),
-        name: userData.name,
-        username: userData.username,
-        document: userData.document,
-        phone: userData.phone,
-      }));
+  // Login function
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
 
-      return true;
-    } catch (error) {
-      console.error('Exception in updateUserProfile:', error);
+      if (error) {
+        console.error('Login error:', error.message);
+        return false;
+      }
+
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+          name: data.user.user_metadata.name || '',
+          username: data.user.user_metadata.username || '',
+          document: data.user.user_metadata.document || '',
+          avatar_url: data.user.user_metadata.avatar_url || '',
+        });
+        return true;
+      }
+
       return false;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Logout function
+  const logout = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Logout error:', error.message);
+      }
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Register function
+  const register = async (name: string, email: string, password: string, username: string, document: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            name: name,
+            username: username,
+            document: document,
+            avatar_url: '',
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Registration error:', error.message);
+        return false;
+      }
+
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+          name: data.user.user_metadata.name || '',
+          username: data.user.user_metadata.username || '',
+          document: data.user.user_metadata.document || '',
+          avatar_url: data.user.user_metadata.avatar_url || '',
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      signIn, 
-      signUp, 
-      logout, 
-      loading, 
-      updateUserProfile,
-      login,
-      isAuthenticated,
-      isLoading 
-    }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        isAuthenticated: !!user, 
+        isLoading, 
+        login,
+        logout,
+        register
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
-
-const useAuth = () => useContext(AuthContext);
-
-export { AuthProvider, useAuth };
