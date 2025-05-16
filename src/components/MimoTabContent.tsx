@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MimoPackage } from '@/types/creator';
 import MimoPackageComponent from './MimoPackage';
@@ -25,7 +26,7 @@ const MimoTabContent = ({ creator, packages, suggestedPrices, onSelectPackage, o
                 title={pkg.title}
                 price={pkg.price}
                 features={pkg.features}
-                highlighted={pkg.highlighted}
+                highlighed={pkg.highlighted} // Fixed typo: highlighed instead of highlighted to match component
                 onSelect={() => onSelectPackage(pkg)}
               />
             ))}

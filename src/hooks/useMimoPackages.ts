@@ -1,152 +1,202 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MimoPackage } from '@/types/creator';
-import { emptyPackage } from './mimo-packages/packageData';
-import { usePackageFeatures } from './mimo-packages/usePackageFeatures';
-import { usePackageMedia } from './mimo-packages/usePackageMedia';
-import { usePackageCRUD } from './mimo-packages/usePackageCRUD';
-import { useToast } from '@/components/ui/use-toast';
-import { getMimoPackages, saveMimoPackages } from '@/services/creator/packageService';
-import { getCreatorPackages } from '@/services/supabase/creatorService';
+import { supabase } from '@/services/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from './use-toast';
 
-export const useMimoPackages = () => {
-  const { toast } = useToast();
+interface UseMimoPackagesProps {
+  creatorId?: string;
+}
+
+type SortOrder = 'asc' | 'desc';
+
+export const useMimoPackages = (creatorId?: string) => {
+  const [packages, setPackages] = useState<MimoPackage[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const { user } = useAuth();
-  const [mimoPackages, setMimoPackagesState] = useState<MimoPackage[]>([]);
-  const [showNewPackageForm, setShowNewPackageForm] = useState(false);
-  const [newPackage, setNewPackage] = useState<MimoPackage>({...emptyPackage});
-  const [isLoading, setIsLoading] = useState(true);
-  
-  // Load saved packages
-  useEffect(() => {
-    const loadPackages = async () => {
-      try {
-        setIsLoading(true);
-        // First try to load from Supabase if user is authenticated
-        if (user?.id) {
-          const supabasePackages = await getCreatorPackages(user.id);
-          if (supabasePackages && supabasePackages.length > 0) {
-            console.log("Loaded packages from Supabase:", supabasePackages);
-            setMimoPackagesState(supabasePackages);
-            // Also save to localStorage for faster access next time
-            saveMimoPackages(supabasePackages);
-            setIsLoading(false);
-            return;
-          }
-        }
-        
-        // Fallback to local storage
-        const localPackages = getMimoPackages();
-        console.log("Loaded packages from local storage:", localPackages);
-        setMimoPackagesState(localPackages);
-      } catch (error) {
-        console.error("Error loading packages:", error);
-        setMimoPackagesState([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadPackages();
-  }, [user]);
-  
-  // Save packages whenever they change - this ensures immediate saving
-  useEffect(() => {
-    if (!isLoading) {
-      console.log("Auto-saving packages to storage:", mimoPackages);
-      saveMimoPackages(mimoPackages);
-    }
-  }, [mimoPackages, isLoading]);
-  
-  // Memoize state updates to reduce re-renders
-  const updateNewPackage = useCallback((changes: Partial<MimoPackage>) => {
-    setNewPackage(prev => ({
-      ...prev,
-      ...changes
-    }));
-  }, []);
+  const { toast } = useToast();
 
-  // Enhanced setMimoPackages function that can handle both direct arrays and updater functions
-  const setMimoPackages = useCallback((updater: MimoPackage[] | ((prev: MimoPackage[]) => MimoPackage[])) => {
-    // Add error handling to prevent state corruption
+  const fetchPackages = async () => {
+    setLoading(true);
     try {
-      setMimoPackagesState(prevPackages => {
-        const newPackages = typeof updater === 'function' ? updater(prevPackages) : updater;
-        
-        // Immediately save to localStorage to ensure packages are persisted
-        saveMimoPackages(newPackages);
-        
-        // Also save to Supabase if user is authenticated
-        if (user?.id && newPackages && newPackages.length > 0) {
-          // This is asynchronous but we don't need to wait for it to complete
-          newPackages.forEach(pkg => {
-            if (pkg.id) {
-              updatePackageInSupabase(pkg, pkg.id?.toString());
-            } else {
-              savePackageToSupabase(pkg, user.id);
-            }
-          });
-        }
-        
-        return newPackages;
-      });
-    } catch (error) {
-      console.error("Error updating packages:", error);
+      const { data, error } = await supabase
+        .from('packages')
+        .select('*')
+        .eq('creator_id', creatorId || user?.id)
+        .order('price', { ascending: sortOrder === 'asc' });
+
+      if (error) {
+        setError(error);
+        toast({
+          title: 'Erro ao carregar pacotes',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        setPackages(data || []);
+      }
+    } catch (err: any) {
+      setError(err);
       toast({
-        title: "Erro ao atualizar pacotes",
-        description: "Ocorreu um erro ao atualizar os pacotes. Por favor, tente novamente.",
-        variant: "destructive"
+        title: 'Erro inesperado',
+        description: err.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const savePackage = async (packageData: MimoPackage) => {
+    const newPackage = await savePackageToSupabase(packageData);
+    if (newPackage) {
+      setPackages(prevPackages => [...prevPackages, newPackage]);
+      toast({
+        title: 'Pacote salvo com sucesso!',
       });
     }
-  }, [toast, user]);
-  
-  // Import feature management functionality with memoization
-  const { 
-    handleAddFeature, 
-    handleFeatureChange, 
-    handleRemoveFeature 
-  } = usePackageFeatures(newPackage, setNewPackage);
-  
-  // Import media management functionality
-  const { 
-    handleAddMedia, 
-    handleRemoveMedia, 
-    handleTogglePreview 
-  } = usePackageMedia(mimoPackages, setMimoPackages, newPackage, setNewPackage);
+  };
 
-  // Import package CRUD operations
-  const { 
-    handlePackageChange, 
-    handleSavePackage, 
-    handleDeletePackage, 
-    handleEditPackage,
-    isSaving
-  } = usePackageCRUD(
-    mimoPackages, 
-    setMimoPackages, 
-    newPackage, 
-    setNewPackage,
-    emptyPackage,
-    setShowNewPackageForm
-  );
+  const updatePackage = async (packageData: MimoPackage) => {
+    const updatedPackage = await updatePackageInSupabase(packageData);
+    if (updatedPackage) {
+      setPackages(prevPackages =>
+        prevPackages.map(pkg => (pkg.id === packageData.id ? { ...pkg, ...updatedPackage } : pkg))
+      );
+      toast({
+        title: 'Pacote atualizado com sucesso!',
+      });
+    }
+  };
+
+  const deletePackage = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('packages')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      setPackages(prevPackages => prevPackages.filter(pkg => pkg.id !== id));
+      toast({
+        title: 'Pacote removido com sucesso!',
+      });
+    } catch (error: any) {
+      console.error('Error deleting package:', error.message);
+      toast({
+        title: 'Erro ao remover pacote',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const toggleFeatured = async (packageId: string, isHighlighted: boolean) => {
+    try {
+      const { data, error } = await supabase
+        .from('packages')
+        .update({ highlighted: !isHighlighted })
+        .eq('id', packageId)
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      setPackages(prevPackages =>
+        prevPackages.map(pkg =>
+          pkg.id === packageId ? { ...pkg, highlighted: !isHighlighted } : pkg
+        )
+      );
+      toast({
+        title: 'Pacote destacado atualizado!',
+      });
+    } catch (error: any) {
+      console.error('Error toggling featured status:', error.message);
+      toast({
+        title: 'Erro ao atualizar pacote destacado',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const savePackageToSupabase = async (packageData: MimoPackage) => {
+    try {
+      const { data, error } = await supabase
+        .from('packages')
+        .insert([{ 
+          ...packageData, 
+          creator_id: creatorId || user?.id 
+        }])
+        .select();
+        
+      if (error) throw error;
+      
+      return data?.[0];
+    } catch (error: any) {
+      console.error('Error saving package:', error.message);
+      toast({
+        title: 'Erro ao salvar pacote',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  const updatePackageInSupabase = async (packageData: MimoPackage) => {
+    try {
+      const { data, error } = await supabase
+        .from('packages')
+        .update({ 
+          title: packageData.title,
+          price: packageData.price,
+          description: packageData.description,
+          features: packageData.features,
+          highlighted: packageData.highlighted,
+          isHidden: packageData.isHidden,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', packageData.id)
+        .select();
+        
+      if (error) throw error;
+      
+      return data?.[0];
+    } catch (error: any) {
+      console.error('Error updating package:', error.message);
+      toast({
+        title: 'Erro ao atualizar pacote',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    if (creatorId || user?.id) {
+      fetchPackages();
+    }
+  }, [creatorId, user?.id]);
 
   return {
-    mimoPackages,
-    setMimoPackages,
-    showNewPackageForm,
-    newPackage,
-    isLoading,
-    isSaving,
-    handleAddFeature,
-    handleFeatureChange,
-    handleRemoveFeature,
-    handlePackageChange,
-    handleAddMedia,
-    handleRemoveMedia,
-    handleTogglePreview,
-    handleSavePackage,
-    handleDeletePackage,
-    handleEditPackage,
-    setShowNewPackageForm
+    packages,
+    loading,
+    error,
+    savePackage,
+    updatePackage,
+    deletePackage,
+    setSortOrder,
+    sortOrder,
+    toggleFeatured
   };
 };
+
+export default useMimoPackages;

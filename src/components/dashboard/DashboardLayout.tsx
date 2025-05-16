@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { useDashboard } from "@/hooks/useDashboard"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -11,7 +10,7 @@ import { Link, Outlet, useNavigate, useLocation } from "react-router-dom"
 import { Home, Users, Coins, Plus, Settings, LogOut, MessageSquare, User, Layout } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { cn } from "@/lib/utils"
-import { MimoLogo } from "@/components/MimoLogo"
+import MimoLogo from "@/components/MimoLogo"
 
 const sidebarNavItems = [
   {
