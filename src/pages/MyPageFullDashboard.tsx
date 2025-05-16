@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -74,11 +73,11 @@ const MyPageFullDashboard = () => {
     }
   };
 
-  const togglePackageVisibility = (id: number) => {
+  const togglePackageVisibility = (id: string | number) => {
     setPackageSaving(true);
     
     const updatedPackages = mimoPackages.map(pkg => {
-      if (pkg.id === id) {
+      if (String(pkg.id) === String(id)) {
         return { ...pkg, isHidden: !pkg.isHidden };
       }
       return pkg;
@@ -297,7 +296,7 @@ const MyPageFullDashboard = () => {
                               id={`package-visible-${pkg.id}`}
                               checked={!pkg.isHidden}
                               disabled={packageSaving}
-                              onCheckedChange={() => togglePackageVisibility(pkg.id!)}
+                              onCheckedChange={() => togglePackageVisibility(pkg.id)}
                             />
                             <Label htmlFor={`package-visible-${pkg.id}`}>
                               {pkg.isHidden ? 'Oculto' : 'Visível'}
