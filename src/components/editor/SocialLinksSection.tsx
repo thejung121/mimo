@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
-import { Instagram, Twitter, Globe, Lock } from 'lucide-react';
+import { Instagram, Twitter, Globe, Lock, Twitch } from 'lucide-react';
 import { SocialLink } from '@/types/creator';
 
 interface SocialLinksSectionProps {
@@ -23,9 +23,11 @@ const SocialLinksSection = ({ socialLinks, onSocialLinkChange }: SocialLinksSect
             <div className="flex-shrink-0 p-2 rounded-md bg-muted">
               {link.type === 'instagram' && <Instagram className="h-5 w-5" />}
               {link.type === 'twitter' && <Twitter className="h-5 w-5" />}
-              {link.type === 'twitch' && <Globe className="h-5 w-5" />}
+              {link.type === 'twitch' && <Twitch className="h-5 w-5" />}
               {link.type === 'onlyfans' && <Globe className="h-5 w-5" />}
               {link.type === 'privacy' && <Lock className="h-5 w-5" />}
+              {link.type === 'youtube' && <Globe className="h-5 w-5" />}
+              {link.type === 'website' && <Globe className="h-5 w-5" />}
             </div>
             
             <div className="flex-grow">
@@ -34,7 +36,9 @@ const SocialLinksSection = ({ socialLinks, onSocialLinkChange }: SocialLinksSect
                  link.type === 'twitter' ? 'Twitter' : 
                  link.type === 'twitch' ? 'Twitch' :
                  link.type === 'onlyfans' ? 'OnlyFans' :
-                 link.type === 'privacy' ? 'Privacy' : 'Link'}
+                 link.type === 'privacy' ? 'Privacy' :
+                 link.type === 'youtube' ? 'YouTube' :
+                 link.type === 'website' ? 'Website' : 'Link'}
               </label>
               <Input
                 value={link.url}

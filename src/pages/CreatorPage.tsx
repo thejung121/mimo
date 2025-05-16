@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Heart, CheckCircle2, CheckCircle, ArrowRight } from 'lucide-react';
+import { Heart, CheckCircle2, CheckCircle, ArrowRight, Instagram, Twitter, Twitch, Globe, Lock } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
 import LoadingState from '@/components/creator/LoadingState';
 import NotFoundState from '@/components/creator/NotFoundState';
@@ -51,6 +51,24 @@ const CreatorPage = () => {
     return <NotFoundState />;
   }
 
+  // Get social media icon based on type
+  const getSocialIcon = (type: string) => {
+    switch (type) {
+      case 'instagram':
+        return <Instagram className="w-5 h-5" />;
+      case 'twitter':
+        return <Twitter className="w-5 h-5" />;
+      case 'twitch':
+        return <Twitch className="w-5 h-5" />;
+      case 'onlyfans':
+        return <Globe className="w-5 h-5" />;
+      case 'privacy':
+        return <Lock className="w-5 h-5" />;
+      default:
+        return <Globe className="w-5 h-5" />;
+    }
+  };
+
   // Filter to get only filled social links
   const filledSocialLinks = creator.socialLinks?.filter(link => 
     link.url && link.url.trim() !== ''
@@ -94,7 +112,7 @@ const CreatorPage = () => {
             {creator.description || creator.about || 'Um perfil exclusivo com conteúdos especiais'}
           </p>
 
-          {/* Social Links */}
+          {/* Social Links with Icons */}
           {filledSocialLinks.length > 0 && (
             <div className="flex justify-center gap-4 border-b border-slate-800 pb-4 mb-4">
               {filledSocialLinks.map((link, index) => (
@@ -103,12 +121,10 @@ const CreatorPage = () => {
                   href={link.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                  className="text-blue-400 hover:text-blue-300 transition-colors p-2"
+                  aria-label={link.type}
                 >
-                  {link.type === 'instagram' && <span className="text-lg">Instagram</span>}
-                  {link.type === 'twitter' && <span className="text-lg">Twitter</span>}
-                  {link.type === 'website' && <span className="text-lg">Website</span>}
-                  {link.type === 'youtube' && <span className="text-lg">Youtube</span>}
+                  {getSocialIcon(link.type)}
                 </a>
               ))}
             </div>

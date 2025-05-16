@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Creator } from '@/types/creator';
@@ -61,7 +62,7 @@ const CreatorHero = ({ creator, onMimoClick }: CreatorHeroProps) => {
         </p>
         
         <div className="flex justify-center gap-2 mb-6">
-          {creator.socialLinks.map((link, index) => (
+          {creator.socialLinks.filter(link => link.url && link.url.trim() !== '').map((link, index) => (
             <a 
               key={index}
               href={link.url}

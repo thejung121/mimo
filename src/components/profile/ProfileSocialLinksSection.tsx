@@ -2,12 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
-import { Instagram, Twitter, Globe, Lock } from 'lucide-react';
-
-interface SocialLink {
-  type: string;
-  url: string;
-}
+import { Instagram, Twitter, Globe, Lock, Twitch } from 'lucide-react';
+import { SocialLink } from '@/types/creator';
 
 interface ProfileSocialLinksSectionProps {
   socialLinks: SocialLink[];
@@ -32,7 +28,7 @@ const ProfileSocialLinksSection: React.FC<ProfileSocialLinksSectionProps> = ({
             Instagram
           </label>
           <Input
-            value={socialLinks[0].url}
+            value={socialLinks[getIndexOfSocialLink('instagram')].url}
             onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('instagram'), 'url', e.target.value)}
             className="mimo-input"
             placeholder="https://instagram.com/seuusuario"
@@ -45,7 +41,7 @@ const ProfileSocialLinksSection: React.FC<ProfileSocialLinksSectionProps> = ({
             Twitter
           </label>
           <Input
-            value={socialLinks[1].url}
+            value={socialLinks[getIndexOfSocialLink('twitter')].url}
             onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('twitter'), 'url', e.target.value)}
             className="mimo-input"
             placeholder="https://twitter.com/seuusuario"
@@ -54,11 +50,11 @@ const ProfileSocialLinksSection: React.FC<ProfileSocialLinksSectionProps> = ({
         
         <div>
           <label className="flex items-center text-sm font-medium mb-1">
-            <Globe className="h-4 w-4 mr-2" />
+            <Twitch className="h-4 w-4 mr-2" />
             Twitch
           </label>
           <Input
-            value={socialLinks[2].url}
+            value={socialLinks[getIndexOfSocialLink('twitch')].url}
             onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('twitch'), 'url', e.target.value)}
             className="mimo-input"
             placeholder="https://twitch.tv/seuusuario"
@@ -71,7 +67,7 @@ const ProfileSocialLinksSection: React.FC<ProfileSocialLinksSectionProps> = ({
             OnlyFans
           </label>
           <Input
-            value={socialLinks[3].url}
+            value={socialLinks[getIndexOfSocialLink('onlyfans')].url}
             onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('onlyfans'), 'url', e.target.value)}
             className="mimo-input"
             placeholder="https://onlyfans.com/seuusuario"
@@ -84,7 +80,7 @@ const ProfileSocialLinksSection: React.FC<ProfileSocialLinksSectionProps> = ({
             Privacy
           </label>
           <Input
-            value={socialLinks[4].url}
+            value={socialLinks[getIndexOfSocialLink('privacy')].url}
             onChange={(e) => handleSocialLinkChange(getIndexOfSocialLink('privacy'), 'url', e.target.value)}
             className="mimo-input"
             placeholder="https://privacy.app/seuusuario"
