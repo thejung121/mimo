@@ -71,6 +71,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
           name: userProfile.name,
           document: isDocumentSet ? user?.document : userProfile.document,
           username: formattedUsername,
+          phone: userProfile.phone, // Include phone in the user metadata
         });
 
         if (!success) {
@@ -83,6 +84,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
             name: userProfile.name,
             document: isDocumentSet ? user?.document : userProfile.document,
             username: formattedUsername,
+            phone: userProfile.phone, // Include phone in the user metadata
           }
         });
 

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Creator } from '@/types/creator';
+import { Creator, SocialLink } from '@/types/creator';
 import ProfileCoverSection from './ProfileCoverSection';
 import ProfileAvatarSection from './ProfileAvatarSection';
 import ProfileBasicInfoSection from './ProfileBasicInfoSection';
@@ -26,8 +26,8 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({
   handleAvatarChange
 }) => {
   // Get social links by type
-  const getSocialLink = (type: string) => {
-    return creator.socialLinks.find(link => link.type === type) || { type, url: '' };
+  const getSocialLink = (type: 'instagram' | 'twitter' | 'twitch' | 'onlyfans' | 'privacy' | 'youtube' | 'website') => {
+    return creator.socialLinks.find(link => link.type === type) || { type, url: '' } as SocialLink;
   };
 
   // Get index of each social link

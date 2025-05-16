@@ -88,8 +88,22 @@ export const useCreatorPage = () => {
           // If no packages from Supabase or empty, try from localStorage
           if (!packages || packages.length === 0) {
             try {
-              packages = getPackagesByUsername(username);
-              console.log("Packages from localStorage by username:", packages);
+              // First try to get directly from localStorage for the creator's ID
+              const localStorageKey = `mimo:packages:${creatorData.id}`;
+              const storedPackages = localStorage.getItem(localStorageKey);
+              
+              if (storedPackages) {
+                try {
+                  packages = JSON.parse(storedPackages);
+                  console.log("Packages from localStorage by creator ID:", packages);
+                } catch (error) {
+                  console.error("Error parsing packages from localStorage:", error);
+                }
+              } else {
+                // If that fails, try by username
+                packages = getPackagesByUsername(username);
+                console.log("Packages from localStorage by username:", packages);
+              }
             } catch (e) {
               console.error("Error getting packages from localStorage:", e);
             }

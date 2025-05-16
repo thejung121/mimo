@@ -8,9 +8,10 @@ import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ModeToggle } from "@/components/ModeToggle"
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom"
-import { Home, Users, Coins, Plus, Settings, Power, MessageSquare, User, Layout } from "lucide-react"
+import { Home, Users, Coins, Plus, Settings, LogOut, MessageSquare, User, Layout } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { cn } from "@/lib/utils"
+import { MimoLogo } from "@/components/MimoLogo"
 
 const sidebarNavItems = [
   {
@@ -56,14 +57,22 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  }
+
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
       <aside
-        className={`bg-white border-r border-border w-64 flex-none py-4 px-2 md:px-4 transition-transform duration-300 transform ${
+        className={`bg-white dark:bg-gray-900 border-r border-border w-64 flex-none py-4 px-2 md:px-4 transition-transform duration-300 transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
+        <div className="px-3 py-2 mb-4">
+          <MimoLogo size="small" />
+        </div>
         <ScrollArea className="h-[calc(100vh-8rem)]">
           <div className="flex flex-col space-y-2">
             <Link to="/" className="px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-accent">
@@ -99,7 +108,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="bg-white border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 md:px-8">
+        <header className="bg-white dark:bg-gray-900 border-b border-border h-16 flex items-center justify-between px-4 sm:px-6 md:px-8">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +128,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </svg>
             <span className="sr-only">Toggle Menu</span>
           </Button>
+          
           <div className="flex items-center space-x-4">
+            <span className="text-sm font-medium hidden md:block">
+              {user?.name || creator?.name || 'Bem-vindo'}
+            </span>
             <ModeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -137,8 +150,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <span>Perfil</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
-                  <Power className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
                   <span>Sair</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -147,7 +160,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 py-6 px-4 sm:px-6 md:px-8 bg-white">
+        <main className="flex-1 py-6 px-4 sm:px-6 md:px-8 bg-white dark:bg-gray-900">
           {children}
         </main>
       </div>

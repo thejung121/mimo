@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Creator } from '@/types/creator';
-import { Heart, ChevronDown, Instagram, Twitter, Globe, Lock, Twitch } from 'lucide-react';
+import { Heart, ChevronDown, Instagram, Twitter, Globe, Lock, Twitch, YoutubeIcon, ExternalLink } from 'lucide-react';
 
 interface CreatorHeroProps {
   creator: Creator;
@@ -18,9 +18,11 @@ const CreatorHero = ({ creator, onMimoClick }: CreatorHeroProps) => {
         return <Twitter className="h-4 w-4" />;
       case 'twitch':
         return <Twitch className="h-4 w-4" />;
-      case 'website':
-      case 'youtube':
       case 'onlyfans':
+        return <ExternalLink className="h-4 w-4" />;
+      case 'youtube':
+        return <YoutubeIcon className="h-4 w-4" />;
+      case 'website':
         return <Globe className="h-4 w-4" />;
       case 'privacy':
         return <Lock className="h-4 w-4" />;
@@ -70,6 +72,7 @@ const CreatorHero = ({ creator, onMimoClick }: CreatorHeroProps) => {
               rel="noopener noreferrer"
               className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               aria-label={`${link.type} link`}
+              title={link.type.charAt(0).toUpperCase() + link.type.slice(1)}
             >
               {getSocialIcon(link.type)}
             </a>
@@ -77,10 +80,10 @@ const CreatorHero = ({ creator, onMimoClick }: CreatorHeroProps) => {
         </div>
         
         <Button 
-          className="bg-white text-black hover:bg-white/90 rounded-full px-6 py-1 text-sm"
+          className="bg-[#F54040] text-white hover:bg-[#E03030] rounded-full px-6 py-1 text-sm"
           onClick={onMimoClick}
         >
-          <Heart className="mr-2 h-4 w-4 text-red-500" />
+          <Heart className="mr-2 h-4 w-4 text-white" />
           Enviar um Mimo
           <ChevronDown className="ml-2 h-4 w-4 animate-bounce" />
         </Button>
