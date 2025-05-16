@@ -49,10 +49,10 @@ export const useMimoPackages = () => {
     loadPackages();
   }, [user]);
   
-  // Save packages whenever they change
+  // Save packages whenever they change - this ensures immediate saving
   useEffect(() => {
     if (!isLoading && mimoPackages.length > 0) {
-      console.log("Saving packages to storage:", mimoPackages);
+      console.log("Auto-saving packages to storage:", mimoPackages);
       saveMimoPackages(mimoPackages);
     }
   }, [mimoPackages, isLoading]);

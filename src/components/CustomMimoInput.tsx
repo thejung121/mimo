@@ -53,7 +53,7 @@ const CustomMimoInput: React.FC<CustomMimoInputProps> = ({
               variant={amount === price.toString() ? "default" : "outline"}
               size="sm"
               onClick={() => selectSuggestedPrice(price)}
-              className={`px-4 ${amount === price.toString() ? 'bg-[#F54040] hover:bg-[#F54040]/90 text-white' : 'text-white border-white/50 hover:text-white hover:bg-[#F54040]/20'}`}
+              className={`px-4 ${amount === price.toString() ? 'bg-[#F54040] hover:bg-[#F54040]/90 text-white' : 'bg-transparent text-white border-white/50 hover:text-white hover:bg-[#F54040]/20'}`}
             >
               R$ {price}
             </Button>
