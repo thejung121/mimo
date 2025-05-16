@@ -15,16 +15,16 @@ import { saveMimoPackages, getMimoPackages } from '@/services/creator/packageSer
 const MyPageDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { mimoPackages, setMimoPackages } = useMimoPackages();
+  const packagesHook = useMimoPackages();
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Force reload packages
   useEffect(() => {
     const loadedPackages = getMimoPackages();
-    setMimoPackages(loadedPackages);
+    packagesHook.setPackages(loadedPackages);
     setIsLoaded(true);
     console.log("MyPageDashboard loaded packages:", loadedPackages);
-  }, [setMimoPackages]);
+  }, [packagesHook.setPackages]);
 
   const copyShareLink = () => {
     if (user?.username) {
@@ -43,15 +43,15 @@ const MyPageDashboard = () => {
     }
   };
 
-  const togglePackageVisibility = (id: number) => {
-    const updatedPackages = mimoPackages.map(pkg => {
-      if (pkg.id === id) {
+  const togglePackageVisibility = (id: number | string) => {
+    const updatedPackages = packagesHook.packages.map(pkg => {
+      if (String(pkg.id) === String(id)) {
         return { ...pkg, isHidden: !pkg.isHidden };
       }
       return pkg;
     });
     
-    setMimoPackages(updatedPackages);
+    packagesHook.setPackages(updatedPackages);
     saveMimoPackages(updatedPackages);
     console.log("Saved package visibility changes:", updatedPackages);
 
@@ -125,7 +125,7 @@ const MyPageDashboard = () => {
                 <div className="text-center py-4">
                   <p>Carregando pacotes...</p>
                 </div>
-              ) : mimoPackages.length === 0 ? (
+              ) : packagesHook.packages.length === 0 ? (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground mb-4">Você ainda não criou nenhum pacote</p>
                   <Button asChild>
@@ -134,7 +134,7 @@ const MyPageDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {mimoPackages.map(pkg => (
+                  {packagesHook.packages.map(pkg => (
                     <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
                       <div>
                         <h3 className="font-medium flex items-center">

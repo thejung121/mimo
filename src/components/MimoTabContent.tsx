@@ -26,7 +26,7 @@ const MimoTabContent = ({ creator, packages, suggestedPrices, onSelectPackage, o
                 title={pkg.title}
                 price={pkg.price}
                 features={pkg.features}
-                highlighed={pkg.highlighted} // Fixed typo: highlighed instead of highlighted to match component
+                highlighted={pkg.highlighted} // Fixed typo: highlighted instead of highlighed
                 onSelect={() => onSelectPackage(pkg)}
               />
             ))}

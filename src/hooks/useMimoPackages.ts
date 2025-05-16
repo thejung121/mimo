@@ -71,18 +71,18 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   };
 
-  const deletePackage = async (id: string) => {
+  const deletePackage = async (id: string | number) => {
     try {
       const { error } = await supabase
         .from('packages')
         .delete()
-        .eq('id', id);
+        .eq('id', String(id));
 
       if (error) {
         throw error;
       }
 
-      setPackages(prevPackages => prevPackages.filter(pkg => pkg.id !== id));
+      setPackages(prevPackages => prevPackages.filter(pkg => String(pkg.id) !== String(id)));
       toast({
         title: 'Pacote removido com sucesso!',
       });
@@ -96,12 +96,12 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   };
 
-  const toggleFeatured = async (packageId: string, isHighlighted: boolean) => {
+  const toggleFeatured = async (packageId: string | number, isHighlighted: boolean) => {
     try {
       const { data, error } = await supabase
         .from('packages')
         .update({ highlighted: !isHighlighted })
-        .eq('id', packageId)
+        .eq('id', String(packageId))
         .select();
 
       if (error) {
@@ -110,7 +110,7 @@ export const useMimoPackages = (creatorId?: string) => {
 
       setPackages(prevPackages =>
         prevPackages.map(pkg =>
-          pkg.id === packageId ? { ...pkg, highlighted: !isHighlighted } : pkg
+          String(pkg.id) === String(packageId) ? { ...pkg, highlighted: !isHighlighted } : pkg
         )
       );
       toast({
@@ -131,7 +131,8 @@ export const useMimoPackages = (creatorId?: string) => {
       const { data, error } = await supabase
         .from('packages')
         .insert([{ 
-          ...packageData, 
+          ...packageData,
+          description: packageData.description || '', // Add default description
           creator_id: creatorId || user?.id 
         }])
         .select();
@@ -157,13 +158,13 @@ export const useMimoPackages = (creatorId?: string) => {
         .update({ 
           title: packageData.title,
           price: packageData.price,
-          description: packageData.description,
+          description: packageData.description || '', // Add default description
           features: packageData.features,
           highlighted: packageData.highlighted,
           isHidden: packageData.isHidden,
           updated_at: new Date().toISOString()
         })
-        .eq('id', packageData.id)
+        .eq('id', String(packageData.id))
         .select();
         
       if (error) throw error;
@@ -186,6 +187,11 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   }, [creatorId, user?.id]);
 
+  // Aliases to keep compatibility with existing code
+  const mimoPackages = packages;
+  const setMimoPackages = setPackages;
+  const handleDeletePackage = deletePackage;
+
   return {
     packages,
     loading,
@@ -195,7 +201,11 @@ export const useMimoPackages = (creatorId?: string) => {
     deletePackage,
     setSortOrder,
     sortOrder,
-    toggleFeatured
+    toggleFeatured,
+    // Compatibility aliases
+    mimoPackages,
+    setMimoPackages,
+    handleDeletePackage
   };
 };
 

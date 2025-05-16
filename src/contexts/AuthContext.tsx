@@ -12,6 +12,7 @@ interface UserData {
   document?: string;
   avatar?: string;
   phone?: string;
+  role?: string; // Add role field for admin check
 }
 
 interface AuthContextType {
@@ -19,7 +20,10 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, userData?: { name?: string; username?: string }) => Promise<{ error: Error | null, data: any | null }>;
   logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>; // Adding login method
   loading: boolean;
+  isAuthenticated: boolean; // Adding isAuthenticated property
+  isLoading: boolean; // Adding isLoading property
   updateUserProfile?: (userData: { name?: string; username?: string; document?: string; phone?: string }) => Promise<boolean>;
 }
 
@@ -28,7 +32,10 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => ({ error: null }),
   signUp: async () => ({ error: null, data: null }),
   logout: async () => { },
+  login: async () => false, // Default implementation
   loading: false,
+  isAuthenticated: false, // Default value
+  isLoading: false, // Default value
   updateUserProfile: async () => true,
 });
 
@@ -40,6 +47,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
+  // Add isAuthenticated and isLoading computed properties
+  const isAuthenticated = Boolean(user);
+  const isLoading = loading;
 
   useEffect(() => {
     const loadUserFromLocalStorage = () => {
@@ -85,6 +96,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       document: user.user_metadata?.document || null,
       avatar: user.user_metadata?.avatar || null,
       phone: user.user_metadata?.phone || null,
+      role: user.user_metadata?.role || null,
     };
   };
 
@@ -157,6 +169,24 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Add login method that matches the expected interface
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        console.error('Login error:', error);
+        return false;
+      }
+      return true;
+    } catch (error: any) {
+      console.error('Unexpected login error:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Update the updateUserProfile function to include phone
   const updateUserProfile = async (userData: { name?: string; username?: string; document?: string; phone?: string }): Promise<boolean> => {
     try {
@@ -202,7 +232,17 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, signIn, signUp, logout, loading, updateUserProfile }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      signIn, 
+      signUp, 
+      logout, 
+      loading, 
+      updateUserProfile,
+      login,
+      isAuthenticated,
+      isLoading 
+    }}>
       {children}
     </AuthContext.Provider>
   );

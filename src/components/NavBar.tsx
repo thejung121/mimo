@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import MimoLogo from './MimoLogo';
 
 const NavBar: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <header className="bg-white border-b border-accent/10 py-4">
