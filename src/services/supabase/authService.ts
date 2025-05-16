@@ -21,12 +21,14 @@ export const useAuthService = () => {
   
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log('Starting login attempt for:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
       if (error) {
+        console.error('Login error from Supabase:', error);
         toast({
           title: "Falha na autenticação",
           description: error.message,
@@ -35,6 +37,7 @@ export const useAuthService = () => {
         return false;
       }
       
+      console.log('Login successful:', data);
       toast({
         title: "Login realizado com sucesso!",
         description: `Bem-vindo(a) de volta!`,
@@ -64,7 +67,8 @@ export const useAuthService = () => {
           data: {
             name,
             username,
-            document: document || '' // Store CPF/CNPJ in user metadata
+            document: document || '', // Store CPF/CNPJ in user metadata
+            avatar_url: ''
           }
         }
       });
@@ -142,6 +146,8 @@ export const convertSupabaseUser = (user: any): AuthUser | null => {
     email: user.email || '',
     username: user.user_metadata?.username || '',
     avatar: user.user_metadata?.avatar || '',
-    document: user.user_metadata?.document || '' // Add document field
+    document: user.user_metadata?.document || '', // Add document field
+    avatar_url: user.user_metadata?.avatar_url || '',
+    phone: user.user_metadata?.phone || ''
   };
 };

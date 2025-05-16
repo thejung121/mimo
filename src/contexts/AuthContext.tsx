@@ -1,10 +1,10 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { supabase } from '@/services/supabase';
-import { AuthUser, UserData } from '@/types/auth';
+import { supabase } from '@/integrations/supabase/client';
+import { AuthUser } from '@/types/auth';
 
 export interface AuthContextType {
-  user: UserData | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
@@ -26,13 +26,14 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   // Initialize auth state
   useEffect(() => {
     // First set up the auth state listener to react to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed, session:', session);
       if (session?.user) {
         setUser({
           id: session.user.id,
@@ -42,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           document: session.user.user_metadata.document || '',
           avatar_url: session.user.user_metadata.avatar_url || '',
           phone: session.user.user_metadata.phone || '',
+          avatar: session.user.user_metadata.avatar || '',
         });
       } else {
         setUser(null);
@@ -51,26 +53,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Then fetch the current session
     const getSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error fetching session:', error);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error fetching session:', error);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log('Initial auth check, session:', data.session);
+        
+        if (data && data.session && data.session.user) {
+          setUser({
+            id: data.session.user.id,
+            email: data.session.user.email || '',
+            name: data.session.user.user_metadata.name || '',
+            username: data.session.user.user_metadata.username || '',
+            document: data.session.user.user_metadata.document || '',
+            avatar_url: data.session.user.user_metadata.avatar_url || '',
+            phone: data.session.user.user_metadata.phone || '',
+            avatar: data.session.user.user_metadata.avatar || '',
+          });
+        }
         setIsLoading(false);
-        return;
+      } catch (error) {
+        console.error('Error in getSession:', error);
+        setIsLoading(false);
       }
-      
-      if (data && data.session && data.session.user) {
-        setUser({
-          id: data.session.user.id,
-          email: data.session.user.email || '',
-          name: data.session.user.user_metadata.name || '',
-          username: data.session.user.user_metadata.username || '',
-          document: data.session.user.user_metadata.document || '',
-          avatar_url: data.session.user.user_metadata.avatar_url || '',
-          phone: data.session.user.user_metadata.phone || '',
-        });
-      }
-      setIsLoading(false);
     };
     
     getSession();
@@ -84,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
+      console.log('Login attempt for:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -95,6 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
+        console.log('Login successful, user:', data.user);
         setUser({
           id: data.user.id,
           email: data.user.email || '',
@@ -103,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           document: data.user.user_metadata.document || '',
           avatar_url: data.user.user_metadata.avatar_url || '',
           phone: data.user.user_metadata.phone || '',
+          avatar: data.user.user_metadata.avatar || '',
         });
         return true;
       }
@@ -136,6 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (name: string, email: string, password: string, username: string, document: string): Promise<boolean> => {
     setIsLoading(true);
     try {
+      console.log('Registration attempt with:', { email, name, username });
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -154,6 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
+      console.log('Registration response:', data);
       if (data.user) {
         setUser({
           id: data.user.id,
@@ -163,6 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           document: data.user.user_metadata.document || '',
           avatar_url: data.user.user_metadata.avatar_url || '',
           phone: data.user.user_metadata.phone || '',
+          avatar: data.user.user_metadata.avatar || '',
         });
         return true;
       }
@@ -184,6 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     phone?: string;
   }): Promise<boolean> => {
     try {
+      console.log('Updating user profile with:', userData);
       const { error } = await supabase.auth.updateUser({
         data: userData
       });

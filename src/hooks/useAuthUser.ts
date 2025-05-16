@@ -29,16 +29,30 @@ export const useAuthUser = () => {
     );
     
     // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      
-      if (currentSession?.user) {
-        const authUser = convertSupabaseUser(currentSession.user);
-        setUser(authUser);
+    const getInitialSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+        } else {
+          console.log('Initial session check:', data);
+          setSession(data.session);
+          
+          if (data.session?.user) {
+            const authUser = convertSupabaseUser(data.session.user);
+            setUser(authUser);
+          }
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error in getInitialSession:', error);
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
-    });
+    };
+    
+    getInitialSession();
     
     // Clean up subscription on unmount
     return () => {

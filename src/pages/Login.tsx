@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Heart, LogIn } from 'lucide-react';
+import { Heart, LogIn, Loader2 } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +16,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   
   const { login } = useAuth();
   const { toast } = useToast();
@@ -49,25 +51,44 @@ const Login = () => {
     try {
       const success = await login(email, password);
       if (success) {
+        toast({
+          title: "Login realizado com sucesso!",
+          description: "Bem-vindo(a) de volta!",
+        });
         navigate(from, { replace: true });
       }
+    } catch (error) {
+      console.error('Error during login:', error);
+      toast({
+        title: "Erro ao fazer login",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleForgotPassword = (e: React.MouseEvent) => {
+  const handleForgotPassword = async (e: React.MouseEvent) => {
     e.preventDefault();
-    toast({
-      title: "Recuperação de senha",
-      description: "Um email com instruções será enviado para você.",
-      variant: "default"
-    });
     
-    // Call Supabase password reset here
-    supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password',
-    }).then(({ error }) => {
+    if (!email.trim()) {
+      toast({
+        title: "Email obrigatório",
+        description: "Por favor, informe seu email para recuperação de senha",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Call Supabase password reset
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      
       if (error) {
         toast({
           title: "Erro",
@@ -75,12 +96,22 @@ const Login = () => {
           variant: "destructive"
         });
       } else {
+        setResetSent(true);
         toast({
           title: "Email enviado",
           description: "Verifique sua caixa de entrada para redefinir sua senha.",
         });
       }
-    });
+    } catch (error) {
+      console.error('Error during password reset:', error);
+      toast({
+        title: "Erro ao processar solicitação",
+        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -136,7 +167,7 @@ const Login = () => {
                       onClick={handleForgotPassword}
                       className="text-xs text-right text-mimo-primary hover:underline"
                     >
-                      Esqueceu sua senha?
+                      {resetSent ? "Email enviado" : "Esqueceu sua senha?"}
                     </a>
                   </div>
                 </div>
@@ -149,7 +180,9 @@ const Login = () => {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  "Entrando..."
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Entrando...
+                  </>
                 ) : (
                   <>
                     <LogIn className="mr-2 h-4 w-4" /> Entrar

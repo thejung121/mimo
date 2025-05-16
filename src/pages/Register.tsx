@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import SellerOnboarding from '@/components/SellerOnboarding';
@@ -123,11 +123,16 @@ const Register = () => {
     setIsLoading(true);
     
     try {
+      console.log('Starting registration process with:', { name, email, username, document });
       // Pass document to register function
       const success = await register(name, email, password, username, document);
       
       if (success) {
-        // Directly navigate to dashboard after registration without needing email confirmation
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Bem-vindo(a) ao Mimo!",
+        });
+        // Navigate to dashboard after registration without needing email confirmation
         navigate('/dashboard');
       }
     } catch (error) {
@@ -300,7 +305,11 @@ const Register = () => {
                     onClick={handleRegister}
                     disabled={isLoading}
                   >
-                    {isLoading ? "Criando conta..." : "Criar conta"}
+                    {isLoading ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Criando conta...</>
+                    ) : (
+                      "Criar conta"
+                    )}
                   </Button>
                 </CardFooter>
                 <div className="px-6 pb-6 text-center">
