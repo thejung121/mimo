@@ -12,8 +12,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { saveMimoPackages } from '@/services/creator/packageService';
 import { MimoPackage, MediaItem } from '@/types/creator';
 import { emptyPackage } from '@/hooks/mimo-packages/packageData';
-import { usePackageFeatures } from '@/hooks/mimo-packages/usePackageFeatures';
-import { usePackageMedia } from '@/hooks/mimo-packages/usePackageMedia';
 
 const PackageFormPage = () => {
   const { id } = useParams();
@@ -23,33 +21,25 @@ const PackageFormPage = () => {
   
   const {
     packages,
-    setPackages
+    setPackages,
+    handleAddFeature,
+    handleFeatureChange,
+    handleRemoveFeature,
+    handleAddMedia,
+    handleRemoveMedia,
+    handleTogglePreview,
+    handlePackageChange,
+    newPackage,
+    setNewPackage
   } = useMimoPackages();
 
-  // Local state for form data to prevent modifying the global state directly
-  const [packageData, setPackageData] = useState<MimoPackage>({...emptyPackage});
-  
-  // Custom hooks for features and media management
-  const { 
-    handleAddFeature, 
-    handleFeatureChange, 
-    handleRemoveFeature 
-  } = usePackageFeatures(packageData, setPackageData);
-  
-  const { 
-    handleAddMedia, 
-    handleRemoveMedia, 
-    handleTogglePreview 
-  } = usePackageMedia(packages, setPackages, packageData, setPackageData);
-  
   // If we're editing, load the package data
   useEffect(() => {
     if (isEditing && id) {
-      const packageId = parseInt(id);
-      const packageToEdit = packages.find(p => p.id === packageId);
+      const packageToEdit = packages.find(p => String(p.id) === id);
       
       if (packageToEdit) {
-        setPackageData({...packageToEdit});
+        setNewPackage({...packageToEdit});
       } else {
         // Package not found, redirect back to packages page
         toast({
@@ -60,18 +50,11 @@ const PackageFormPage = () => {
         navigate('/dashboard/pacotes');
       }
     }
-  }, [isEditing, id, packages, navigate, toast]);
-
-  const handlePackageChange = (field: string, value: any) => {
-    setPackageData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  }, [isEditing, id, packages, navigate, toast, setNewPackage]);
 
   const handleFormSubmit = () => {
     // Basic validations
-    if (!packageData.title.trim()) {
+    if (!newPackage.title.trim()) {
       toast({
         title: "Título obrigatório",
         description: "Por favor, insira um título para o pacote.",
@@ -80,7 +63,7 @@ const PackageFormPage = () => {
       return;
     }
 
-    if (packageData.price <= 0) {
+    if (newPackage.price <= 0) {
       toast({
         title: "Preço inválido",
         description: "Por favor, insira um preço válido maior que zero.",
@@ -90,7 +73,7 @@ const PackageFormPage = () => {
     }
 
     // Filter empty features
-    const filteredFeatures = packageData.features.filter(feature => feature.trim());
+    const filteredFeatures = newPackage.features.filter(feature => feature.trim());
     if (filteredFeatures.length === 0) {
       toast({
         title: "Características obrigatórias",
@@ -101,16 +84,16 @@ const PackageFormPage = () => {
     }
 
     // Create a new package with a unique ID or use existing ID if editing
-    const packageId = isEditing && id ? parseInt(id) : Math.max(0, ...packages.map(p => p.id || 0)) + 1;
+    const packageId = isEditing && id ? id : Math.max(0, ...packages.map(p => typeof p.id === 'number' ? p.id : 0)) + 1;
     
     const packageToSave = {
-      ...packageData,
+      ...newPackage,
       id: packageId,
       features: filteredFeatures
     };
 
     // Remove existing package with same ID if it exists (should only happen when editing)
-    const filteredPackages = packages.filter(p => p.id !== packageId);
+    const filteredPackages = packages.filter(p => String(p.id) !== String(packageId));
     
     // Update the packages list
     const updatedPackages = [...filteredPackages, packageToSave];
@@ -148,7 +131,7 @@ const PackageFormPage = () => {
                   </label>
                   <Input
                     name="title"
-                    value={packageData.title}
+                    value={newPackage.title}
                     onChange={(e) => handlePackageChange('title', e.target.value)}
                     placeholder="ex: Mimo Básico"
                     className="mimo-input"
@@ -162,7 +145,7 @@ const PackageFormPage = () => {
                   <Input
                     type="number"
                     name="price"
-                    value={packageData.price}
+                    value={newPackage.price}
                     onChange={(e) => handlePackageChange('price', Number(e.target.value))}
                     className="mimo-input"
                     min={1}
@@ -179,7 +162,7 @@ const PackageFormPage = () => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setPackageData(prev => ({
+                    onClick={() => setNewPackage(prev => ({
                       ...prev, 
                       features: [...prev.features, '']
                     }))}
@@ -190,27 +173,27 @@ const PackageFormPage = () => {
                   </Button>
                 </div>
                 
-                {packageData.features.map((feature, index) => (
+                {newPackage.features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Input
                       value={feature}
                       onChange={(e) => {
-                        const newFeatures = [...packageData.features];
+                        const newFeatures = [...newPackage.features];
                         newFeatures[index] = e.target.value;
-                        setPackageData(prev => ({...prev, features: newFeatures}));
+                        setNewPackage(prev => ({...prev, features: newFeatures}));
                       }}
                       placeholder="ex: Foto exclusiva"
                       className="mimo-input"
                     />
                     
-                    {packageData.features.length > 1 && (
+                    {newPackage.features.length > 1 && (
                       <Button 
                         type="button"
                         variant="ghost" 
                         size="sm"
                         onClick={() => {
-                          const newFeatures = packageData.features.filter((_, i) => i !== index);
-                          setPackageData(prev => ({...prev, features: newFeatures}));
+                          const newFeatures = newPackage.features.filter((_, i) => i !== index);
+                          setNewPackage(prev => ({...prev, features: newFeatures}));
                         }}
                         className="text-destructive hover:text-destructive/90"
                       >
@@ -226,7 +209,7 @@ const PackageFormPage = () => {
                   type="checkbox"
                   id="highlighted"
                   name="highlighted"
-                  checked={packageData.highlighted}
+                  checked={newPackage.highlighted}
                   onChange={(e) => handlePackageChange('highlighted', e.target.checked)}
                   className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
@@ -247,24 +230,24 @@ const PackageFormPage = () => {
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {packageData.media.map((media) => (
+                {newPackage.media.map((media) => (
                   <MediaItemDisplay 
                     key={media.id}
                     media={media}
                     onTogglePreview={() => {
-                      const newMedia = packageData.media.map(m => 
+                      const newMedia = newPackage.media.map(m => 
                         m.id === media.id ? {...m, isPreview: !m.isPreview} : m);
-                      setPackageData(prev => ({...prev, media: newMedia}));
+                      setNewPackage(prev => ({...prev, media: newMedia}));
                     }}
                     onRemove={() => {
-                      const newMedia = packageData.media.filter(m => m.id !== media.id);
-                      setPackageData(prev => ({...prev, media: newMedia}));
+                      const newMedia = newPackage.media.filter(m => m.id !== media.id);
+                      setNewPackage(prev => ({...prev, media: newMedia}));
                     }}
                   />
                 ))}
                 
                 <MediaUploader onMediaAdd={(media) => {
-                  setPackageData(prev => ({
+                  setNewPackage(prev => ({
                     ...prev, 
                     media: [...prev.media, media]
                   }));

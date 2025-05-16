@@ -6,9 +6,11 @@ export const initialMimoPackages: MimoPackage[] = [];
 
 // Modelo de pacote vazio
 export const emptyPackage: MimoPackage = {
+  id: 0,
   title: '',
   price: 0,
   features: [''],
   highlighted: false,
-  media: []
+  media: [],
+  isHidden: false
 };

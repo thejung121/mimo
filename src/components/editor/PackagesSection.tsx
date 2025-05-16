@@ -14,12 +14,12 @@ interface PackagesSectionProps {
   onFeatureChange: (index: number, value: string) => void;
   onAddFeature: () => void;
   onRemoveFeature: (index: number) => void;
-  onAddMedia: (packageId: number | null, media: MediaItem) => void;
-  onRemoveMedia: (packageId: number | null, mediaId: number) => void;
-  onTogglePreview: (packageId: number | null, mediaId: number) => void;
+  onAddMedia: (packageId: number | string | null, media: MediaItem) => void;
+  onRemoveMedia: (packageId: number | string | null, mediaId: number) => void;
+  onTogglePreview: (packageId: number | string | null, mediaId: number) => void;
   onSavePackage: () => void;
-  onDeletePackage: (id: number) => void;
-  onEditPackage: (id: number) => void;
+  onDeletePackage: (id: number | string) => void;
+  onEditPackage: (id: number | string) => void;
   setShowNewPackageForm: React.Dispatch<React.SetStateAction<boolean>>;
 }
 

@@ -1,3 +1,4 @@
+
 // Creator related types
 export interface SocialLink {
   type: 'instagram' | 'twitter' | 'twitch' | 'onlyfans' | 'privacy' | 'youtube' | 'website';
@@ -33,7 +34,7 @@ export interface MimoPackage {
   highlighted: boolean;
   media: MediaItem[];
   isHidden: boolean;
-  description?: string; // Add description as an optional field
+  description?: string; // Optional description field
 }
 
 // Interface for form data

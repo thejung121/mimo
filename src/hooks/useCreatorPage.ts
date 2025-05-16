@@ -158,7 +158,8 @@ export const useCreatorPage = () => {
       price: amount,
       features: ["Valor personalizado definido por você"],
       highlighted: false,
-      media: []
+      media: [],
+      isHidden: false
     });
     setPurchaseFlowOpen(true);
   };

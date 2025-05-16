@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { MimoPackage } from '@/types/creator';
+import { MimoPackage, MediaItem } from '@/types/creator';
 import { supabase } from '@/services/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from './use-toast';
+import { emptyPackage } from './mimo-packages/packageData';
 
 interface UseMimoPackagesProps {
   creatorId?: string;
@@ -16,39 +17,97 @@ export const useMimoPackages = (creatorId?: string) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [showNewPackageForm, setShowNewPackageForm] = useState<boolean>(false);
+  const [newPackage, setNewPackage] = useState<MimoPackage>({...emptyPackage});
   const { user } = useAuth();
   const { toast } = useToast();
 
   // Feature methods implementation
   const handleAddFeature = () => {
-    console.log('Feature add requested');
-    // Implementation will be provided in usePackageFeatures
+    setNewPackage(prev => ({
+      ...prev,
+      features: [...prev.features, '']
+    }));
   };
 
   const handleFeatureChange = (index: number, value: string) => {
-    console.log('Feature change requested', index, value);
-    // Implementation will be provided in usePackageFeatures
+    setNewPackage(prev => {
+      const updatedFeatures = [...prev.features];
+      updatedFeatures[index] = value;
+      return {
+        ...prev,
+        features: updatedFeatures
+      };
+    });
   };
 
   const handleRemoveFeature = (index: number) => {
-    console.log('Feature remove requested', index);
-    // Implementation will be provided in usePackageFeatures
+    setNewPackage(prev => {
+      const updatedFeatures = prev.features.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        features: updatedFeatures
+      };
+    });
   };
 
   // Media methods implementation
-  const handleAddMedia = (packageId: number | string | null, media: any) => {
-    console.log('Media add requested', packageId, media);
-    // Implementation will be provided in usePackageMedia  
+  const handleAddMedia = (packageId: number | string | null, media: MediaItem) => {
+    if (packageId === null) {
+      setNewPackage(prev => ({
+        ...prev,
+        media: [...prev.media, media]
+      }));
+    } else {
+      setPackages(prevPackages => 
+        prevPackages.map(pkg => 
+          pkg.id === packageId 
+            ? { ...pkg, media: [...pkg.media, media] } 
+            : pkg
+        )
+      );
+    }
   };
 
   const handleRemoveMedia = (packageId: number | string | null, mediaId: number) => {
-    console.log('Media remove requested', packageId, mediaId);
-    // Implementation will be provided in usePackageMedia
+    if (packageId === null) {
+      setNewPackage(prev => ({
+        ...prev,
+        media: prev.media.filter(m => m.id !== mediaId)
+      }));
+    } else {
+      setPackages(prevPackages => 
+        prevPackages.map(pkg => 
+          pkg.id === packageId 
+            ? { ...pkg, media: pkg.media.filter(m => m.id !== mediaId) } 
+            : pkg
+        )
+      );
+    }
   };
 
   const handleTogglePreview = (packageId: number | string | null, mediaId: number) => {
-    console.log('Toggle preview requested', packageId, mediaId);
-    // Implementation will be provided in usePackageMedia
+    if (packageId === null) {
+      setNewPackage(prev => ({
+        ...prev,
+        media: prev.media.map(m => 
+          m.id === mediaId ? { ...m, isPreview: !m.isPreview } : m
+        )
+      }));
+    } else {
+      setPackages(prevPackages => 
+        prevPackages.map(pkg => 
+          pkg.id === packageId 
+            ? { 
+                ...pkg, 
+                media: pkg.media.map(m => 
+                  m.id === mediaId ? { ...m, isPreview: !m.isPreview } : m
+                ) 
+              } 
+            : pkg
+        )
+      );
+    }
   };
 
   const fetchPackages = async () => {
@@ -99,19 +158,26 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   };
 
-  const updatePackage = async (packageData: MimoPackage) => {
-    const updatedPackage = await updatePackageInSupabase(packageData);
-    if (updatedPackage) {
-      setPackages(prevPackages =>
-        prevPackages.map(pkg => (String(pkg.id) === String(packageData.id) ? { ...pkg, ...updatedPackage } : pkg))
-      );
-      toast({
-        title: 'Pacote atualizado com sucesso!',
-      });
+  const updatePackage = async (packageData: MimoPackage): Promise<boolean> => {
+    try {
+      const updatedPackage = await updatePackageInSupabase(packageData);
+      if (updatedPackage) {
+        setPackages(prevPackages =>
+          prevPackages.map(pkg => (String(pkg.id) === String(packageData.id) ? { ...pkg, ...updatedPackage } : pkg))
+        );
+        toast({
+          title: 'Pacote atualizado com sucesso!',
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error in updatePackage:", error);
+      return false;
     }
   };
 
-  const deletePackage = async (id: string | number) => {
+  const deletePackage = async (id: string | number): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from('packages')
@@ -138,7 +204,7 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   };
 
-  const toggleFeatured = async (packageId: string | number, isHighlighted: boolean) => {
+  const toggleFeatured = async (packageId: string | number, isHighlighted: boolean): Promise<boolean> => {
     try {
       const { data, error } = await supabase
         .from('packages')
@@ -232,29 +298,38 @@ export const useMimoPackages = (creatorId?: string) => {
   }, [creatorId, user?.id]);
 
   // Package editing methods
-  const handleEditPackage = (id: number | string) => {
+  const handleEditPackage = (id: number | string): boolean => {
     console.log('Edit package requested', id);
-    // Find the package and return it
     const packageToEdit = packages.find(p => String(p.id) === String(id));
-    return packageToEdit ? true : false;
-  };
-
-  const setShowNewPackageForm = (show: boolean) => {
-    console.log('Show new package form', show);
-    // This would be implemented in a parent component
+    if (packageToEdit) {
+      setNewPackage({...packageToEdit});
+      setShowNewPackageForm(true);
+      return true;
+    }
+    return false;
   };
 
   // Handle package changes
   const handlePackageChange = (field: string, value: any) => {
-    console.log('Package change requested', field, value);
-    // Implementation will be provided in usePackageForm
+    setNewPackage(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle save package
+  const handleSavePackage = async (): Promise<boolean> => {
+    if (newPackage.id) {
+      return await updatePackage(newPackage);
+    } else {
+      return await savePackage(newPackage);
+    }
   };
 
   // Aliases for backward compatibility
   const mimoPackages = packages;
   const setMimoPackages = setPackages;
   const handleDeletePackage = deletePackage;
-  const handleSavePackage = savePackage;
 
   return {
     packages,
@@ -278,14 +353,17 @@ export const useMimoPackages = (creatorId?: string) => {
     handleRemoveMedia,
     handleTogglePreview,
     
+    // Form state
+    showNewPackageForm,
+    setShowNewPackageForm,
+    newPackage,
+    setNewPackage,
+    
     // Package handling
     handlePackageChange,
-    
-    // Extra methods
     handleSavePackage,
     handleEditPackage,
     handleDeletePackage,
-    setShowNewPackageForm,
     
     // Compatibility aliases
     mimoPackages,

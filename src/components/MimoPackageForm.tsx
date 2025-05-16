@@ -1,27 +1,21 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Plus, Trash2, Eye, AudioLines } from 'lucide-react';
+import { DollarSign, Plus, Trash2 } from 'lucide-react';
 import MediaUploader from './MediaUploader';
 import MediaItemDisplay from './MediaItemDisplay';
-
-interface MediaItem {
-  id: number;
-  type: 'image' | 'video' | 'audio';
-  url: string;
-  caption?: string;
-  isPreview: boolean;
-}
+import { MediaItem } from '@/types/creator';
 
 interface MimoPackage {
-  id?: number;
+  id?: number | string;
   title: string;
   price: number;
   features: string[];
   highlighted: boolean;
   media: MediaItem[];
+  isHidden: boolean;
+  description?: string;
 }
 
 interface MimoPackageFormProps {

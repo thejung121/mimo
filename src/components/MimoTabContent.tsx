@@ -27,6 +27,7 @@ const MimoTabContent = ({ creator, packages, suggestedPrices, onSelectPackage, o
                 price={pkg.price}
                 features={pkg.features}
                 highlighted={pkg.highlighted}
+                previewImageUrl={pkg.media?.find(m => m.isPreview)?.url}
                 onClick={() => onSelectPackage(pkg)}
               />
             ))}

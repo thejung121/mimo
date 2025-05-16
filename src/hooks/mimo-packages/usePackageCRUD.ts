@@ -61,7 +61,11 @@ export const usePackageCRUD = (
     setIsSaving(true);
     try {
       // Create a new package with a unique ID
-      const newId = Math.max(0, ...mimoPackages.map(p => p.id || 0)) + 1;
+      const numericIds = mimoPackages
+        .map(p => typeof p.id === 'number' ? p.id : parseInt(p.id as string))
+        .filter(id => !isNaN(id));
+        
+      const newId = Math.max(0, ...numericIds) + 1;
       
       const packageToAdd: MimoPackage = {
         ...newPackage,
@@ -113,7 +117,7 @@ export const usePackageCRUD = (
   };
 
   // Handler to delete an existing package
-  const handleDeletePackage = async (id: number) => {
+  const handleDeletePackage = async (id: number | string) => {
     try {
       const packageToDelete = mimoPackages.find(p => p.id === id);
       if (!packageToDelete) {
@@ -163,7 +167,7 @@ export const usePackageCRUD = (
   };
 
   // Handler to edit an existing package
-  const handleEditPackage = (id: number) => {
+  const handleEditPackage = (id: number | string) => {
     try {
       const packageToEdit = mimoPackages.find(p => p.id === id);
       if (packageToEdit) {

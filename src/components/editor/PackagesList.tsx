@@ -8,11 +8,11 @@ import { MimoPackage } from '@/types/creator';
 
 interface PackagesListProps {
   mimoPackages: MimoPackage[];
-  onEditPackage: (id: number) => void;
-  onDeletePackage: (id: number) => void;
-  onAddMedia: (packageId: number, media: any) => void;
-  onRemoveMedia: (packageId: number, mediaId: number) => void;
-  onTogglePreview: (packageId: number, mediaId: number) => void;
+  onEditPackage: (id: number | string) => void;
+  onDeletePackage: (id: number | string) => void;
+  onAddMedia: (packageId: number | string, media: any) => void;
+  onRemoveMedia: (packageId: number | string, mediaId: number) => void;
+  onTogglePreview: (packageId: number | string, mediaId: number) => void;
 }
 
 const PackagesList = ({ 
@@ -67,14 +67,14 @@ const PackagesList = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onEditPackage(pkg.id!)}
+                onClick={() => onEditPackage(pkg.id)}
               >
                 Editar
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onDeletePackage(pkg.id!)}
+                onClick={() => onDeletePackage(pkg.id)}
                 className="text-destructive hover:text-destructive/90"
               >
                 <Trash2 className="h-4 w-4" />
@@ -93,14 +93,14 @@ const PackagesList = ({
                 <div key={media.id} className="w-24 md:w-auto flex-shrink-0">
                   <MediaItemDisplay
                     media={media}
-                    onTogglePreview={() => onTogglePreview(pkg.id!, media.id)}
-                    onRemove={() => onRemoveMedia(pkg.id!, media.id)}
+                    onTogglePreview={() => onTogglePreview(pkg.id, media.id)}
+                    onRemove={() => onRemoveMedia(pkg.id, media.id)}
                   />
                 </div>
               ))}
               
               <div className="w-24 md:w-auto flex-shrink-0">
-                <MediaUploader onMediaAdd={(media) => onAddMedia(pkg.id!, media)} />
+                <MediaUploader onMediaAdd={(media) => onAddMedia(pkg.id, media)} />
               </div>
             </div>
           </div>
