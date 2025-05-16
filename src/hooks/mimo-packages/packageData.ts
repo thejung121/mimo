@@ -1,16 +1,13 @@
 
 import { MimoPackage } from '@/types/creator';
 
-// Array vazio para pacotes iniciais - o usuário vai cadastrar sem exemplos
-export const initialMimoPackages: MimoPackage[] = [];
-
-// Modelo de pacote vazio
+// Initialize an empty package with default values
 export const emptyPackage: MimoPackage = {
-  id: 0,
+  id: '', // Will be replaced with a UUID when saved
   title: '',
   price: 0,
   features: [''],
   highlighted: false,
-  media: [],
-  isHidden: false
+  isHidden: false,
+  media: []
 };

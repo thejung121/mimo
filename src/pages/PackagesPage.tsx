@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMimoPackages } from '@/hooks/useMimoPackages';
 import { useToast } from '@/components/ui/use-toast';
@@ -15,6 +16,8 @@ const PackagesPage = () => {
     packages,
     setPackages,
     handleDeletePackage,
+    loading,
+    refreshPackages
   } = useMimoPackages();
   
   const navigate = useNavigate();
@@ -31,6 +34,11 @@ const PackagesPage = () => {
       isActive: pkg.isHidden !== true
     })));
   }, [packages]);
+
+  // Initial data loading
+  useEffect(() => {
+    refreshPackages();
+  }, []);
 
   const togglePackageStatus = (id: number | string) => {
     // Update local state
@@ -55,7 +63,7 @@ const PackagesPage = () => {
     
     toast({
       title: "Configuração salva",
-      description: "Visibilidade do pacote atualizada com sucesso.",
+      description: "Visibilidade da recompensa atualizada com sucesso.",
     });
   };
 
@@ -64,32 +72,45 @@ const PackagesPage = () => {
   };
 
   const handleDeletePackageWithConfirmation = (id: number | string) => {
-    if (window.confirm("Tem certeza que deseja excluir este pacote?")) {
+    if (window.confirm("Tem certeza que deseja excluir esta recompensa?")) {
       handleDeletePackage(id);
     }
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6 flex items-center justify-center" style={{minHeight: '400px'}}>
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <p>Carregando recompensas...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
       <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Gerenciar Pacotes</h1>
+          <h1 className="text-2xl font-bold">Gerenciar Recompensas</h1>
           <Button asChild>
             <Link to="/dashboard/pacotes/novo" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Novo Pacote
+              Nova Recompensa
             </Link>
           </Button>
         </div>
         
         {packagesState.length === 0 ? (
           <div className="text-center py-12">
-            <h2 className="text-lg font-medium mb-2">Nenhum pacote encontrado</h2>
-            <p className="text-muted-foreground mb-6">Você ainda não criou nenhum pacote de mimo</p>
+            <h2 className="text-lg font-medium mb-2">Nenhuma recompensa encontrada</h2>
+            <p className="text-muted-foreground mb-6">Você ainda não criou nenhuma recompensa para seus fãs</p>
             <Button asChild>
               <Link to="/dashboard/pacotes/novo" className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
-                Criar Primeiro Pacote
+                Criar Primeira Recompensa
               </Link>
             </Button>
           </div>

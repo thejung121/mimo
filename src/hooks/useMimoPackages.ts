@@ -1,18 +1,20 @@
 
 import { useState, useEffect } from 'react';
 import { MimoPackage, MediaItem } from '@/types/creator';
-import { supabase } from '@/services/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from './use-toast';
 import { emptyPackage } from './mimo-packages/packageData';
+import { getMimoPackages, saveMimoPackages, getPackagesByUsername } from '@/services/creator/packageService';
 
 interface UseMimoPackagesProps {
   creatorId?: string;
+  username?: string;
 }
 
 type SortOrder = 'asc' | 'desc';
 
-export const useMimoPackages = (creatorId?: string) => {
+export const useMimoPackages = (props?: UseMimoPackagesProps) => {
   const [packages, setPackages] = useState<MimoPackage[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -61,7 +63,7 @@ export const useMimoPackages = (creatorId?: string) => {
     } else {
       setPackages(prevPackages => 
         prevPackages.map(pkg => 
-          pkg.id === packageId 
+          String(pkg.id) === String(packageId) 
             ? { ...pkg, media: [...pkg.media, media] } 
             : pkg
         )
@@ -69,7 +71,7 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   };
 
-  const handleRemoveMedia = (packageId: number | string | null, mediaId: number) => {
+  const handleRemoveMedia = (packageId: number | string | null, mediaId: number | string) => {
     if (packageId === null) {
       setNewPackage(prev => ({
         ...prev,
@@ -78,7 +80,7 @@ export const useMimoPackages = (creatorId?: string) => {
     } else {
       setPackages(prevPackages => 
         prevPackages.map(pkg => 
-          pkg.id === packageId 
+          String(pkg.id) === String(packageId) 
             ? { ...pkg, media: pkg.media.filter(m => m.id !== mediaId) } 
             : pkg
         )
@@ -86,7 +88,7 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   };
 
-  const handleTogglePreview = (packageId: number | string | null, mediaId: number) => {
+  const handleTogglePreview = (packageId: number | string | null, mediaId: number | string) => {
     if (packageId === null) {
       setNewPackage(prev => ({
         ...prev,
@@ -97,7 +99,7 @@ export const useMimoPackages = (creatorId?: string) => {
     } else {
       setPackages(prevPackages => 
         prevPackages.map(pkg => 
-          pkg.id === packageId 
+          String(pkg.id) === String(packageId) 
             ? { 
                 ...pkg, 
                 media: pkg.media.map(m => 
@@ -113,27 +115,31 @@ export const useMimoPackages = (creatorId?: string) => {
   const fetchPackages = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('packages')
-        .select('*')
-        .eq('creator_id', creatorId || user?.id)
-        .order('price', { ascending: sortOrder === 'asc' });
-
-      if (error) {
-        setError(error);
-        toast({
-          title: 'Erro ao carregar pacotes',
-          description: error.message,
-          variant: 'destructive',
-        });
+      let fetchedPackages: MimoPackage[] = [];
+      
+      if (props?.username) {
+        // Fetch packages for a specific creator by username
+        fetchedPackages = await getPackagesByUsername(props.username);
       } else {
-        setPackages(data || []);
+        // Fetch packages for the current user
+        fetchedPackages = await getMimoPackages();
       }
+      
+      // Sort packages if needed
+      if (sortOrder === 'asc') {
+        fetchedPackages.sort((a, b) => a.price - b.price);
+      } else {
+        fetchedPackages.sort((a, b) => b.price - a.price);
+      }
+      
+      setPackages(fetchedPackages);
+      console.log("Packages fetched successfully:", fetchedPackages);
     } catch (err: any) {
+      console.error("Error fetching packages:", err);
       setError(err);
       toast({
         title: 'Erro inesperado',
-        description: err.message,
+        description: err.message || "Erro ao carregar recompensas",
         variant: 'destructive',
       });
     } finally {
@@ -143,60 +149,82 @@ export const useMimoPackages = (creatorId?: string) => {
 
   const savePackage = async (packageData: MimoPackage): Promise<boolean> => {
     try {
-      const newPackage = await savePackageToSupabase(packageData);
-      if (newPackage) {
-        setPackages(prevPackages => [...prevPackages, newPackage]);
+      const updatedPackages = [...packages, packageData];
+      const saved = await saveMimoPackages(updatedPackages);
+      
+      if (saved) {
+        setPackages(updatedPackages);
         toast({
-          title: 'Pacote salvo com sucesso!',
+          title: 'Recompensa salva com sucesso!',
         });
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in savePackage:", error);
+      toast({
+        title: 'Erro ao salvar recompensa',
+        description: error.message,
+        variant: 'destructive',
+      });
       return false;
     }
   };
 
   const updatePackage = async (packageData: MimoPackage): Promise<boolean> => {
     try {
-      const updatedPackage = await updatePackageInSupabase(packageData);
-      if (updatedPackage) {
-        setPackages(prevPackages =>
-          prevPackages.map(pkg => (String(pkg.id) === String(packageData.id) ? { ...pkg, ...updatedPackage } : pkg))
-        );
+      const updatedPackages = packages.map(pkg => 
+        String(pkg.id) === String(packageData.id) ? packageData : pkg
+      );
+      
+      const saved = await saveMimoPackages(updatedPackages);
+      
+      if (saved) {
+        setPackages(updatedPackages);
         toast({
-          title: 'Pacote atualizado com sucesso!',
+          title: 'Recompensa atualizada com sucesso!',
         });
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in updatePackage:", error);
+      toast({
+        title: 'Erro ao atualizar recompensa',
+        description: error.message,
+        variant: 'destructive',
+      });
       return false;
     }
   };
 
   const deletePackage = async (id: string | number): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('packages')
-        .delete()
-        .eq('id', String(id));
+      // First check if we need to delete from Supabase
+      if (typeof id === 'string' && id.length > 10) {
+        const { error } = await supabase
+          .from('packages')
+          .delete()
+          .eq('id', id);
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.warn("Error deleting package from Supabase:", error);
+          // Continue anyway to remove from local state
+        }
       }
-
-      setPackages(prevPackages => prevPackages.filter(pkg => String(pkg.id) !== String(id)));
+      
+      const updatedPackages = packages.filter(pkg => String(pkg.id) !== String(id));
+      await saveMimoPackages(updatedPackages);
+      
+      setPackages(updatedPackages);
       toast({
-        title: 'Pacote removido com sucesso!',
+        title: 'Recompensa removida com sucesso!',
       });
       return true;
     } catch (error: any) {
-      console.error('Error deleting package:', error.message);
+      console.error('Error deleting package:', error);
       toast({
-        title: 'Erro ao remover pacote',
+        title: 'Erro ao remover recompensa',
         description: error.message,
         variant: 'destructive',
       });
@@ -206,29 +234,26 @@ export const useMimoPackages = (creatorId?: string) => {
 
   const toggleFeatured = async (packageId: string | number, isHighlighted: boolean): Promise<boolean> => {
     try {
-      const { data, error } = await supabase
-        .from('packages')
-        .update({ highlighted: !isHighlighted })
-        .eq('id', String(packageId))
-        .select();
-
-      if (error) {
-        throw error;
-      }
-
-      setPackages(prevPackages =>
-        prevPackages.map(pkg =>
-          String(pkg.id) === String(packageId) ? { ...pkg, highlighted: !isHighlighted } : pkg
-        )
+      const updatedPackages = packages.map(pkg => 
+        String(pkg.id) === String(packageId) 
+          ? { ...pkg, highlighted: !isHighlighted } 
+          : pkg
       );
-      toast({
-        title: 'Pacote destacado atualizado!',
-      });
-      return true;
+      
+      const saved = await saveMimoPackages(updatedPackages);
+      
+      if (saved) {
+        setPackages(updatedPackages);
+        toast({
+          title: 'Status de destaque atualizado!',
+        });
+        return true;
+      }
+      return false;
     } catch (error: any) {
-      console.error('Error toggling featured status:', error.message);
+      console.error('Error toggling featured status:', error);
       toast({
-        title: 'Erro ao atualizar pacote destacado',
+        title: 'Erro ao atualizar status de destaque',
         description: error.message,
         variant: 'destructive',
       });
@@ -236,66 +261,9 @@ export const useMimoPackages = (creatorId?: string) => {
     }
   };
 
-  const savePackageToSupabase = async (packageData: MimoPackage) => {
-    try {
-      const { data, error } = await supabase
-        .from('packages')
-        .insert([{ 
-          ...packageData,
-          description: packageData.description || '', 
-          creator_id: creatorId || user?.id 
-        }])
-        .select();
-        
-      if (error) throw error;
-      
-      return data?.[0];
-    } catch (error: any) {
-      console.error('Error saving package:', error.message);
-      toast({
-        title: 'Erro ao salvar pacote',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return null;
-    }
-  };
-
-  const updatePackageInSupabase = async (packageData: MimoPackage) => {
-    try {
-      const { data, error } = await supabase
-        .from('packages')
-        .update({ 
-          title: packageData.title,
-          price: packageData.price,
-          description: packageData.description || '', 
-          features: packageData.features,
-          highlighted: packageData.highlighted,
-          isHidden: packageData.isHidden,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', String(packageData.id))
-        .select();
-        
-      if (error) throw error;
-      
-      return data?.[0];
-    } catch (error: any) {
-      console.error('Error updating package:', error.message);
-      toast({
-        title: 'Erro ao atualizar pacote',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return null;
-    }
-  };
-
   useEffect(() => {
-    if (creatorId || user?.id) {
-      fetchPackages();
-    }
-  }, [creatorId, user?.id]);
+    fetchPackages();
+  }, [props?.username, props?.creatorId, user?.id]);
 
   // Package editing methods
   const handleEditPackage = (id: number | string): boolean => {
@@ -325,6 +293,11 @@ export const useMimoPackages = (creatorId?: string) => {
       return await savePackage(newPackage);
     }
   };
+  
+  // Force refresh packages
+  const refreshPackages = () => {
+    fetchPackages();
+  };
 
   // Aliases for backward compatibility
   const mimoPackages = packages;
@@ -342,6 +315,7 @@ export const useMimoPackages = (creatorId?: string) => {
     sortOrder,
     toggleFeatured,
     setPackages,
+    refreshPackages,
     
     // Feature methods
     handleAddFeature,

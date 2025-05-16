@@ -15,8 +15,8 @@ interface PackagesSectionProps {
   onAddFeature: () => void;
   onRemoveFeature: (index: number) => void;
   onAddMedia: (packageId: number | string | null, media: MediaItem) => void;
-  onRemoveMedia: (packageId: number | string | null, mediaId: number) => void;
-  onTogglePreview: (packageId: number | string | null, mediaId: number) => void;
+  onRemoveMedia: (packageId: number | string | null, mediaId: number | string) => void;
+  onTogglePreview: (packageId: number | string | null, mediaId: number | string) => void;
   onSavePackage: () => void;
   onDeletePackage: (id: number | string) => void;
   onEditPackage: (id: number | string) => void;
@@ -44,11 +44,11 @@ const PackagesSection = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pacotes de Mimo</CardTitle>
-        <CardDescription>Gerencie os pacotes que seus fãs podem adquirir para te enviar mimos.</CardDescription>
+        <CardTitle>Recompensas para Fãs</CardTitle>
+        <CardDescription>Gerencie as recompensas que seus fãs podem adquirir para te enviar mimos.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Lista de pacotes existentes quando houver pacotes */}
+        {/* Lista de recompensas existentes quando houver */}
         {!hasNoPackages && (
           <PackagesList
             mimoPackages={mimoPackages}
@@ -60,7 +60,7 @@ const PackagesSection = ({
           />
         )}
         
-        {/* Formulário para adicionar novo pacote ou botão para mostrá-lo */}
+        {/* Formulário para adicionar nova recompensa ou botão para mostrá-lo */}
         {!showNewPackageForm ? (
           <NewPackageButton 
             onClick={() => setShowNewPackageForm(true)} 

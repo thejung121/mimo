@@ -1,6 +1,6 @@
-
 import { MimoPackage } from '@/types/creator';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
+import { supabase } from '@/integrations/supabase/client';
 
 // Get the current authenticated user from localStorage
 const getCurrentUser = () => {
@@ -16,7 +16,7 @@ const getCurrentUser = () => {
 };
 
 // Get mimo packages with proper user association
-export const getMimoPackages = (): MimoPackage[] => {
+export const getMimoPackages = async (): Promise<MimoPackage[]> => {
   const user = getCurrentUser();
   
   // If not logged in, return empty array
@@ -25,93 +25,322 @@ export const getMimoPackages = (): MimoPackage[] => {
     return [];
   }
   
-  // Try to load stored packages data
-  const packagesKey = `mimo:packages:${user.id}`;
-  const storedPackages = localStorage.getItem(packagesKey);
-  
-  if (storedPackages) {
-    try {
+  try {
+    // First try to get data from Supabase
+    const { data: supabasePackages, error } = await supabase
+      .from('packages')
+      .select('*, package_features(feature), package_media(id, url, type, caption, is_preview)')
+      .eq('creator_id', user.id);
+    
+    if (error) {
+      console.error("Error fetching packages from Supabase:", error);
+      // Fallback to localStorage
+      return getLocalPackages(user.id);
+    }
+    
+    if (supabasePackages && supabasePackages.length > 0) {
+      console.log("Loaded packages from Supabase:", supabasePackages);
+      
+      // Transform data to match our MimoPackage structure
+      const formattedPackages = supabasePackages.map(pkg => ({
+        id: pkg.id,
+        title: pkg.title,
+        price: Number(pkg.price),
+        features: pkg.package_features ? pkg.package_features.map((f: any) => f.feature) : [],
+        highlighted: pkg.highlighted,
+        isHidden: pkg.is_hidden,
+        media: pkg.package_media ? pkg.package_media.map((m: any) => ({
+          id: m.id,
+          url: m.url,
+          type: m.type,
+          caption: m.caption,
+          isPreview: m.is_preview
+        })) : []
+      }));
+      
+      // Update localStorage with the latest data
+      saveLocalPackages(user.id, formattedPackages);
+      
+      return formattedPackages;
+    } else {
+      // No data in Supabase, fallback to localStorage
+      console.log("No packages in Supabase, checking localStorage");
+      return getLocalPackages(user.id);
+    }
+  } catch (e) {
+    console.error("Error in getMimoPackages:", e);
+    // Fallback to localStorage on any error
+    return getLocalPackages(user.id);
+  }
+};
+
+// Helper for localStorage fallback
+const getLocalPackages = (userId: string): MimoPackage[] => {
+  try {
+    const packagesKey = `mimo:packages:${userId}`;
+    const storedPackages = localStorage.getItem(packagesKey);
+    
+    if (storedPackages) {
       const parsed = JSON.parse(storedPackages);
       console.log("Loaded packages from local storage:", parsed);
       return parsed;
-    } catch (e) {
-      console.error("Failed to parse packages data", e);
-      // Return empty array for authenticated users
-      return [];
     }
-  } else {
-    console.log("No packages found in localStorage for user:", user.id);
+  } catch (e) {
+    console.error("Failed to parse packages data from localStorage", e);
   }
   
-  // If no stored packages, return empty array for new users
   return [];
 };
 
-// Save mimo packages with user ID association
-export const saveMimoPackages = (packages: MimoPackage[]): void => {
-  const user = getCurrentUser();
-  
-  if (!user) {
-    // If not logged in, just update in session, not persisted
-    console.warn("Attempting to save packages data without being logged in");
-    return;
-  }
-  
-  const packagesKey = `mimo:packages:${user.id}`;
-  
+// Save local backup of packages
+const saveLocalPackages = (userId: string, packages: MimoPackage[]): void => {
   try {
+    const packagesKey = `mimo:packages:${userId}`;
     localStorage.setItem(packagesKey, JSON.stringify(packages));
-    console.log("Saved packages to storage:", packages);
-    
-    // Debug to check if packages are properly saved
-    const savedPackages = localStorage.getItem(packagesKey);
-    if (savedPackages) {
-      console.log("Verified saved packages:", JSON.parse(savedPackages));
-    }
+    console.log("Saved packages to localStorage as backup:", packages);
   } catch (error) {
     console.error("Error saving packages to localStorage:", error);
   }
 };
 
+// Save mimo packages with user ID association
+export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean> => {
+  const user = getCurrentUser();
+  
+  if (!user) {
+    console.warn("Attempting to save packages data without being logged in");
+    return false;
+  }
+  
+  try {
+    // Save to Supabase
+    for (const pkg of packages) {
+      // Check if package exists in Supabase
+      const { data: existingPkg, error: checkError } = await supabase
+        .from('packages')
+        .select('id')
+        .eq('id', pkg.id)
+        .maybeSingle();
+      
+      if (checkError) {
+        console.error("Error checking if package exists:", checkError);
+        continue;
+      }
+      
+      if (existingPkg) {
+        // Package exists, update it
+        console.log("Updating existing package in Supabase:", pkg.id);
+        const { error } = await supabase
+          .from('packages')
+          .update({
+            title: pkg.title,
+            price: pkg.price,
+            highlighted: pkg.highlighted,
+            is_hidden: pkg.isHidden,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', pkg.id);
+        
+        if (error) {
+          console.error("Error updating package:", error);
+          continue;
+        }
+        
+        // Update features: first delete existing, then add new ones
+        const { error: deleteError } = await supabase
+          .from('package_features')
+          .delete()
+          .eq('package_id', pkg.id);
+        
+        if (deleteError) {
+          console.error("Error deleting package features:", deleteError);
+        }
+        
+        if (pkg.features && pkg.features.length > 0) {
+          const { error: featuresError } = await supabase
+            .from('package_features')
+            .insert(pkg.features.map(feature => ({
+              package_id: pkg.id,
+              feature
+            })));
+          
+          if (featuresError) {
+            console.error("Error adding package features:", featuresError);
+          }
+        }
+        
+        // Handle media: Only update changed items
+        if (pkg.media && pkg.media.length > 0) {
+          for (const media of pkg.media) {
+            if (typeof media.id === 'number') {
+              // This is a new media item that hasn't been saved to Supabase yet
+              const { data: mediaData, error: mediaError } = await supabase
+                .from('package_media')
+                .insert({
+                  package_id: pkg.id,
+                  type: media.type,
+                  url: media.url,
+                  caption: media.caption,
+                  is_preview: media.isPreview
+                })
+                .select('id')
+                .single();
+              
+              if (mediaError) {
+                console.error("Error adding media:", mediaError);
+              } else {
+                // Update the local ID with the Supabase UUID
+                media.id = mediaData.id;
+              }
+            } else {
+              // Existing media, update it
+              const { error: updateMediaError } = await supabase
+                .from('package_media')
+                .update({
+                  type: media.type,
+                  url: media.url,
+                  caption: media.caption,
+                  is_preview: media.isPreview
+                })
+                .eq('id', media.id);
+              
+              if (updateMediaError) {
+                console.error("Error updating media:", updateMediaError);
+              }
+            }
+          }
+        }
+      } else {
+        // New package, insert it
+        console.log("Creating new package in Supabase");
+        const { data: newPkg, error: insertError } = await supabase
+          .from('packages')
+          .insert({
+            title: pkg.title,
+            price: pkg.price,
+            highlighted: pkg.highlighted,
+            is_hidden: pkg.isHidden,
+            creator_id: user.id
+          })
+          .select('id')
+          .single();
+        
+        if (insertError) {
+          console.error("Error inserting package:", insertError);
+          continue;
+        }
+        
+        // Update the package ID with the UUID from Supabase
+        pkg.id = newPkg.id;
+        
+        // Add features
+        if (pkg.features && pkg.features.length > 0) {
+          const { error: featuresError } = await supabase
+            .from('package_features')
+            .insert(pkg.features.map(feature => ({
+              package_id: newPkg.id,
+              feature
+            })));
+          
+          if (featuresError) {
+            console.error("Error adding package features:", featuresError);
+          }
+        }
+        
+        // Add media
+        if (pkg.media && pkg.media.length > 0) {
+          for (const media of pkg.media) {
+            const { data: mediaData, error: mediaError } = await supabase
+              .from('package_media')
+              .insert({
+                package_id: newPkg.id,
+                type: media.type,
+                url: media.url,
+                caption: media.caption,
+                is_preview: media.isPreview
+              })
+              .select('id')
+              .single();
+            
+            if (mediaError) {
+              console.error("Error adding media:", mediaError);
+            } else {
+              // Update the local ID with the Supabase UUID
+              media.id = mediaData.id;
+            }
+          }
+        }
+      }
+    }
+    
+    // Save to localStorage as backup
+    saveLocalPackages(user.id, packages);
+    console.log("Successfully saved all packages to Supabase and localStorage");
+    
+    return true;
+  } catch (error) {
+    console.error("Error saving packages:", error);
+    
+    // Save to localStorage anyway as backup
+    saveLocalPackages(user.id, packages);
+    
+    return false;
+  }
+};
+
 // Get packages for a specific creator by username
-export const getPackagesByUsername = (username: string | null | undefined): MimoPackage[] => {
+export const getPackagesByUsername = async (username: string | null | undefined): Promise<MimoPackage[]> => {
   if (!username) {
     console.log("No username provided to getPackagesByUsername");
     return [];
   }
   
-  // Try to find user ID from username
-  const allUsers = Object.keys(localStorage)
-    .filter(key => key.startsWith(LOCAL_STORAGE_KEY) || key === LOCAL_STORAGE_KEY)
-    .map(key => {
-      try {
-        return JSON.parse(localStorage.getItem(key) || "{}");
-      } catch (e) {
-        return null;
-      }
-    })
-    .filter(user => user && user.username === username);
-  
-  if (allUsers.length === 0) {
-    console.log(`No user found with username: ${username}`);
-    return [];
-  }
-  
-  const user = allUsers[0];
-  const packagesKey = `mimo:packages:${user.id}`;
-  const storedPackages = localStorage.getItem(packagesKey);
-  
-  if (storedPackages) {
-    try {
-      const parsed = JSON.parse(storedPackages);
-      console.log(`Loaded packages for username ${username}:`, parsed);
-      // Filter out hidden packages
-      return parsed.filter((pkg: MimoPackage) => !pkg.isHidden);
-    } catch (e) {
-      console.error(`Failed to parse packages data for username ${username}`, e);
+  try {
+    // First try to get creator ID by username
+    const { data: creatorData, error: creatorError } = await supabase
+      .from('creators')
+      .select('id')
+      .eq('username', username)
+      .maybeSingle();
+    
+    if (creatorError || !creatorData) {
+      console.error(`Error or no creator found for username ${username}:`, creatorError);
       return [];
     }
+    
+    // Get packages for this creator
+    const { data: packages, error: packagesError } = await supabase
+      .from('packages')
+      .select('*, package_features(feature), package_media(id, url, type, caption, is_preview)')
+      .eq('creator_id', creatorData.id)
+      .eq('is_hidden', false);
+    
+    if (packagesError) {
+      console.error(`Error fetching packages for username ${username}:`, packagesError);
+      return [];
+    }
+    
+    // Transform data to match our MimoPackage structure
+    const formattedPackages = packages.map(pkg => ({
+      id: pkg.id,
+      title: pkg.title,
+      price: Number(pkg.price),
+      features: pkg.package_features ? pkg.package_features.map((f: any) => f.feature) : [],
+      highlighted: pkg.highlighted,
+      isHidden: pkg.is_hidden,
+      media: pkg.package_media ? pkg.package_media.map((m: any) => ({
+        id: m.id,
+        url: m.url,
+        type: m.type,
+        caption: m.caption,
+        isPreview: m.is_preview
+      })) : []
+    }));
+    
+    console.log(`Loaded ${formattedPackages.length} packages for username ${username}`);
+    return formattedPackages;
+  } catch (e) {
+    console.error(`Error in getPackagesByUsername for ${username}:`, e);
+    return [];
   }
-  
-  return [];
 };

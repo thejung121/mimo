@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MimoPackage } from '@/types/creator';
 import MimoPackageComponent from './MimoPackage';
+import { Loader2 } from 'lucide-react';
+import { getPackagesByUsername } from '@/services/creator/packageService';
 
 interface MimoTabContentProps {
   creator: any;
@@ -11,30 +13,69 @@ interface MimoTabContentProps {
   onCustomAmount: (amount: number) => void;
 }
 
-const MimoTabContent = ({ creator, packages, suggestedPrices, onSelectPackage, onCustomAmount }: MimoTabContentProps) => {
-  const hasPackages = packages && packages.length > 0;
+const MimoTabContent = ({ 
+  creator, 
+  packages: initialPackages, 
+  suggestedPrices, 
+  onSelectPackage, 
+  onCustomAmount 
+}: MimoTabContentProps) => {
+  const [packages, setPackages] = useState<MimoPackage[]>(initialPackages);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  useEffect(() => {
+    const loadPackages = async () => {
+      if (creator?.username) {
+        setLoading(true);
+        console.log("Fetching packages for creator:", creator.username);
+        try {
+          const fetchedPackages = await getPackagesByUsername(creator.username);
+          console.log("Fetched packages:", fetchedPackages);
+          setPackages(fetchedPackages);
+        } catch (error) {
+          console.error("Error fetching packages:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    loadPackages();
+  }, [creator?.username]);
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p>Carregando recompensas...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const visiblePackages = packages.filter(pkg => !pkg.isHidden);
+  const hasPackages = visiblePackages && visiblePackages.length > 0;
   
   return (
     <div className="space-y-6">
       {hasPackages ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {packages
-            .filter(pkg => !pkg.isHidden) // Filter out hidden packages
-            .map(pkg => (
-              <MimoPackageComponent
-                key={pkg.id}
-                title={pkg.title}
-                price={pkg.price}
-                features={pkg.features}
-                highlighted={pkg.highlighted}
-                previewImageUrl={pkg.media?.find(m => m.isPreview)?.url}
-                onClick={() => onSelectPackage(pkg)}
-              />
-            ))}
+          {visiblePackages.map(pkg => (
+            <MimoPackageComponent
+              key={pkg.id}
+              title={pkg.title}
+              price={pkg.price}
+              features={pkg.features}
+              highlighted={pkg.highlighted}
+              previewImageUrl={pkg.media?.find(m => m.isPreview)?.url}
+              onClick={() => onSelectPackage(pkg)}
+            />
+          ))}
         </div>
       ) : (
         <div className="text-center p-8 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <p className="text-gray-500 dark:text-gray-400">Ainda não há pacotes disponíveis.</p>
+          <p className="text-gray-500 dark:text-gray-400">Ainda não há recompensas disponíveis.</p>
         </div>
       )}
 
