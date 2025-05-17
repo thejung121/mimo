@@ -5,7 +5,6 @@ import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase/cr
 import { Creator, MimoPackage } from '@/types/creator';
 import { getPackagesByUsername } from '@/services/creator/packageService';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 export const useCreatorPage = () => {
   const [creator, setCreator] = useState<Creator | null>(null);
@@ -101,8 +100,11 @@ export const useCreatorPage = () => {
                 }
               } else {
                 // If that fails, try by username
-                packages = getPackagesByUsername(username);
-                console.log("Packages from localStorage by username:", packages);
+                const usernamePackages = await getPackagesByUsername(username);
+                if (usernamePackages && usernamePackages.length > 0) {
+                  packages = usernamePackages;
+                  console.log("Packages from localStorage by username:", packages);
+                }
               }
             } catch (e) {
               console.error("Error getting packages from localStorage:", e);

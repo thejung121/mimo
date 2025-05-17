@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -6,13 +7,13 @@ import { Copy, ExternalLink, Loader2, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMimoPackages } from '@/hooks/useMimoPackages';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileEditor from '@/components/profile/ProfileEditor';
 import { useCreatorProfile } from '@/hooks/useCreatorProfile';
-import { saveMimoPackages, getMimoPackages } from '@/services/creator/packageService';
+import { saveMimoPackages } from '@/services/creator/packageService';
 
 const MyPageFullDashboard = () => {
   const { user, updateUserProfile } = useAuth();
@@ -20,7 +21,7 @@ const MyPageFullDashboard = () => {
   const [activeTab, setActiveTab] = useState<string>("profile");
   const [isSaving, setIsSaving] = useState(false);
   const [packageSaving, setPackageSaving] = useState(false);
-  const { mimoPackages, setMimoPackages } = useMimoPackages();
+  const { mimoPackages, setMimoPackages, refreshPackages } = useMimoPackages();
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Creator profile hooks
@@ -38,11 +39,12 @@ const MyPageFullDashboard = () => {
 
   // Force reload packages
   useEffect(() => {
-    const loadedPackages = getMimoPackages();
-    setMimoPackages(loadedPackages);
-    setIsLoaded(true);
-    console.log("MyPageFullDashboard loaded packages:", loadedPackages);
-  }, [setMimoPackages]);
+    const loadPackages = async () => {
+      await refreshPackages();
+      setIsLoaded(true);
+    };
+    loadPackages();
+  }, [refreshPackages]);
   
   // Sync creator username with auth user username
   useEffect(() => {
@@ -89,7 +91,7 @@ const MyPageFullDashboard = () => {
 
     toast({
       title: "Configuração salva",
-      description: "Visibilidade do pacote atualizada com sucesso.",
+      description: "Visibilidade da recompensa atualizada com sucesso.",
     });
     
     setTimeout(() => {
@@ -208,7 +210,7 @@ const MyPageFullDashboard = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="profile">Perfil</TabsTrigger>
-            <TabsTrigger value="packages">Pacotes</TabsTrigger>
+            <TabsTrigger value="packages">Recompensas</TabsTrigger>
           </TabsList>
           
           <TabsContent value="profile">
@@ -258,21 +260,21 @@ const MyPageFullDashboard = () => {
           <TabsContent value="packages">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Pacotes Disponíveis</CardTitle>
+                <CardTitle>Recompensas Disponíveis</CardTitle>
                 <Button asChild>
-                  <Link to="/dashboard/pacotes/novo">Criar Novo Pacote</Link>
+                  <Link to="/dashboard/pacotes/novo">Criar Nova Recompensa</Link>
                 </Button>
               </CardHeader>
               <CardContent>
                 {!isLoaded ? (
                   <div className="text-center py-4">
-                    <p>Carregando pacotes...</p>
+                    <p>Carregando recompensas...</p>
                   </div>
                 ) : mimoPackages.length === 0 ? (
                   <div className="text-center py-6">
-                    <p className="text-muted-foreground mb-4">Você ainda não criou nenhum pacote</p>
+                    <p className="text-muted-foreground mb-4">Você ainda não criou nenhuma recompensa</p>
                     <Button asChild>
-                      <Link to="/dashboard/pacotes/novo">Criar Primeiro Pacote</Link>
+                      <Link to="/dashboard/pacotes/novo">Criar Primeira Recompensa</Link>
                     </Button>
                   </div>
                 ) : (
@@ -302,11 +304,14 @@ const MyPageFullDashboard = () => {
                               {pkg.isHidden ? 'Oculto' : 'Visível'}
                             </Label>
                           </div>
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link to={`/dashboard/pacotes/editar/${pkg.id}`}>
-                              <ExternalLink className="h-4 w-4" />
-                            </Link>
-                          </Button>
+                          
+                          <div className="flex items-center">
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link to={`/dashboard/pacotes/editar/${pkg.id}`}>
+                                <ExternalLink className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}

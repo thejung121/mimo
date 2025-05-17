@@ -9,5 +9,6 @@ export const emptyPackage: MimoPackage = {
   features: [''],
   highlighted: false,
   isHidden: false,
-  media: []
+  media: [],
+  description: '' // Optional description field
 };

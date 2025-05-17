@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { MimoPackage, MediaItem } from '@/types/creator';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from './use-toast';
 import { emptyPackage } from './mimo-packages/packageData';
@@ -200,19 +199,6 @@ export const useMimoPackages = (props?: UseMimoPackagesProps) => {
 
   const deletePackage = async (id: string | number): Promise<boolean> => {
     try {
-      // First check if we need to delete from Supabase
-      if (typeof id === 'string' && id.length > 10) {
-        const { error } = await supabase
-          .from('packages')
-          .delete()
-          .eq('id', id);
-
-        if (error) {
-          console.warn("Error deleting package from Supabase:", error);
-          // Continue anyway to remove from local state
-        }
-      }
-      
       const updatedPackages = packages.filter(pkg => String(pkg.id) !== String(id));
       await saveMimoPackages(updatedPackages);
       

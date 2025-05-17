@@ -1,3 +1,4 @@
+
 import { MimoPackage } from '@/types/creator';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
@@ -119,7 +120,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
       const { data: existingPkg, error: checkError } = await supabase
         .from('packages')
         .select('id')
-        .eq('id', pkg.id)
+        .eq('id', String(pkg.id))
         .maybeSingle();
       
       if (checkError) {
@@ -139,7 +140,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
             is_hidden: pkg.isHidden,
             updated_at: new Date().toISOString()
           })
-          .eq('id', pkg.id);
+          .eq('id', String(pkg.id));
         
         if (error) {
           console.error("Error updating package:", error);
@@ -150,22 +151,25 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
         const { error: deleteError } = await supabase
           .from('package_features')
           .delete()
-          .eq('package_id', pkg.id);
+          .eq('package_id', String(pkg.id));
         
         if (deleteError) {
           console.error("Error deleting package features:", deleteError);
         }
         
         if (pkg.features && pkg.features.length > 0) {
-          const { error: featuresError } = await supabase
-            .from('package_features')
-            .insert(pkg.features.map(feature => ({
-              package_id: pkg.id,
-              feature
-            })));
-          
-          if (featuresError) {
-            console.error("Error adding package features:", featuresError);
+          // Insert each feature individually
+          for (const feature of pkg.features) {
+            const { error: featureError } = await supabase
+              .from('package_features')
+              .insert({
+                package_id: String(pkg.id),
+                feature: feature
+              });
+            
+            if (featureError) {
+              console.error("Error adding package feature:", featureError);
+            }
           }
         }
         
@@ -177,7 +181,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
               const { data: mediaData, error: mediaError } = await supabase
                 .from('package_media')
                 .insert({
-                  package_id: pkg.id,
+                  package_id: String(pkg.id),
                   type: media.type,
                   url: media.url,
                   caption: media.caption,
@@ -188,7 +192,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
               
               if (mediaError) {
                 console.error("Error adding media:", mediaError);
-              } else {
+              } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
                 media.id = mediaData.id;
               }
@@ -202,7 +206,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                   caption: media.caption,
                   is_preview: media.isPreview
                 })
-                .eq('id', media.id);
+                .eq('id', String(media.id));
               
               if (updateMediaError) {
                 console.error("Error updating media:", updateMediaError);
@@ -230,43 +234,49 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
           continue;
         }
         
-        // Update the package ID with the UUID from Supabase
-        pkg.id = newPkg.id;
-        
-        // Add features
-        if (pkg.features && pkg.features.length > 0) {
-          const { error: featuresError } = await supabase
-            .from('package_features')
-            .insert(pkg.features.map(feature => ({
-              package_id: newPkg.id,
-              feature
-            })));
+        if (newPkg) {
+          // Update the package ID with the UUID from Supabase
+          const oldId = pkg.id;
+          pkg.id = newPkg.id;
           
-          if (featuresError) {
-            console.error("Error adding package features:", featuresError);
+          // Add features
+          if (pkg.features && pkg.features.length > 0) {
+            // Insert each feature individually
+            for (const feature of pkg.features) {
+              const { error: featureError } = await supabase
+                .from('package_features')
+                .insert({
+                  package_id: String(newPkg.id),
+                  feature: feature
+                });
+              
+              if (featureError) {
+                console.error("Error adding package feature:", featureError);
+              }
+            }
           }
-        }
-        
-        // Add media
-        if (pkg.media && pkg.media.length > 0) {
-          for (const media of pkg.media) {
-            const { data: mediaData, error: mediaError } = await supabase
-              .from('package_media')
-              .insert({
-                package_id: newPkg.id,
-                type: media.type,
-                url: media.url,
-                caption: media.caption,
-                is_preview: media.isPreview
-              })
-              .select('id')
-              .single();
-            
-            if (mediaError) {
-              console.error("Error adding media:", mediaError);
-            } else {
-              // Update the local ID with the Supabase UUID
-              media.id = mediaData.id;
+          
+          // Add media
+          if (pkg.media && pkg.media.length > 0) {
+            for (const media of pkg.media) {
+              const { data: mediaData, error: mediaError } = await supabase
+                .from('package_media')
+                .insert({
+                  package_id: String(newPkg.id),
+                  type: media.type,
+                  url: media.url,
+                  caption: media.caption,
+                  is_preview: media.isPreview
+                })
+                .select('id')
+                .single();
+              
+              if (mediaError) {
+                console.error("Error adding media:", mediaError);
+              } else if (mediaData) {
+                // Update the local ID with the Supabase UUID
+                media.id = mediaData.id;
+              }
             }
           }
         }
