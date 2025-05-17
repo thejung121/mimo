@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { useDashboard } from "@/hooks/useDashboard"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -29,7 +30,7 @@ const sidebarNavItems = [
     icon: Users
   },
   {
-    title: "Conteúdo",
+    title: "Recompensas",
     href: "/dashboard/conteudo",
     icon: MessageSquare
   },

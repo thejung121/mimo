@@ -75,7 +75,7 @@ const MyPageDashboard = () => {
 
     toast({
       title: "Configuração salva",
-      description: "Visibilidade do pacote atualizada com sucesso.",
+      description: "Visibilidade da recompensa atualizada com sucesso.",
     });
   };
 
@@ -146,7 +146,7 @@ const MyPageDashboard = () => {
                 </div>
               ) : !isLoaded ? (
                 <div className="text-center py-4">
-                  <p>Carregando pacotes...</p>
+                  <p>Carregando recompensas...</p>
                 </div>
               ) : packagesHook.packages.length === 0 ? (
                 <div className="text-center py-6">

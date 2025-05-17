@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -55,7 +56,7 @@ const ContentPage = () => {
     
     toast({
       title: "Configuração salva",
-      description: "Visibilidade do conteúdo atualizada com sucesso.",
+      description: "Visibilidade da recompensa atualizada com sucesso.",
     });
   };
 
@@ -64,7 +65,7 @@ const ContentPage = () => {
   };
 
   const handleDeletePackageWithConfirmation = (id: number | string) => {
-    if (window.confirm("Tem certeza que deseja excluir este conteúdo?")) {
+    if (window.confirm("Tem certeza que deseja excluir esta recompensa?")) {
       handleDeletePackage(id);
     }
   };
@@ -73,23 +74,23 @@ const ContentPage = () => {
     <DashboardLayout>
       <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Gerenciar Conteúdo</h1>
+          <h1 className="text-2xl font-bold">Gerenciar Recompensas</h1>
           <Button asChild>
             <Link to="/dashboard/pacotes/novo" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Novo Conteúdo
+              Nova Recompensa
             </Link>
           </Button>
         </div>
         
         {packagesState.length === 0 ? (
           <div className="text-center py-12">
-            <h2 className="text-lg font-medium mb-2">Nenhum conteúdo encontrado</h2>
-            <p className="text-muted-foreground mb-6">Você ainda não criou nenhum conteúdo</p>
+            <h2 className="text-lg font-medium mb-2">Nenhuma recompensa encontrada</h2>
+            <p className="text-muted-foreground mb-6">Você ainda não criou nenhuma recompensa</p>
             <Button asChild>
               <Link to="/dashboard/pacotes/novo" className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
-                Criar Meu Primeiro Conteúdo
+                Criar Minha Primeira Recompensa
               </Link>
             </Button>
           </div>
@@ -160,11 +161,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
         <div className="flex items-center gap-3 md:flex-shrink-0">
           <div className="flex items-center space-x-2">
             <Switch 
-              id={`content-status-${pkg.id}`}
+              id={`package-visible-${pkg.id}`}
               checked={pkg.isActive}
               onCheckedChange={onToggle}
             />
-            <Label htmlFor={`content-status-${pkg.id}`} className="cursor-pointer">
+            <Label htmlFor={`package-visible-${pkg.id}`} className="cursor-pointer">
               {pkg.isActive ? 'Ativo' : 'Inativo'}
             </Label>
           </div>

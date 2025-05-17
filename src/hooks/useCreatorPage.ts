@@ -74,14 +74,19 @@ export const useCreatorPage = () => {
           
           // Try to get packages from Supabase first
           try {
-            // Load packages by username (now properly awaiting)
+            // Load packages by username
             const packages = await getPackagesByUsername(username);
-            console.log("Packages loaded:", packages);
+            console.log("Packages loaded for creator:", packages);
             
-            // Filter out hidden packages for display
-            const visiblePackages = packages.filter(pkg => !pkg.isHidden);
-            console.log("Filtered visible packages:", visiblePackages);
-            setMimoPackages(visiblePackages);
+            if (packages && packages.length > 0) {
+              // Filter out hidden packages for display
+              const visiblePackages = packages.filter(pkg => !pkg.isHidden);
+              console.log("Filtered visible packages:", visiblePackages);
+              setMimoPackages(visiblePackages);
+            } else {
+              console.log("No packages found for this creator or all are hidden");
+              setMimoPackages([]);
+            }
           } catch (e) {
             console.error("Error getting packages:", e);
             setMimoPackages([]);
