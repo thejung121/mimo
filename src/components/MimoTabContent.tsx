@@ -31,17 +31,31 @@ const MimoTabContent = ({
         try {
           const fetchedPackages = await getPackagesByUsername(creator.username);
           console.log("Fetched packages:", fetchedPackages);
-          setPackages(fetchedPackages);
+          
+          // Filter out hidden packages
+          const visiblePackages = fetchedPackages.filter(pkg => !pkg.isHidden);
+          console.log("Visible packages:", visiblePackages);
+          
+          setPackages(visiblePackages);
         } catch (error) {
           console.error("Error fetching packages:", error);
         } finally {
           setLoading(false);
         }
+      } else {
+        // If initialPackages are provided, use them
+        console.log("Using provided initialPackages:", initialPackages);
+        if (initialPackages && initialPackages.length > 0) {
+          const visiblePackages = initialPackages.filter(pkg => !pkg.isHidden);
+          console.log("Visible initialPackages:", visiblePackages);
+          setPackages(visiblePackages);
+        }
+        setLoading(false);
       }
     };
     
     loadPackages();
-  }, [creator?.username]);
+  }, [creator?.username, initialPackages]);
   
   if (loading) {
     return (
@@ -54,14 +68,14 @@ const MimoTabContent = ({
     );
   }
   
-  const visiblePackages = packages.filter(pkg => !pkg.isHidden);
-  const hasPackages = visiblePackages && visiblePackages.length > 0;
+  console.log("Rendering MimoTabContent with packages:", packages);
+  const hasPackages = packages && packages.length > 0;
   
   return (
     <div className="space-y-6">
       {hasPackages ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {visiblePackages.map(pkg => (
+          {packages.map(pkg => (
             <MimoPackageComponent
               key={pkg.id}
               title={pkg.title}

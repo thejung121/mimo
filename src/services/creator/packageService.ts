@@ -1,4 +1,3 @@
-
 import { MimoPackage } from '@/types/creator';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
@@ -176,10 +175,10 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
         // Handle media: Only update changed items
         if (pkg.media && pkg.media.length > 0) {
           for (const media of pkg.media) {
-            // Fix: Properly check for UUID format or numeric IDs
-            const mediaIdString = String(media.id);
-            const isUUID = typeof media.id === 'string' && 
-                          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(mediaIdString);
+            // Fix: Check if the ID is a UUID
+            const mediaId = String(media.id);
+            const isUUID = typeof mediaId === 'string' && 
+                          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(mediaId);
                           
             if (!isUUID) {
               // This is a new media item that hasn't been saved to Supabase yet
@@ -189,7 +188,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                   package_id: String(pkg.id),
                   type: media.type,
                   url: media.url,
-                  caption: media.caption,
+                  caption: media.caption || null,
                   is_preview: media.isPreview
                 })
                 .select('id')
@@ -200,13 +199,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
               } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
                 // We need to handle both string and number IDs
-                if (typeof media.id === 'number') {
-                  // For numeric IDs, assign as string but TypeScript won't complain
-                  media.id = mediaData.id as unknown as number;
-                } else {
-                  // For string IDs
-                  media.id = mediaData.id;
-                }
+                media.id = mediaData.id;
               }
             } else {
               // Existing media, update it
@@ -218,7 +211,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                   caption: media.caption,
                   is_preview: media.isPreview
                 })
-                .eq('id', String(media.id));
+                .eq('id', mediaId);
               
               if (updateMediaError) {
                 console.error("Error updating media:", updateMediaError);
@@ -287,13 +280,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
-                if (typeof media.id === 'number') {
-                  // For numeric IDs, assign as string but TypeScript won't complain
-                  media.id = mediaData.id as unknown as number;
-                } else {
-                  // For string IDs
-                  media.id = mediaData.id;
-                }
+                media.id = mediaData.id;
               }
             }
           }
@@ -340,13 +327,14 @@ export const getPackagesByUsername = async (username: string | null | undefined)
     const { data: packages, error: packagesError } = await supabase
       .from('packages')
       .select('*, package_features(feature), package_media(id, url, type, caption, is_preview)')
-      .eq('creator_id', creatorData.id)
-      .eq('is_hidden', false);
+      .eq('creator_id', creatorData.id);
     
     if (packagesError) {
       console.error(`Error fetching packages for username ${username}:`, packagesError);
       return [];
     }
+    
+    console.log(`Raw packages for ${username}:`, packages);
     
     // Transform data to match our MimoPackage structure
     const formattedPackages = packages.map(pkg => ({
