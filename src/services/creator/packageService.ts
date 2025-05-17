@@ -177,8 +177,9 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
         if (pkg.media && pkg.media.length > 0) {
           for (const media of pkg.media) {
             // Fix: Properly check for UUID format or numeric IDs
+            const mediaIdString = String(media.id);
             const isUUID = typeof media.id === 'string' && 
-                          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(media.id.toString());
+                          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(mediaIdString);
                           
             if (!isUUID) {
               // This is a new media item that hasn't been saved to Supabase yet
@@ -198,6 +199,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
+                // Convert number to string if needed for consistent typing
                 media.id = mediaData.id;
               }
             } else {
