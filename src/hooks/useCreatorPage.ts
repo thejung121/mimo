@@ -131,7 +131,7 @@ export const useCreatorPage = () => {
     console.log("Custom amount selected:", amount);
     setCustomAmount(amount);
     setSelectedPackage({
-      id: 0,
+      id: "custom", // Use string ID
       title: "Valor personalizado",
       price: amount,
       features: ["Valor personalizado definido por você"],

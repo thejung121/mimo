@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -31,6 +32,7 @@ const Register = () => {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
+      console.log('User is already authenticated, redirecting to dashboard');
       navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
@@ -128,18 +130,15 @@ const Register = () => {
       const success = await register(name, email, password, username, document);
       
       if (success) {
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Bem-vindo(a) ao Mimo!",
-        });
+        console.log('Registration successful, redirecting to dashboard');
         // Navigate to dashboard after registration without needing email confirmation
         navigate('/dashboard');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
       toast({
         title: "Erro no cadastro",
-        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        description: error.message || "Ocorreu um erro inesperado. Por favor, tente novamente.",
         variant: "destructive"
       });
     } finally {

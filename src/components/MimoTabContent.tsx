@@ -20,7 +20,7 @@ const MimoTabContent = ({
   onSelectPackage, 
   onCustomAmount 
 }: MimoTabContentProps) => {
-  const [packages, setPackages] = useState<MimoPackage[]>(initialPackages);
+  const [packages, setPackages] = useState<MimoPackage[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
   useEffect(() => {
@@ -33,12 +33,17 @@ const MimoTabContent = ({
           console.log("Fetched packages:", fetchedPackages);
           
           // Filter out hidden packages
-          const visiblePackages = fetchedPackages.filter(pkg => !pkg.isHidden);
+          const visiblePackages = fetchedPackages.filter(pkg => pkg.isHidden !== true);
           console.log("Visible packages:", visiblePackages);
           
           setPackages(visiblePackages);
         } catch (error) {
           console.error("Error fetching packages:", error);
+          // If fetching fails, try using the provided initialPackages
+          if (initialPackages && initialPackages.length > 0) {
+            const visibleInitialPackages = initialPackages.filter(pkg => !pkg.isHidden);
+            setPackages(visibleInitialPackages);
+          }
         } finally {
           setLoading(false);
         }

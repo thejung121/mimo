@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
+import { useToast } from '@/hooks/use-toast';
 
 export interface AuthContextType {
   user: AuthUser | null;
@@ -28,26 +29,38 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   
   // Initialize auth state
   useEffect(() => {
+    console.log('Setting up auth state listener');
+    
     // First set up the auth state listener to react to changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed, session:', session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed, event:', event, 'session:', session);
+      
       if (session?.user) {
-        setUser({
+        const authUser: AuthUser = {
           id: session.user.id,
           email: session.user.email || '',
-          name: session.user.user_metadata.name || '',
-          username: session.user.user_metadata.username || '',
-          document: session.user.user_metadata.document || '',
-          avatar_url: session.user.user_metadata.avatar_url || '',
-          phone: session.user.user_metadata.phone || '',
-          avatar: session.user.user_metadata.avatar || '',
-        });
+          name: session.user.user_metadata?.name || '',
+          username: session.user.user_metadata?.username || '',
+          document: session.user.user_metadata?.document || '',
+          avatar_url: session.user.user_metadata?.avatar_url || '',
+          phone: session.user.user_metadata?.phone || '',
+          avatar: session.user.user_metadata?.avatar || '',
+        };
+        
+        console.log('Setting user state from session:', authUser);
+        setUser(authUser);
+        // Store in localStorage for other services to access
+        localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(authUser));
       } else {
+        console.log('No session, clearing user state');
         setUser(null);
+        localStorage.removeItem('LOCAL_STORAGE_KEY');
       }
+      
       setIsLoading(false);
     });
 
@@ -65,16 +78,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Initial auth check, session:', data.session);
         
         if (data && data.session && data.session.user) {
-          setUser({
+          const authUser: AuthUser = {
             id: data.session.user.id,
             email: data.session.user.email || '',
-            name: data.session.user.user_metadata.name || '',
-            username: data.session.user.user_metadata.username || '',
-            document: data.session.user.user_metadata.document || '',
-            avatar_url: data.session.user.user_metadata.avatar_url || '',
-            phone: data.session.user.user_metadata.phone || '',
-            avatar: data.session.user.user_metadata.avatar || '',
-          });
+            name: data.session.user.user_metadata?.name || '',
+            username: data.session.user.user_metadata?.username || '',
+            document: data.session.user.user_metadata?.document || '',
+            avatar_url: data.session.user.user_metadata?.avatar_url || '',
+            phone: data.session.user.user_metadata?.phone || '',
+            avatar: data.session.user.user_metadata?.avatar || '',
+          };
+          
+          console.log('Setting initial user state:', authUser);
+          setUser(authUser);
+          // Store in localStorage for other services to access
+          localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(authUser));
         }
         setIsLoading(false);
       } catch (error) {
@@ -102,27 +120,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Login error:', error.message);
+        toast({
+          title: "Falha na autenticação",
+          description: error.message,
+          variant: "destructive",
+        });
         return false;
       }
 
       if (data.user) {
         console.log('Login successful, user:', data.user);
-        setUser({
+        const authUser: AuthUser = {
           id: data.user.id,
           email: data.user.email || '',
-          name: data.user.user_metadata.name || '',
-          username: data.user.user_metadata.username || '',
-          document: data.user.user_metadata.document || '',
-          avatar_url: data.user.user_metadata.avatar_url || '',
-          phone: data.user.user_metadata.phone || '',
-          avatar: data.user.user_metadata.avatar || '',
+          name: data.user.user_metadata?.name || '',
+          username: data.user.user_metadata?.username || '',
+          document: data.user.user_metadata?.document || '',
+          avatar_url: data.user.user_metadata?.avatar_url || '',
+          phone: data.user.user_metadata?.phone || '',
+          avatar: data.user.user_metadata?.avatar || '',
+        };
+        
+        setUser(authUser);
+        // Store in localStorage for other services to access
+        localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(authUser));
+        
+        toast({
+          title: "Login realizado com sucesso!",
+          description: `Bem-vindo(a) de volta, ${authUser.name || 'Usuário'}!`,
         });
+        
         return true;
       }
 
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
+      toast({
+        title: "Erro de login",
+        description: error.message || "Ocorreu um erro ao tentar fazer login",
+        variant: "destructive",
+      });
       return false;
     } finally {
       setIsLoading(false);
@@ -133,13 +171,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
+      console.log('Logging out...');
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
         console.error('Logout error:', error.message);
+        toast({
+          title: "Erro ao sair",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setUser(null);
+        // Remove from localStorage
+        localStorage.removeItem('LOCAL_STORAGE_KEY');
+        toast({
+          title: "Logout realizado com sucesso",
+          description: "Você saiu da sua conta com sucesso.",
+        });
       }
-      setUser(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Logout failed:', error);
+      toast({
+        title: "Erro ao sair",
+        description: error.message || "Ocorreu um erro ao tentar sair",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -149,7 +206,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (name: string, email: string, password: string, username: string, document: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      console.log('Registration attempt with:', { email, name, username });
+      console.log('Registration attempt with:', { email, name, username, document });
+      
+      // Check if username exists first
+      const { data: existingUserWithUsername, error: usernameCheckError } = await supabase
+        .from('creators')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+      
+      if (usernameCheckError) {
+        console.error('Error checking username:', usernameCheckError.message);
+      }
+      
+      if (existingUserWithUsername) {
+        console.error('Username already exists:', username);
+        toast({
+          title: "Nome de usuário indisponível",
+          description: "Este nome de usuário já está sendo utilizado. Por favor, escolha outro.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      // If username is available, proceed with registration
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -165,27 +245,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Registration error:', error.message);
+        toast({
+          title: "Erro no cadastro",
+          description: error.message,
+          variant: "destructive",
+        });
         return false;
       }
 
       console.log('Registration response:', data);
+      
       if (data.user) {
-        setUser({
+        // Create a new user profile
+        const authUser: AuthUser = {
           id: data.user.id,
           email: data.user.email || '',
-          name: data.user.user_metadata.name || '',
-          username: data.user.user_metadata.username || '',
-          document: data.user.user_metadata.document || '',
-          avatar_url: data.user.user_metadata.avatar_url || '',
-          phone: data.user.user_metadata.phone || '',
-          avatar: data.user.user_metadata.avatar || '',
+          name: name,
+          username: username,
+          document: document,
+          avatar_url: '',
+          phone: '',
+          avatar: '',
+        };
+        
+        setUser(authUser);
+        // Store in localStorage for other services to access
+        localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(authUser));
+        
+        toast({
+          title: "Conta criada com sucesso!",
+          description: `Bem-vindo(a) ao Mimo, ${name}!`,
         });
+        
         return true;
       }
 
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration failed:', error);
+      toast({
+        title: "Erro no cadastro",
+        description: error.message || "Ocorreu um erro inesperado durante o cadastro",
+        variant: "destructive",
+      });
       return false;
     } finally {
       setIsLoading(false);
@@ -207,21 +309,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Profile update error:', error.message);
+        toast({
+          title: "Erro ao atualizar perfil",
+          description: error.message,
+          variant: "destructive",
+        });
         return false;
       }
 
       // Update local user state
       setUser(currentUser => {
         if (!currentUser) return null;
-        return {
+        const updatedUser = {
           ...currentUser,
           ...userData
         };
+        
+        // Update localStorage too
+        localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(updatedUser));
+        
+        return updatedUser;
+      });
+      
+      toast({
+        title: "Perfil atualizado",
+        description: "Suas informações foram atualizadas com sucesso.",
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Profile update failed:', error);
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: error.message || "Ocorreu um erro inesperado ao atualizar o perfil",
+        variant: "destructive",
+      });
       return false;
     }
   };

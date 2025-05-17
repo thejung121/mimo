@@ -1,3 +1,4 @@
+
 import { MimoPackage } from '@/types/creator';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,14 +44,14 @@ export const getMimoPackages = async (): Promise<MimoPackage[]> => {
       
       // Transform data to match our MimoPackage structure
       const formattedPackages = supabasePackages.map(pkg => ({
-        id: pkg.id,
+        id: pkg.id, // Keep as string ID from Supabase
         title: pkg.title,
         price: Number(pkg.price),
         features: pkg.package_features ? pkg.package_features.map((f: any) => f.feature) : [],
         highlighted: pkg.highlighted,
         isHidden: pkg.is_hidden,
         media: pkg.package_media ? pkg.package_media.map((m: any) => ({
-          id: m.id,
+          id: m.id, // Keep as string ID from Supabase
           url: m.url,
           type: m.type,
           caption: m.caption,
@@ -198,8 +199,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
-                // We need to handle both string and number IDs
-                media.id = mediaData.id;
+                media.id = mediaData.id; // This is a string from Supabase
               }
             } else {
               // Existing media, update it
@@ -242,7 +242,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
         if (newPkg) {
           // Update the package ID with the UUID from Supabase
           const oldId = pkg.id;
-          pkg.id = newPkg.id;
+          pkg.id = newPkg.id; // String ID from Supabase
           
           // Add features
           if (pkg.features && pkg.features.length > 0) {
@@ -280,7 +280,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
-                media.id = mediaData.id; // This is already a string coming from Supabase
+                media.id = mediaData.id; // This is a string from Supabase
               }
             }
           }
@@ -338,14 +338,14 @@ export const getPackagesByUsername = async (username: string | null | undefined)
     
     // Transform data to match our MimoPackage structure
     const formattedPackages = packages.map(pkg => ({
-      id: pkg.id, // This is already a string coming from Supabase
+      id: pkg.id, // String ID from Supabase
       title: pkg.title,
       price: Number(pkg.price),
       features: pkg.package_features ? pkg.package_features.map((f: any) => f.feature) : [],
       highlighted: pkg.highlighted,
       isHidden: pkg.is_hidden,
       media: pkg.package_media ? pkg.package_media.map((m: any) => ({
-        id: m.id,
+        id: m.id, // String ID from Supabase
         url: m.url,
         type: m.type,
         caption: m.caption,

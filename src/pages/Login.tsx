@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,12 +18,20 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   
   const from = location.state?.from?.pathname || '/dashboard';
+  
+  // If already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('User is already authenticated, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,18 +58,16 @@ const Login = () => {
     
     try {
       const success = await login(email, password);
+      
       if (success) {
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo(a) de volta!",
-        });
+        console.log('Login successful, navigating to:', from);
         navigate(from, { replace: true });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during login:', error);
       toast({
         title: "Erro ao fazer login",
-        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        description: error.message || "Ocorreu um erro inesperado. Por favor, tente novamente.",
         variant: "destructive"
       });
     } finally {
@@ -102,11 +108,11 @@ const Login = () => {
           description: "Verifique sua caixa de entrada para redefinir sua senha.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during password reset:', error);
       toast({
         title: "Erro ao processar solicitação",
-        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
+        description: error.message || "Ocorreu um erro inesperado. Por favor, tente novamente.",
         variant: "destructive"
       });
     } finally {

@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useDashboard } from "@/hooks/useDashboard"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -52,6 +52,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const { creator } = useDashboard()
+  const [isClient, setIsClient] = useState(false)
+
+  // Set isClient to true once the component mounts
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // If no user is logged in, redirect to login page
+    if (isClient && !user) {
+      console.log('No user found in dashboard, redirecting to login');
+      navigate('/login', { state: { from: location } });
+    }
+  }, [user, navigate, location, isClient]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)
@@ -60,6 +74,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  }
+
+  // If not client yet or no user, return empty to prevent flash of content
+  if (!isClient || !user) {
+    return null;
   }
 
   return (
@@ -99,7 +118,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               className="group px-3 py-2 flex items-center space-x-2 rounded-md hover:bg-accent transition-colors"
             >
               <Plus className="h-4 w-4 text-[#F54040]" />
-              <span>Novo pacote</span>
+              <span>Nova recompensa</span>
             </Link>
           </div>
         </ScrollArea>
