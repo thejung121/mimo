@@ -280,7 +280,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
-                media.id = mediaData.id;
+                media.id = mediaData.id; // This is already a string coming from Supabase
               }
             }
           }
@@ -338,7 +338,7 @@ export const getPackagesByUsername = async (username: string | null | undefined)
     
     // Transform data to match our MimoPackage structure
     const formattedPackages = packages.map(pkg => ({
-      id: pkg.id,
+      id: pkg.id, // This is already a string coming from Supabase
       title: pkg.title,
       price: Number(pkg.price),
       features: pkg.package_features ? pkg.package_features.map((f: any) => f.feature) : [],
