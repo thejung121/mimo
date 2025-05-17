@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { getCreatorByUsername, getCreatorPackages } from '@/services/supabase/creatorService';
+import { getCreatorByUsername } from '@/services/supabase/creatorService';
 import { Creator, MimoPackage } from '@/types/creator';
 import { getPackagesByUsername } from '@/services/creator/packageService';
 import { useAuth } from '@/contexts/AuthContext';
@@ -73,48 +73,19 @@ export const useCreatorPage = () => {
           setCreator(creatorData);
           
           // Try to get packages from Supabase first
-          let packages: MimoPackage[] = [];
-          
-          if (creatorData?.id) {
-            try {
-              packages = await getCreatorPackages(creatorData.id);
-              console.log("Packages from Supabase:", packages);
-            } catch (e) {
-              console.error("Error fetching from Supabase:", e);
-            }
+          try {
+            // Load packages by username (now properly awaiting)
+            const packages = await getPackagesByUsername(username);
+            console.log("Packages loaded:", packages);
+            
+            // Filter out hidden packages for display
+            const visiblePackages = packages.filter(pkg => !pkg.isHidden);
+            console.log("Filtered visible packages:", visiblePackages);
+            setMimoPackages(visiblePackages);
+          } catch (e) {
+            console.error("Error getting packages:", e);
+            setMimoPackages([]);
           }
-          
-          // If no packages from Supabase or empty, try from localStorage
-          if (!packages || packages.length === 0) {
-            try {
-              // First try to get directly from localStorage for the creator's ID
-              const localStorageKey = `mimo:packages:${creatorData.id}`;
-              const storedPackages = localStorage.getItem(localStorageKey);
-              
-              if (storedPackages) {
-                try {
-                  packages = JSON.parse(storedPackages);
-                  console.log("Packages from localStorage by creator ID:", packages);
-                } catch (error) {
-                  console.error("Error parsing packages from localStorage:", error);
-                }
-              } else {
-                // If that fails, try by username
-                const usernamePackages = await getPackagesByUsername(username);
-                if (usernamePackages && usernamePackages.length > 0) {
-                  packages = usernamePackages;
-                  console.log("Packages from localStorage by username:", packages);
-                }
-              }
-            } catch (e) {
-              console.error("Error getting packages from localStorage:", e);
-            }
-          }
-          
-          // Filter out hidden packages for display
-          packages = packages.filter(pkg => !pkg.isHidden);
-          console.log("Filtered visible packages:", packages);
-          setMimoPackages(packages);
         } else {
           console.log("Creator not found");
           setCreator(null);

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Creator, MimoPackage } from '@/types/creator';
 import { getCreatorData } from '@/services/creator/profileService';
@@ -31,7 +30,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
           // Load the current user's packages directly from localStorage
           try {
             // This will get all packages for the current user
-            const packages = getMimoPackages();
+            const packages = await getMimoPackages();
             console.log('Loaded packages for preview:', packages);
             
             // Filter only packages that are not hidden
@@ -40,6 +39,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
             setMimoPackages(visiblePackages);
           } catch (err) {
             console.error('Error loading packages for preview:', err);
+            setMimoPackages([]);
           }
         } else {
           setError("Nenhum dado de criador encontrado. Configure seu perfil primeiro.");
@@ -74,7 +74,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
   }
 
   // Count media items
-  const countMediaByType = (packages, type) => {
+  const countMediaByType = (packages: MimoPackage[], type: string) => {
     return packages.reduce((count, pkg) => {
       return count + pkg.media.filter(media => media.type === type).length;
     }, 0);
@@ -206,7 +206,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
           ) : (
             <div className="text-center p-6 bg-slate-800/50 rounded-lg">
               <p className="text-slate-400">
-                Este criador ainda não configurou nenhum pacote visível.
+                Este criador ainda não configurou nenhuma recompensa visível.
               </p>
             </div>
           )}

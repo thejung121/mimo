@@ -281,8 +281,8 @@ export const useMimoPackages = (props?: UseMimoPackagesProps) => {
   };
   
   // Force refresh packages
-  const refreshPackages = () => {
-    fetchPackages();
+  const refreshPackages = async () => {
+    await fetchPackages();
   };
 
   // Aliases for backward compatibility

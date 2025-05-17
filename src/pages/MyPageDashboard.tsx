@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, ExternalLink, Edit, CheckCircle } from 'lucide-react';
+import { Copy, ExternalLink, Edit, CheckCircle, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMimoPackages } from '@/hooks/useMimoPackages';
@@ -16,13 +17,30 @@ const MyPageDashboard = () => {
   const { toast } = useToast();
   const packagesHook = useMimoPackages();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Force reload packages
   useEffect(() => {
-    const loadedPackages = getMimoPackages();
-    packagesHook.setPackages(loadedPackages);
-    setIsLoaded(true);
-    console.log("MyPageDashboard loaded packages:", loadedPackages);
+    const loadPackages = async () => {
+      try {
+        setIsLoading(true);
+        const loadedPackages = await getMimoPackages();
+        packagesHook.setPackages(loadedPackages);
+        console.log("MyPageDashboard loaded packages:", loadedPackages);
+      } catch (error) {
+        console.error("Error loading packages:", error);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar recompensas",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoaded(true);
+        setIsLoading(false);
+      }
+    };
+    
+    loadPackages();
   }, []);
 
   const copyShareLink = () => {
@@ -42,7 +60,7 @@ const MyPageDashboard = () => {
     }
   };
 
-  const togglePackageVisibility = (id: number | string) => {
+  const togglePackageVisibility = async (id: number | string) => {
     const updatedPackages = packagesHook.packages.map(pkg => {
       if (String(pkg.id) === String(id)) {
         return { ...pkg, isHidden: !pkg.isHidden };
@@ -51,7 +69,7 @@ const MyPageDashboard = () => {
     });
     
     packagesHook.setPackages(updatedPackages);
-    saveMimoPackages(updatedPackages);
+    await saveMimoPackages(updatedPackages);
     console.log("Saved package visibility changes:", updatedPackages);
 
     toast({
@@ -117,18 +135,23 @@ const MyPageDashboard = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Pacotes Disponíveis</CardTitle>
+              <CardTitle>Recompensas Disponíveis</CardTitle>
             </CardHeader>
             <CardContent>
-              {!isLoaded ? (
+              {isLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+                  <p>Carregando recompensas...</p>
+                </div>
+              ) : !isLoaded ? (
                 <div className="text-center py-4">
                   <p>Carregando pacotes...</p>
                 </div>
               ) : packagesHook.packages.length === 0 ? (
                 <div className="text-center py-6">
-                  <p className="text-muted-foreground mb-4">Você ainda não criou nenhum pacote</p>
+                  <p className="text-muted-foreground mb-4">Você ainda não criou nenhuma recompensa</p>
                   <Button asChild>
-                    <Link to="/dashboard/pacotes/novo">Criar Primeiro Pacote</Link>
+                    <Link to="/dashboard/pacotes/novo">Criar Primeira Recompensa</Link>
                   </Button>
                 </div>
               ) : (
@@ -151,7 +174,7 @@ const MyPageDashboard = () => {
                           <Switch 
                             id={`package-visible-${pkg.id}`}
                             checked={!pkg.isHidden}
-                            onCheckedChange={() => togglePackageVisibility(pkg.id!)}
+                            onCheckedChange={() => togglePackageVisibility(pkg.id)}
                           />
                           <Label htmlFor={`package-visible-${pkg.id}`}>
                             {pkg.isHidden ? 'Oculto' : 'Visível'}

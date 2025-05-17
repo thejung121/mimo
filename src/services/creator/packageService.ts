@@ -176,7 +176,8 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
         // Handle media: Only update changed items
         if (pkg.media && pkg.media.length > 0) {
           for (const media of pkg.media) {
-            if (typeof media.id === 'number') {
+            // Fix: Handle both string and number IDs properly
+            if (typeof media.id === 'number' || !media.id.includes('-')) {
               // This is a new media item that hasn't been saved to Supabase yet
               const { data: mediaData, error: mediaError } = await supabase
                 .from('package_media')
