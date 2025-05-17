@@ -176,8 +176,11 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
         // Handle media: Only update changed items
         if (pkg.media && pkg.media.length > 0) {
           for (const media of pkg.media) {
-            // Fix: Handle both string and number IDs properly
-            if (typeof media.id === 'number' || !media.id.includes('-')) {
+            // Fix: Properly check for UUID format or numeric IDs
+            const isUUID = typeof media.id === 'string' && 
+                          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(media.id.toString());
+                          
+            if (!isUUID) {
               // This is a new media item that hasn't been saved to Supabase yet
               const { data: mediaData, error: mediaError } = await supabase
                 .from('package_media')

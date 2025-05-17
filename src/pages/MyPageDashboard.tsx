@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { saveMimoPackages, getMimoPackages } from '@/services/creator/packageService';
+import { MimoPackage } from '@/types/creator';
 
 const MyPageDashboard = () => {
   const { user } = useAuth();
