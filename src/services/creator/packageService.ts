@@ -199,7 +199,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
-                media.id = mediaData.id; // This is a string from Supabase
+                media.id = mediaData.id; // Fix: Now properly typed as string | number
               }
             } else {
               // Existing media, update it
@@ -242,7 +242,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
         if (newPkg) {
           // Update the package ID with the UUID from Supabase
           const oldId = pkg.id;
-          pkg.id = newPkg.id; // String ID from Supabase
+          pkg.id = newPkg.id; // Fix: Now pkg.id is properly typed as string | number
           
           // Add features
           if (pkg.features && pkg.features.length > 0) {
@@ -280,7 +280,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
                 // Update the local ID with the Supabase UUID
-                media.id = mediaData.id; // This is a string from Supabase
+                media.id = mediaData.id; // Fix: Now properly typed as string | number
               }
             }
           }
