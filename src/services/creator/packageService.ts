@@ -198,10 +198,16 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
               if (mediaError) {
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
-                // Fix: Convert the string ID to the correct type
-                // Use the same type that the media.id already is
+                // Fix: Convert the string ID to the correct type that works with current media.id type
                 if (typeof media.id === 'number') {
-                  media.id = parseInt(mediaData.id, 10);
+                  // The key fix: Ensure we handle number types correctly by creating a new number
+                  const numericId = Number(mediaData.id);
+                  if (!isNaN(numericId)) {
+                    media.id = numericId;
+                  } else {
+                    // Fallback if conversion fails
+                    media.id = 0;
+                  }
                 } else {
                   media.id = mediaData.id;
                 }
@@ -249,7 +255,14 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
           const oldId = pkg.id;
           // Fix: Handle id type conversion correctly
           if (typeof pkg.id === 'number') {
-            pkg.id = parseInt(newPkg.id, 10);
+            // The key fix: Ensure we handle number types correctly by creating a new number
+            const numericId = Number(newPkg.id);
+            if (!isNaN(numericId)) {
+              pkg.id = numericId;
+            } else {
+              // Fallback if conversion fails
+              pkg.id = 0;
+            }
           } else {
             pkg.id = newPkg.id;
           }
@@ -289,10 +302,16 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
               if (mediaError) {
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
-                // Fix: Convert the string ID to the correct type
-                // Use the same type that the media.id already is
+                // Fix: Convert the string ID to the correct type that works with current media.id type
                 if (typeof media.id === 'number') {
-                  media.id = parseInt(mediaData.id, 10);
+                  // The key fix: Ensure we handle number types correctly by creating a new number
+                  const numericId = Number(mediaData.id);
+                  if (!isNaN(numericId)) {
+                    media.id = numericId;
+                  } else {
+                    // Fallback if conversion fails
+                    media.id = 0;
+                  }
                 } else {
                   media.id = mediaData.id;
                 }
