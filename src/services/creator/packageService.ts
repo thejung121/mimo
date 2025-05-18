@@ -198,8 +198,13 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
               if (mediaError) {
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
-                // Update the local ID with the Supabase UUID
-                media.id = mediaData.id; // Fix: Now properly typed as string | number
+                // Fix: Convert the string ID to the correct type
+                // Use the same type that the media.id already is
+                if (typeof media.id === 'number') {
+                  media.id = parseInt(mediaData.id, 10);
+                } else {
+                  media.id = mediaData.id;
+                }
               }
             } else {
               // Existing media, update it
@@ -242,7 +247,12 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
         if (newPkg) {
           // Update the package ID with the UUID from Supabase
           const oldId = pkg.id;
-          pkg.id = newPkg.id; // Fix: Now pkg.id is properly typed as string | number
+          // Fix: Handle id type conversion correctly
+          if (typeof pkg.id === 'number') {
+            pkg.id = parseInt(newPkg.id, 10);
+          } else {
+            pkg.id = newPkg.id;
+          }
           
           // Add features
           if (pkg.features && pkg.features.length > 0) {
@@ -279,8 +289,13 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
               if (mediaError) {
                 console.error("Error adding media:", mediaError);
               } else if (mediaData) {
-                // Update the local ID with the Supabase UUID
-                media.id = mediaData.id; // Fix: Now properly typed as string | number
+                // Fix: Convert the string ID to the correct type
+                // Use the same type that the media.id already is
+                if (typeof media.id === 'number') {
+                  media.id = parseInt(mediaData.id, 10);
+                } else {
+                  media.id = mediaData.id;
+                }
               }
             }
           }
