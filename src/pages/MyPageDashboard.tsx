@@ -3,10 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, ExternalLink, Edit, CheckCircle, Loader2 } from 'lucide-react';
+import { Copy, ExternalLink, Edit, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMimoPackages } from '@/hooks/useMimoPackages';
 import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -16,7 +15,7 @@ import { MimoPackage } from '@/types/creator';
 const MyPageDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const packagesHook = useMimoPackages();
+  const [packages, setPackages] = useState<MimoPackage[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,7 +25,7 @@ const MyPageDashboard = () => {
       try {
         setIsLoading(true);
         const loadedPackages = await getMimoPackages();
-        packagesHook.setPackages(loadedPackages);
+        setPackages(loadedPackages);
         console.log("MyPageDashboard loaded packages:", loadedPackages);
       } catch (error) {
         console.error("Error loading packages:", error);
@@ -62,14 +61,14 @@ const MyPageDashboard = () => {
   };
 
   const togglePackageVisibility = async (id: number | string) => {
-    const updatedPackages = packagesHook.packages.map(pkg => {
+    const updatedPackages = packages.map(pkg => {
       if (String(pkg.id) === String(id)) {
         return { ...pkg, isHidden: !pkg.isHidden };
       }
       return pkg;
     });
     
-    packagesHook.setPackages(updatedPackages);
+    setPackages(updatedPackages);
     await saveMimoPackages(updatedPackages);
     console.log("Saved package visibility changes:", updatedPackages);
 
@@ -148,7 +147,7 @@ const MyPageDashboard = () => {
                 <div className="text-center py-4">
                   <p>Carregando recompensas...</p>
                 </div>
-              ) : packagesHook.packages.length === 0 ? (
+              ) : packages.length === 0 ? (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground mb-4">Você ainda não criou nenhuma recompensa</p>
                   <Button asChild>
@@ -157,7 +156,7 @@ const MyPageDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {packagesHook.packages.map(pkg => (
+                  {packages.map(pkg => (
                     <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
                       <div>
                         <h3 className="font-medium flex items-center">

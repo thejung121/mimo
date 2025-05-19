@@ -15,6 +15,7 @@ export const getMimoPackages = async (): Promise<MimoPackage[]> => {
   }
   
   try {
+    console.log("Trying to get packages for user ID:", user.id);
     // First try to get data from Supabase
     const { data: supabasePackages, error } = await supabase
       .from('packages')
@@ -71,6 +72,7 @@ export const getPackagesByUsername = async (username: string | null | undefined)
   }
   
   try {
+    console.log("Fetching packages for username:", username);
     // First try to get creator ID by username
     const { data: creatorData, error: creatorError } = await supabase
       .from('creators')
@@ -82,6 +84,8 @@ export const getPackagesByUsername = async (username: string | null | undefined)
       console.error(`Error or no creator found for username ${username}:`, creatorError);
       return [];
     }
+    
+    console.log(`Found creator ID ${creatorData.id} for username ${username}`);
     
     // Get packages for this creator
     const { data: packages, error: packagesError } = await supabase

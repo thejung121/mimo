@@ -1,3 +1,4 @@
+
 import { MimoPackage } from '@/types/creator';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentUser, isUUID, safeParseInt } from './packageUtils';
@@ -13,6 +14,8 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
   }
   
   try {
+    console.log("Saving packages to Supabase:", packages);
+    
     // Save to Supabase
     for (const pkg of packages) {
       // Check if package exists in Supabase
@@ -129,8 +132,9 @@ const updatePackageMedia = async (pkg: MimoPackage): Promise<void> => {
       if (mediaError) {
         console.error("Error adding media:", mediaError);
       } else if (mediaData) {
-        // Convert the string ID to numeric ID and update the media object
-        media.id = safeParseInt(mediaData.id);
+        // Update media id with numeric value, not string
+        const parsedId = safeParseInt(mediaData.id);
+        media.id = parsedId;
       }
     } else {
       // Existing media, update it
@@ -174,8 +178,9 @@ const createNewPackage = async (pkg: MimoPackage, creatorId: string): Promise<vo
   if (newPkg) {
     // Update the package ID with the UUID from Supabase
     const oldId = pkg.id;
-    // Handle id type conversion correctly
-    pkg.id = safeParseInt(newPkg.id);
+    // Convert ID properly
+    const parsedId = safeParseInt(newPkg.id);
+    pkg.id = parsedId;
     
     // Add features
     if (pkg.features && pkg.features.length > 0) {
@@ -212,8 +217,9 @@ const createNewPackage = async (pkg: MimoPackage, creatorId: string): Promise<vo
         if (mediaError) {
           console.error("Error adding media:", mediaError);
         } else if (mediaData) {
-          // Convert the string ID to numeric ID and update the media object
-          media.id = safeParseInt(mediaData.id);
+          // Convert ID properly
+          const parsedId = safeParseInt(mediaData.id);
+          media.id = parsedId;
         }
       }
     }
