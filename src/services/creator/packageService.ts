@@ -1,4 +1,3 @@
-
 import { MimoPackage } from '@/types/creator';
 import { LOCAL_STORAGE_KEY } from '@/utils/storage';
 import { supabase } from '@/integrations/supabase/client';
@@ -209,6 +208,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                     media.id = 0;
                   }
                 } else {
+                  // If media.id is not a number, just assign the string directly
                   media.id = mediaData.id;
                 }
               }
@@ -313,6 +313,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                     media.id = 0;
                   }
                 } else {
+                  // If media.id is not a number, just assign the string directly
                   media.id = mediaData.id;
                 }
               }

@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
@@ -239,7 +238,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             username: username,
             document: document,
             avatar_url: '',
-          }
+          },
+          // Don't wait for email verification to allow immediate login
+          emailRedirectTo: window.location.origin + '/dashboard'
         }
       });
 

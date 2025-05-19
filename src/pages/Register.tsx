@@ -126,13 +126,16 @@ const Register = () => {
     
     try {
       console.log('Starting registration process with:', { name, email, username, document });
-      // Pass document to register function
       const success = await register(name, email, password, username, document);
       
       if (success) {
         console.log('Registration successful, redirecting to dashboard');
-        // Navigate to dashboard after registration without needing email confirmation
-        navigate('/dashboard');
+        toast({
+          title: "Conta criada com sucesso!",
+          description: `Bem-vindo(a) ao Mimo, ${name}!`,
+        });
+        // Use setTimeout to ensure auth context has time to update before redirect
+        setTimeout(() => navigate('/dashboard'), 100);
       }
     } catch (error: any) {
       console.error("Registration error:", error);
