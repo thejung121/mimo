@@ -200,7 +200,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 // Fix: Convert the string ID to the correct type that works with current media.id type
                 if (typeof media.id === 'number') {
                   // The key fix: Ensure we handle number types correctly by creating a new number
-                  const numericId = Number(mediaData.id);
+                  const numericId = parseInt(mediaData.id, 10);
                   if (!isNaN(numericId)) {
                     media.id = numericId;
                   } else {
@@ -209,7 +209,10 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                   }
                 } else {
                   // If media.id is not a number, just assign the string directly
-                  media.id = mediaData.id;
+                  // FIX: Need to handle this case differently since media.id expects a number
+                  // Try to convert to number first, fallback to 0 if not possible
+                  const numericId = parseInt(mediaData.id, 10);
+                  media.id = !isNaN(numericId) ? numericId : 0;
                 }
               }
             } else {
@@ -256,7 +259,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
           // Fix: Handle id type conversion correctly
           if (typeof pkg.id === 'number') {
             // The key fix: Ensure we handle number types correctly by creating a new number
-            const numericId = Number(newPkg.id);
+            const numericId = parseInt(newPkg.id, 10);
             if (!isNaN(numericId)) {
               pkg.id = numericId;
             } else {
@@ -305,7 +308,7 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                 // Fix: Convert the string ID to the correct type that works with current media.id type
                 if (typeof media.id === 'number') {
                   // The key fix: Ensure we handle number types correctly by creating a new number
-                  const numericId = Number(mediaData.id);
+                  const numericId = parseInt(mediaData.id, 10);
                   if (!isNaN(numericId)) {
                     media.id = numericId;
                   } else {
@@ -314,7 +317,10 @@ export const saveMimoPackages = async (packages: MimoPackage[]): Promise<boolean
                   }
                 } else {
                   // If media.id is not a number, just assign the string directly
-                  media.id = mediaData.id;
+                  // FIX: Need to handle this case differently since media.id expects a number
+                  // Try to convert to number first, fallback to 0 if not possible
+                  const numericId = parseInt(mediaData.id, 10);
+                  media.id = !isNaN(numericId) ? numericId : 0;
                 }
               }
             }
