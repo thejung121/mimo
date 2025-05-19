@@ -72,7 +72,7 @@ export const useCreatorPage = () => {
           console.log("Creator found:", creatorData);
           setCreator(creatorData);
           
-          // Try to get packages from Supabase
+          // Try to get packages from Supabase or localStorage
           try {
             // Load packages by username
             const packages = await getPackagesByUsername(username);
@@ -85,7 +85,32 @@ export const useCreatorPage = () => {
               setMimoPackages(visiblePackages);
             } else {
               console.log("No packages found for this creator or all are hidden");
-              setMimoPackages([]);
+              // Try fallback for current user
+              if (user?.username === username) {
+                console.log("Attempting direct load for current user");
+                // Try localStorage directly for current user's packages
+                const localStorageKey = `mimo:packages:${user.id}`;
+                const localPackagesStr = localStorage.getItem(localStorageKey);
+                if (localPackagesStr) {
+                  try {
+                    const localPackages = JSON.parse(localPackagesStr);
+                    if (Array.isArray(localPackages) && localPackages.length > 0) {
+                      const visibleLocalPackages = localPackages.filter(pkg => pkg.isHidden !== true);
+                      console.log("Found packages in localStorage:", visibleLocalPackages);
+                      setMimoPackages(visibleLocalPackages);
+                    } else {
+                      setMimoPackages([]);
+                    }
+                  } catch (error) {
+                    console.error("Error parsing packages from localStorage:", error);
+                    setMimoPackages([]);
+                  }
+                } else {
+                  setMimoPackages([]);
+                }
+              } else {
+                setMimoPackages([]);
+              }
             }
           } catch (e) {
             console.error("Error getting packages:", e);

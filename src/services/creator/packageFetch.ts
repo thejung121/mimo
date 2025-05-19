@@ -82,6 +82,14 @@ export const getPackagesByUsername = async (username: string | null | undefined)
     
     if (creatorError || !creatorData) {
       console.error(`Error or no creator found for username ${username}:`, creatorError);
+      
+      // Try to check if this is the current user
+      const currentUser = getCurrentUser();
+      if (currentUser?.username === username) {
+        console.log("Username matches current user, fetching packages directly");
+        return getMimoPackages();
+      }
+      
       return [];
     }
     
