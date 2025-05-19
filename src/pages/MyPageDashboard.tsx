@@ -19,7 +19,7 @@ const MyPageDashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Force reload packages
+  // Add dependency array to prevent infinite loop
   useEffect(() => {
     const loadPackages = async () => {
       try {
@@ -41,7 +41,7 @@ const MyPageDashboard = () => {
     };
     
     loadPackages();
-  }, []);
+  }, []); // Empty dependency array so it only runs once
 
   const copyShareLink = () => {
     if (user?.username) {
@@ -61,21 +61,30 @@ const MyPageDashboard = () => {
   };
 
   const togglePackageVisibility = async (id: number | string) => {
-    const updatedPackages = packages.map(pkg => {
-      if (String(pkg.id) === String(id)) {
-        return { ...pkg, isHidden: !pkg.isHidden };
-      }
-      return pkg;
-    });
-    
-    setPackages(updatedPackages);
-    await saveMimoPackages(updatedPackages);
-    console.log("Saved package visibility changes:", updatedPackages);
+    try {
+      const updatedPackages = packages.map(pkg => {
+        if (String(pkg.id) === String(id)) {
+          return { ...pkg, isHidden: !pkg.isHidden };
+        }
+        return pkg;
+      });
+      
+      setPackages(updatedPackages);
+      await saveMimoPackages(updatedPackages);
+      console.log("Saved package visibility changes:", updatedPackages);
 
-    toast({
-      title: "Configuração salva",
-      description: "Visibilidade da recompensa atualizada com sucesso.",
-    });
+      toast({
+        title: "Configuração salva",
+        description: "Visibilidade da recompensa atualizada com sucesso.",
+      });
+    } catch (error) {
+      console.error("Error toggling package visibility:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar visibilidade da recompensa",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
