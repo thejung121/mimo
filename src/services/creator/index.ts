@@ -3,7 +3,7 @@
 import { Creator, MimoPackage } from '@/types/creator';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
 import { saveCreatorData } from './profileService';
-import { saveMimoPackages } from './packageService';
+import { saveMimoPackages } from './packageSave';
 
 // Re-export from profile service
 export { 
