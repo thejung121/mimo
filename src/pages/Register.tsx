@@ -5,7 +5,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Loader2 } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
-import SellerOnboarding from '@/components/SellerOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
@@ -22,7 +21,7 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [document, setDocument] = useState(''); // Added document state
+  const [document, setDocument] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
   const { register, isAuthenticated } = useAuth();
@@ -39,23 +38,19 @@ const Register = () => {
 
   const handleStartRegistration = () => {
     setStartRegistration(true);
-    setTimeout(() => setShowForm(true), 500); // Add a delay for smoother transition
+    setTimeout(() => setShowForm(true), 500);
   };
   
   // Function to format CPF/CNPJ as user types
   const formatDocument = (value: string) => {
-    // Remove non-digit characters
     const digits = value.replace(/\D/g, '');
     
-    // Format based on length (CPF or CNPJ)
     if (digits.length <= 11) {
-      // CPF format: 123.456.789-01
       return digits
         .replace(/(\d{3})(?=\d)/, '$1.')
         .replace(/(\d{3})(?=\d)/, '$1.')
         .replace(/(\d{3})(?=\d)/, '$1-');
     } else {
-      // CNPJ format: 12.345.678/0001-90
       return digits
         .replace(/(\d{2})(?=\d)/, '$1.')
         .replace(/(\d{3})(?=\d)/, '$1.')
@@ -67,6 +62,8 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Register form submitted');
+    
     // Validate form
     if (!name.trim()) {
       toast({
@@ -77,7 +74,7 @@ const Register = () => {
       return;
     }
     
-    if (!email.trim()) {
+    if (!email.trim() || !email.includes('@')) {
       toast({
         title: "Email obrigatório",
         description: "Por favor, informe um email válido",
@@ -104,10 +101,10 @@ const Register = () => {
       return;
     }
     
-    if (!password) {
+    if (!password || password.length < 6) {
       toast({
         title: "Senha obrigatória",
-        description: "Por favor, escolha uma senha segura",
+        description: "Por favor, escolha uma senha com pelo menos 6 caracteres",
         variant: "destructive"
       });
       return;
@@ -134,8 +131,10 @@ const Register = () => {
           title: "Conta criada com sucesso!",
           description: `Bem-vindo(a) ao Mimo, ${name}!`,
         });
-        // Use setTimeout to ensure auth context has time to update before redirect
-        setTimeout(() => navigate('/dashboard'), 100);
+        // Navigate immediately after success
+        navigate('/dashboard');
+      } else {
+        console.log('Registration failed');
       }
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -230,6 +229,7 @@ const Register = () => {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           disabled={isLoading}
+                          required
                         />
                       </div>
                       
@@ -242,6 +242,7 @@ const Register = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           disabled={isLoading}
+                          required
                         />
                       </div>
                       
@@ -254,6 +255,7 @@ const Register = () => {
                           value={username}
                           onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
                           disabled={isLoading}
+                          required
                         />
                         <p className="text-xs text-muted-foreground">
                           Este será o endereço da sua página: mimo.com/criador/{username || 'seunome'}
@@ -269,6 +271,7 @@ const Register = () => {
                           value={document}
                           onChange={(e) => setDocument(formatDocument(e.target.value))}
                           disabled={isLoading}
+                          required
                         />
                         <p className="text-xs text-muted-foreground">
                           O CPF/CNPJ será registrado como sua chave PIX para recebimentos
@@ -284,6 +287,8 @@ const Register = () => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           disabled={isLoading}
+                          required
+                          minLength={6}
                         />
                       </div>
                       
@@ -296,6 +301,7 @@ const Register = () => {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           disabled={isLoading}
+                          required
                         />
                       </div>
                     </div>
@@ -306,6 +312,7 @@ const Register = () => {
                     className="w-full mimo-button" 
                     onClick={handleRegister}
                     disabled={isLoading}
+                    type="submit"
                   >
                     {isLoading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Criando conta...</>
@@ -321,11 +328,7 @@ const Register = () => {
                 </div>
               </Card>
             </div>
-          ) : (
-            <div className="animate-fade-in">
-              <SellerOnboarding />
-            </div>
-          )}
+          ) : null}
         </div>
       </main>
       
