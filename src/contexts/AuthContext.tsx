@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
@@ -188,10 +187,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Register function
   const register = async (name: string, email: string, password: string, username: string, document: string): Promise<boolean> => {
     setIsLoading(true);
+    console.log('=== STARTING REGISTRATION PROCESS ===');
+    console.log('Registration data:', { name, email, username, document: document.substring(0, 3) + '***' });
+    
     try {
-      console.log('Registration attempt with:', { email, name, username, document });
-      
       // Check if username exists first by checking the creators table
+      console.log('Checking if username exists:', username);
       const { data: existingUserWithUsername, error: usernameCheckError } = await supabase
         .from('creators')
         .select('username')
@@ -215,6 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Username is available, proceeding with registration');
       
       // Proceed with registration
+      console.log('Calling supabase.auth.signUp...');
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -225,10 +227,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             document: document,
             avatar_url: '',
             phone: '',
-          },
-          emailRedirectTo: undefined // Disable email confirmation redirect
+          }
         }
       });
+
+      console.log('Supabase signUp response:', { data, error });
 
       if (error) {
         console.error('Registration error:', error.message);
@@ -244,17 +247,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (data.user) {
         console.log('User created successfully:', data.user);
+        console.log('Session data:', data.session);
+        console.log('User confirmed?', data.user.email_confirmed_at);
         
         // Check if user is immediately confirmed (email confirmation disabled)
         if (data.user.email_confirmed_at || data.session) {
-          console.log('User confirmed immediately, registration complete');
+          console.log('=== USER CONFIRMED IMMEDIATELY - REGISTRATION COMPLETE ===');
           toast({
             title: "Conta criada com sucesso!",
             description: `Bem-vindo(a) ao Mimo, ${name}!`,
           });
           return true;
         } else {
-          console.log('User needs email confirmation');
+          console.log('=== USER NEEDS EMAIL CONFIRMATION ===');
           toast({
             title: "Verifique seu email",
             description: "Enviamos um link de confirmação para seu email.",
@@ -262,7 +267,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return false;
         }
       } else {
-        console.error('Registration failed - no user returned');
+        console.error('=== REGISTRATION FAILED - NO USER RETURNED ===');
         toast({
           title: "Erro no cadastro",
           description: "Não foi possível criar sua conta. Por favor, tente novamente.",
@@ -271,7 +276,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
     } catch (error: any) {
-      console.error('Registration failed:', error);
+      console.error('=== REGISTRATION EXCEPTION ===', error);
       toast({
         title: "Erro no cadastro",
         description: error.message || "Ocorreu um erro inesperado durante o cadastro",
@@ -280,6 +285,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } finally {
       setIsLoading(false);
+      console.log('=== REGISTRATION PROCESS FINISHED ===');
     }
   };
 

@@ -121,7 +121,8 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Register form submitted');
+    console.log('=== FORM SUBMITTED ===');
+    console.log('Form data:', { name, email, username, document: document.substring(0, 3) + '***' });
     
     if (!validateForm()) {
       console.log('Form validation failed');
@@ -136,25 +137,23 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      console.log('Starting registration process with:', { name, email, username, document });
+      console.log('Calling register function...');
       
       const success = await register(name, email, password, username, document);
       
+      console.log('Register function returned:', success);
+      
       if (success) {
-        console.log('Registration successful!');
-        toast({
-          title: "Conta criada com sucesso!",
-          description: `Bem-vindo(a) ao Mimo, ${name}!`,
-        });
+        console.log('=== REGISTRATION SUCCESSFUL - NAVIGATING TO DASHBOARD ===');
         
         // Navigate immediately after successful registration
-        console.log('Navigating to dashboard...');
         navigate('/dashboard', { replace: true });
       } else {
-        console.log('Registration failed - no success returned');
+        console.log('=== REGISTRATION FAILED ===');
+        // Error toast is already shown in the register function
       }
     } catch (error: any) {
-      console.error("Registration error:", error);
+      console.error("=== REGISTRATION EXCEPTION IN COMPONENT ===", error);
       toast({
         title: "Erro no cadastro",
         description: error.message || "Ocorreu um erro inesperado. Por favor, tente novamente.",
