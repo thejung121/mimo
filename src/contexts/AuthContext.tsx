@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
@@ -319,7 +318,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast({
         title: "Erro ao atualizar perfil",
         description: error.message || "Ocorreu um erro inesperado ao atualizar o perfil",
-        variant: "descriptive",
+        variant: "destructive",
       });
       return false;
     }
