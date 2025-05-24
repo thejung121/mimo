@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
@@ -224,7 +225,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             document: document,
             avatar_url: '',
             phone: '',
-          }
+          },
+          emailRedirectTo: undefined // Disable email confirmation redirect
         }
       });
 
@@ -243,12 +245,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.user) {
         console.log('User created successfully:', data.user);
         
-        toast({
-          title: "Conta criada com sucesso!",
-          description: `Bem-vindo(a) ao Mimo, ${name}!`,
-        });
-        
-        return true;
+        // Check if user is immediately confirmed (email confirmation disabled)
+        if (data.user.email_confirmed_at || data.session) {
+          console.log('User confirmed immediately, registration complete');
+          toast({
+            title: "Conta criada com sucesso!",
+            description: `Bem-vindo(a) ao Mimo, ${name}!`,
+          });
+          return true;
+        } else {
+          console.log('User needs email confirmation');
+          toast({
+            title: "Verifique seu email",
+            description: "Enviamos um link de confirmação para seu email.",
+          });
+          return false;
+        }
       } else {
         console.error('Registration failed - no user returned');
         toast({

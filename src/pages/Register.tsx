@@ -31,7 +31,7 @@ const Register = () => {
   useEffect(() => {
     if (isAuthenticated) {
       console.log('User is already authenticated, redirecting to dashboard');
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -121,7 +121,7 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Register form submitted with preventDefault');
+    console.log('Register form submitted');
     
     if (!validateForm()) {
       console.log('Form validation failed');
@@ -137,27 +137,21 @@ const Register = () => {
     
     try {
       console.log('Starting registration process with:', { name, email, username, document });
+      
       const success = await register(name, email, password, username, document);
       
       if (success) {
-        console.log('Registration successful, redirecting to dashboard');
+        console.log('Registration successful!');
         toast({
           title: "Conta criada com sucesso!",
           description: `Bem-vindo(a) ao Mimo, ${name}!`,
         });
         
-        // Force navigation after a small delay to ensure auth state is updated
-        setTimeout(() => {
-          console.log('Forcing navigation to dashboard');
-          navigate('/dashboard', { replace: true });
-        }, 1000);
+        // Navigate immediately after successful registration
+        console.log('Navigating to dashboard...');
+        navigate('/dashboard', { replace: true });
       } else {
         console.log('Registration failed - no success returned');
-        toast({
-          title: "Erro no cadastro",
-          description: "Não foi possível criar sua conta. Verifique os dados e tente novamente.",
-          variant: "destructive"
-        });
       }
     } catch (error: any) {
       console.error("Registration error:", error);
