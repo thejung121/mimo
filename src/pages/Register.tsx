@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -59,19 +58,16 @@ const Register = () => {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateForm = () => {
+    console.log('Validating form with data:', { name, email, username, document, password, confirmPassword });
     
-    console.log('Register form submitted');
-    
-    // Validate form
     if (!name.trim()) {
       toast({
         title: "Nome obrigatório",
         description: "Por favor, informe seu nome completo",
         variant: "destructive"
       });
-      return;
+      return false;
     }
     
     if (!email.trim() || !email.includes('@')) {
@@ -80,7 +76,7 @@ const Register = () => {
         description: "Por favor, informe um email válido",
         variant: "destructive"
       });
-      return;
+      return false;
     }
     
     if (!username.trim()) {
@@ -89,7 +85,7 @@ const Register = () => {
         description: "Por favor, escolha um nome de usuário",
         variant: "destructive"
       });
-      return;
+      return false;
     }
     
     if (!document.trim()) {
@@ -98,7 +94,7 @@ const Register = () => {
         description: "Por favor, informe seu CPF ou CNPJ para recebimento via PIX",
         variant: "destructive"
       });
-      return;
+      return false;
     }
     
     if (!password || password.length < 6) {
@@ -107,7 +103,7 @@ const Register = () => {
         description: "Por favor, escolha uma senha com pelo menos 6 caracteres",
         variant: "destructive"
       });
-      return;
+      return false;
     }
     
     if (password !== confirmPassword) {
@@ -116,6 +112,24 @@ const Register = () => {
         description: "A senha e a confirmação de senha devem ser iguais",
         variant: "destructive"
       });
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    console.log('Register form submitted with preventDefault');
+    
+    if (!validateForm()) {
+      console.log('Form validation failed');
+      return;
+    }
+    
+    if (isLoading) {
+      console.log('Already loading, ignoring duplicate submission');
       return;
     }
     
@@ -131,10 +145,19 @@ const Register = () => {
           title: "Conta criada com sucesso!",
           description: `Bem-vindo(a) ao Mimo, ${name}!`,
         });
-        // Navigate immediately after success
-        navigate('/dashboard');
+        
+        // Force navigation after a small delay to ensure auth state is updated
+        setTimeout(() => {
+          console.log('Forcing navigation to dashboard');
+          navigate('/dashboard', { replace: true });
+        }, 1000);
       } else {
-        console.log('Registration failed');
+        console.log('Registration failed - no success returned');
+        toast({
+          title: "Erro no cadastro",
+          description: "Não foi possível criar sua conta. Verifique os dados e tente novamente.",
+          variant: "destructive"
+        });
       }
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -217,8 +240,8 @@ const Register = () => {
                     Informe seus dados para criar sua página
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleRegister}>
+                <form onSubmit={handleRegister}>
+                  <CardContent>
                     <div className="grid gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="name">Nome completo</Label>
@@ -305,22 +328,21 @@ const Register = () => {
                         />
                       </div>
                     </div>
-                  </form>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    className="w-full mimo-button" 
-                    onClick={handleRegister}
-                    disabled={isLoading}
-                    type="submit"
-                  >
-                    {isLoading ? (
-                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Criando conta...</>
-                    ) : (
-                      "Criar conta"
-                    )}
-                  </Button>
-                </CardFooter>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full mimo-button" 
+                      disabled={isLoading}
+                      type="submit"
+                    >
+                      {isLoading ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Criando conta...</>
+                      ) : (
+                        "Criar conta"
+                      )}
+                    </Button>
+                  </CardFooter>
+                </form>
                 <div className="px-6 pb-6 text-center">
                   <p className="text-sm text-muted-foreground">
                     Já tem uma conta? <Link to="/login" className="text-mimo-primary hover:underline">Entre aqui</Link>
