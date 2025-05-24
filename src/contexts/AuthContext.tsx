@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
@@ -32,11 +33,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Initialize auth state
   useEffect(() => {
-    console.log('Setting up auth state listener');
+    console.log('=== INITIALIZING AUTH CONTEXT ===');
     
     // First set up the auth state listener to react to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed, event:', event, 'session:', session);
+      console.log('=== AUTH STATE CHANGE ===', event, session?.user?.id);
       
       if (session?.user) {
         const authUser: AuthUser = {
@@ -50,11 +51,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           avatar: session.user.user_metadata?.avatar || '',
         };
         
-        console.log('Setting user state from session:', authUser);
+        console.log('=== SETTING USER STATE ===', authUser);
         setUser(authUser);
         localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(authUser));
       } else {
-        console.log('No session, clearing user state');
+        console.log('=== CLEARING USER STATE ===');
         setUser(null);
         localStorage.removeItem('LOCAL_STORAGE_KEY');
       }
@@ -73,9 +74,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
         
-        console.log('Initial auth check, session:', data.session);
+        console.log('=== INITIAL SESSION CHECK ===', data.session?.user?.id);
         
-        if (data && data.session && data.session.user) {
+        if (data?.session?.user) {
           const authUser: AuthUser = {
             id: data.session.user.id,
             email: data.session.user.email || '',
@@ -87,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             avatar: data.session.user.user_metadata?.avatar || '',
           };
           
-          console.log('Setting initial user state:', authUser);
+          console.log('=== SETTING INITIAL USER ===', authUser);
           setUser(authUser);
           localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(authUser));
         }
@@ -109,14 +110,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      console.log('Login attempt for:', email);
+      console.log('=== LOGIN ATTEMPT ===', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
 
       if (error) {
-        console.error('Login error:', error.message);
+        console.error('=== LOGIN ERROR ===', error.message);
         toast({
           title: "Falha na autenticação",
           description: error.message,
@@ -126,7 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
-        console.log('Login successful, user:', data.user);
+        console.log('=== LOGIN SUCCESS ===', data.user.id);
         
         toast({
           title: "Login realizado com sucesso!",
@@ -138,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return false;
     } catch (error: any) {
-      console.error('Login failed:', error);
+      console.error('=== LOGIN EXCEPTION ===', error);
       toast({
         title: "Erro de login",
         description: error.message || "Ocorreu um erro ao tentar fazer login",
@@ -154,17 +155,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      console.log('Logging out...');
+      console.log('=== LOGOUT ATTEMPT ===');
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Logout error:', error.message);
+        console.error('=== LOGOUT ERROR ===', error.message);
         toast({
           title: "Erro ao sair",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log('=== LOGOUT SUCCESS ===');
         setUser(null);
         localStorage.removeItem('LOCAL_STORAGE_KEY');
         toast({
@@ -173,7 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
     } catch (error: any) {
-      console.error('Logout failed:', error);
+      console.error('=== LOGOUT EXCEPTION ===', error);
       toast({
         title: "Erro ao sair",
         description: error.message || "Ocorreu um erro ao tentar sair",
@@ -187,12 +189,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Register function
   const register = async (name: string, email: string, password: string, username: string, document: string): Promise<boolean> => {
     setIsLoading(true);
-    console.log('=== STARTING REGISTRATION PROCESS ===');
-    console.log('Registration data:', { name, email, username, document: document.substring(0, 3) + '***' });
+    console.log('=== REGISTER ATTEMPT ===', { name, email, username });
     
     try {
-      // Check if username exists first by checking the creators table
-      console.log('Checking if username exists:', username);
+      // Check if username exists first
+      console.log('=== CHECKING USERNAME AVAILABILITY ===', username);
       const { data: existingUserWithUsername, error: usernameCheckError } = await supabase
         .from('creators')
         .select('username')
@@ -200,11 +201,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
       
       if (usernameCheckError) {
-        console.error('Error checking username:', usernameCheckError.message);
+        console.error('=== USERNAME CHECK ERROR ===', usernameCheckError.message);
       }
       
       if (existingUserWithUsername) {
-        console.error('Username already exists:', username);
+        console.error('=== USERNAME EXISTS ===', username);
         toast({
           title: "Nome de usuário indisponível",
           description: "Este nome de usuário já está sendo utilizado. Por favor, escolha outro.",
@@ -213,10 +214,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
       
-      console.log('Username is available, proceeding with registration');
+      console.log('=== USERNAME AVAILABLE, PROCEEDING WITH SIGNUP ===');
       
       // Proceed with registration
-      console.log('Calling supabase.auth.signUp...');
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -231,10 +231,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
 
-      console.log('Supabase signUp response:', { data, error });
+      console.log('=== SIGNUP RESPONSE ===', { 
+        user: data.user?.id, 
+        session: !!data.session,
+        confirmed: data.user?.email_confirmed_at,
+        error: error?.message 
+      });
 
       if (error) {
-        console.error('Registration error:', error.message);
+        console.error('=== REGISTRATION ERROR ===', error.message);
         toast({
           title: "Erro no cadastro",
           description: error.message,
@@ -243,23 +248,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
-      console.log('Registration response:', data);
-      
       if (data.user) {
-        console.log('User created successfully:', data.user);
-        console.log('Session data:', data.session);
-        console.log('User confirmed?', data.user.email_confirmed_at);
+        console.log('=== USER CREATED ===', data.user.id);
         
-        // Check if user is immediately confirmed (email confirmation disabled)
+        // Check if user is immediately confirmed or has a session
         if (data.user.email_confirmed_at || data.session) {
-          console.log('=== USER CONFIRMED IMMEDIATELY - REGISTRATION COMPLETE ===');
+          console.log('=== USER CONFIRMED - REGISTRATION SUCCESS ===');
           toast({
             title: "Conta criada com sucesso!",
             description: `Bem-vindo(a) ao Mimo, ${name}!`,
           });
           return true;
         } else {
-          console.log('=== USER NEEDS EMAIL CONFIRMATION ===');
+          console.log('=== USER NEEDS CONFIRMATION ===');
           toast({
             title: "Verifique seu email",
             description: "Enviamos um link de confirmação para seu email.",
@@ -267,7 +268,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return false;
         }
       } else {
-        console.error('=== REGISTRATION FAILED - NO USER RETURNED ===');
+        console.error('=== NO USER RETURNED ===');
         toast({
           title: "Erro no cadastro",
           description: "Não foi possível criar sua conta. Por favor, tente novamente.",

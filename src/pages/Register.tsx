@@ -23,17 +23,18 @@ const Register = () => {
   const [document, setDocument] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { register, isAuthenticated } = useAuth();
+  const { register, isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Redirect to dashboard if already authenticated
+  // Monitor authentication status and redirect when user is authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User is already authenticated, redirecting to dashboard');
+    console.log('=== REGISTER PAGE AUTH CHECK ===', { isAuthenticated, userId: user?.id });
+    if (isAuthenticated && user) {
+      console.log('=== USER IS AUTHENTICATED, REDIRECTING ===');
       navigate('/dashboard', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   const handleStartRegistration = () => {
     setStartRegistration(true);
@@ -59,7 +60,7 @@ const Register = () => {
   };
 
   const validateForm = () => {
-    console.log('Validating form with data:', { name, email, username, document, password, confirmPassword });
+    console.log('=== VALIDATING FORM ===', { name, email, username, document });
     
     if (!name.trim()) {
       toast({
@@ -121,39 +122,34 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('=== FORM SUBMITTED ===');
-    console.log('Form data:', { name, email, username, document: document.substring(0, 3) + '***' });
+    console.log('=== FORM SUBMISSION ===', { name, email, username });
     
     if (!validateForm()) {
-      console.log('Form validation failed');
+      console.log('=== VALIDATION FAILED ===');
       return;
     }
     
     if (isLoading) {
-      console.log('Already loading, ignoring duplicate submission');
+      console.log('=== ALREADY LOADING ===');
       return;
     }
     
     setIsLoading(true);
     
     try {
-      console.log('Calling register function...');
-      
+      console.log('=== CALLING REGISTER FUNCTION ===');
       const success = await register(name, email, password, username, document);
       
-      console.log('Register function returned:', success);
+      console.log('=== REGISTER RESULT ===', success);
       
       if (success) {
-        console.log('=== REGISTRATION SUCCESSFUL - NAVIGATING TO DASHBOARD ===');
-        
-        // Navigate immediately after successful registration
-        navigate('/dashboard', { replace: true });
+        console.log('=== REGISTRATION SUCCESSFUL ===');
+        // The useEffect will handle the redirect when isAuthenticated becomes true
       } else {
         console.log('=== REGISTRATION FAILED ===');
-        // Error toast is already shown in the register function
       }
     } catch (error: any) {
-      console.error("=== REGISTRATION EXCEPTION IN COMPONENT ===", error);
+      console.error("=== REGISTRATION EXCEPTION ===", error);
       toast({
         title: "Erro no cadastro",
         description: error.message || "Ocorreu um erro inesperado. Por favor, tente novamente.",
