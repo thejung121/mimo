@@ -32,10 +32,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
   
   useEffect(() => {
-    console.log('=== INITIALIZING AUTH ===');
+    console.log('=== AUTH PROVIDER INIT ===');
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('=== AUTH EVENT ===', event, session?.user?.email);
+      console.log('=== AUTH STATE CHANGE ===', event, session?.user?.email);
       
       if (session?.user) {
         const authUser: AuthUser = {
@@ -49,35 +49,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           avatar: session.user.user_metadata?.avatar || '',
         };
         
-        console.log('=== SETTING USER ===', authUser);
+        console.log('=== USER SET ===', authUser);
         setUser(authUser);
       } else {
-        console.log('=== CLEARING USER ===');
+        console.log('=== USER CLEARED ===');
         setUser(null);
       }
       
       setIsLoading(false);
     });
 
-    const getSession = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session error:', error);
-          setIsLoading(false);
-          return;
-        }
-        
-        console.log('=== INITIAL SESSION ===', data.session?.user?.email);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error in getSession:', error);
-        setIsLoading(false);
-      }
-    };
-    
-    getSession();
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('=== INITIAL SESSION CHECK ===', session?.user?.email);
+      setIsLoading(false);
+    });
     
     return () => {
       subscription.unsubscribe();
@@ -87,14 +73,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      console.log('=== LOGIN ATTEMPT ===', email);
+      console.log('=== LOGIN START ===', email);
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
+        email,
+        password,
       });
 
       if (error) {
-        console.error('=== LOGIN ERROR ===', error.message);
+        console.error('=== LOGIN ERROR ===', error);
         toast({
           title: "Falha na autenticação",
           description: error.message,
@@ -103,18 +89,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
-      if (data.user) {
-        console.log('=== LOGIN SUCCESS ===', data.user.email);
-        
-        toast({
-          title: "Login realizado com sucesso!",
-          description: `Bem-vindo(a) de volta!`,
-        });
-        
-        return true;
-      }
-
-      return false;
+      console.log('=== LOGIN SUCCESS ===', data.user?.email);
+      toast({
+        title: "Login realizado com sucesso!",
+        description: `Bem-vindo(a) de volta!`,
+      });
+      
+      return true;
     } catch (error: any) {
       console.error('=== LOGIN EXCEPTION ===', error);
       toast({
@@ -131,11 +112,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      console.log('=== LOGOUT ATTEMPT ===');
+      console.log('=== LOGOUT START ===');
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('=== LOGOUT ERROR ===', error.message);
+        console.error('=== LOGOUT ERROR ===', error);
         toast({
           title: "Erro ao sair",
           description: error.message,
@@ -143,7 +124,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       } else {
         console.log('=== LOGOUT SUCCESS ===');
-        setUser(null);
         toast({
           title: "Logout realizado com sucesso",
           description: "Você saiu da sua conta com sucesso.",
@@ -162,32 +142,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (name: string, email: string, password: string, username: string, document: string): Promise<boolean> => {
+    console.log('=== REGISTER START ===', { name, email, username, document });
     setIsLoading(true);
-    console.log('=== REGISTER START ===', { name, email, username });
     
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
+        email,
+        password,
         options: {
           data: {
-            name: name,
-            username: username,
-            document: document,
+            name,
+            username,
+            document,
             avatar_url: '',
             phone: '',
           }
         }
       });
 
-      console.log('=== SIGNUP RESPONSE ===', { 
+      console.log('=== REGISTER RESPONSE ===', { 
         user: data.user?.email, 
         session: !!data.session,
         error: error?.message 
       });
 
       if (error) {
-        console.error('=== REGISTRATION ERROR ===', error.message);
+        console.error('=== REGISTER ERROR ===', error);
         toast({
           title: "Erro no cadastro",
           description: error.message,
@@ -197,24 +177,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
-        console.log('=== USER CREATED ===', data.user.email);
-        
+        console.log('=== REGISTER SUCCESS ===', data.user.email);
         toast({
           title: "Conta criada com sucesso!",
           description: `Bem-vindo(a) ao Mimo, ${name}!`,
         });
         return true;
-      } else {
-        console.error('=== NO USER RETURNED ===');
-        toast({
-          title: "Erro no cadastro",
-          description: "Não foi possível criar sua conta. Por favor, tente novamente.",
-          variant: "destructive",
-        });
-        return false;
       }
+
+      console.error('=== NO USER RETURNED ===');
+      return false;
     } catch (error: any) {
-      console.error('=== REGISTRATION EXCEPTION ===', error);
+      console.error('=== REGISTER EXCEPTION ===', error);
       toast({
         title: "Erro no cadastro",
         description: error.message || "Ocorreu um erro inesperado durante o cadastro",
@@ -223,7 +197,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } finally {
       setIsLoading(false);
-      console.log('=== REGISTRATION FINISHED ===');
     }
   };
 
@@ -234,13 +207,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     phone?: string;
   }): Promise<boolean> => {
     try {
-      console.log('Updating user profile with:', userData);
+      console.log('=== UPDATE PROFILE ===', userData);
       const { error } = await supabase.auth.updateUser({
         data: userData
       });
 
       if (error) {
-        console.error('Profile update error:', error.message);
+        console.error('=== UPDATE ERROR ===', error);
         toast({
           title: "Erro ao atualizar perfil",
           description: error.message,
@@ -251,10 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUser(currentUser => {
         if (!currentUser) return null;
-        return {
-          ...currentUser,
-          ...userData
-        };
+        return { ...currentUser, ...userData };
       });
       
       toast({
@@ -264,7 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return true;
     } catch (error: any) {
-      console.error('Profile update failed:', error);
+      console.error('=== UPDATE EXCEPTION ===', error);
       toast({
         title: "Erro ao atualizar perfil",
         description: error.message || "Ocorreu um erro inesperado ao atualizar o perfil",

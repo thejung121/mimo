@@ -1,17 +1,20 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Heart, Loader2 } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Register = () => {
+  // Use the redirect hook to handle automatic redirects
+  useAuthRedirect('/dashboard');
+  
   const [startRegistration, setStartRegistration] = useState(false);
   const [showForm, setShowForm] = useState(false);
   
@@ -23,17 +26,8 @@ const Register = () => {
   const [document, setDocument] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { register, isAuthenticated, user } = useAuth();
+  const { register } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    console.log('=== REGISTER PAGE AUTH CHECK ===', { isAuthenticated, userId: user?.id });
-    if (isAuthenticated && user) {
-      console.log('=== REDIRECTING TO DASHBOARD ===');
-      navigate('/dashboard', { replace: true });
-    }
-  }, [isAuthenticated, user, navigate]);
 
   const handleStartRegistration = () => {
     setStartRegistration(true);
@@ -58,8 +52,6 @@ const Register = () => {
   };
 
   const validateForm = () => {
-    console.log('=== VALIDATING FORM ===', { name, email, username, document });
-    
     if (!name.trim()) {
       toast({
         title: "Nome obrigatório",
@@ -120,37 +112,20 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('=== FORM SUBMISSION ===', { name, email, username });
+    console.log('=== FORM SUBMIT ===', { name, email, username });
     
-    if (!validateForm()) {
-      console.log('=== VALIDATION FAILED ===');
-      return;
-    }
-    
-    if (isLoading) {
-      console.log('=== ALREADY LOADING ===');
+    if (!validateForm() || isLoading) {
       return;
     }
     
     setIsLoading(true);
     
     try {
-      console.log('=== CALLING REGISTER FUNCTION ===');
+      console.log('=== CALLING REGISTER ===');
       const success = await register(name, email, password, username, document);
-      
       console.log('=== REGISTER RESULT ===', success);
-      
-      if (success) {
-        console.log('=== REGISTRATION SUCCESSFUL - REDIRECTING ===');
-        // Force immediate redirect on success
-        setTimeout(() => {
-          navigate('/dashboard', { replace: true });
-        }, 1000);
-      } else {
-        console.log('=== REGISTRATION FAILED ===');
-      }
     } catch (error: any) {
-      console.error("=== REGISTRATION EXCEPTION ===", error);
+      console.error("=== REGISTRATION ERROR ===", error);
       toast({
         title: "Erro no cadastro",
         description: error.message || "Ocorreu um erro inesperado. Por favor, tente novamente.",
