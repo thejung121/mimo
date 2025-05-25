@@ -14,7 +14,7 @@ import { useMimoPackages } from '@/hooks/useMimoPackages';
 const OptimizedMyPageDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { mimoPackages, setMimoPackages, isLoading } = useMimoPackages();
+  const { mimoPackages, setMimoPackages, loading } = useMimoPackages();
   const [packageSaving, setPackageSaving] = useState(false);
 
   const copyShareLink = useCallback(() => {
@@ -166,7 +166,7 @@ const OptimizedMyPageDashboard = () => {
               <CardTitle>Recompensas Disponíveis</CardTitle>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
+              {loading ? (
                 <div className="flex items-center justify-center h-32">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
                   <p>Carregando recompensas...</p>
