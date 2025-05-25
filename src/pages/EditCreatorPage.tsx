@@ -10,7 +10,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
 import { saveCreatorData, saveMimoPackages } from '@/services/creator';
-// Importing a new component that will contain all editor sections in one view
 import UnifiedEditorSection from '@/components/UnifiedEditorSection';
 
 const EditCreatorPage = () => {
@@ -44,14 +43,11 @@ const EditCreatorPage = () => {
     setShowNewPackageForm
   } = useCreatorEditor();
 
-  // Enhanced save function that explicitly updates the profile and packages
   const handleSaveAll = async () => {
     try {
-      // First save the profile
       const profileSaved = await handleSaveProfile();
       
       if (profileSaved) {
-        // Also save packages explicitly
         saveMimoPackages(mimoPackages);
         
         toast({
@@ -59,10 +55,8 @@ const EditCreatorPage = () => {
           description: "Todas as suas alterações foram salvas.",
         });
         
-        // Navigate to the creator page to see the changes
         const username = user?.username || creator.username;
         if (username) {
-          // Prefetch the user's page to ensure it loads correctly
           setTimeout(() => {
             navigate(`/criador/${username}`);
           }, 100);
@@ -71,7 +65,7 @@ const EditCreatorPage = () => {
           toast({
             title: "Nome de usuário não definido",
             description: "Configure seu nome de usuário no perfil para ver sua página.",
-            variant: "destructive"  // Changed from "warning" to "destructive"
+            variant: "destructive"
           });
         }
       }
@@ -86,10 +80,10 @@ const EditCreatorPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
       
-      <main className="flex-grow py-8">
+      <main className="flex-grow py-8 bg-background">
         <div className="mimo-container">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold">Editar Página</h1>
@@ -150,7 +144,6 @@ const EditCreatorPage = () => {
             setShowNewPackageForm={setShowNewPackageForm}
           />
           
-          {/* Bottom save button */}
           <div className="mt-8 pt-4 border-t flex justify-center">
             <Button 
               className="mimo-button w-full max-w-md" 

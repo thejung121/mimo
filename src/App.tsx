@@ -19,12 +19,11 @@ import PackageFormPage from "@/pages/PackageFormPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SettingsPage from "@/pages/SettingsPage";
 import MyPageFullDashboard from "@/pages/MyPageFullDashboard";
-import MyPageDashboard from "@/pages/MyPageDashboard";
+import OptimizedMyPageDashboard from "@/components/dashboard/OptimizedMyPageDashboard";
+import EditCreatorPage from "@/pages/EditCreatorPage";
 import MimosPage from "@/pages/MimosPage";
 import FansPage from "@/pages/FansPage";
 import ContentPage from "@/pages/ContentPage";
-
-// Import for auth-protected routes
 import PrivateRoute from "@/components/PrivateRoute";
 
 function App() {
@@ -42,6 +41,13 @@ function App() {
       
       {/* Creator Pages */}
       <Route path="/criador/:username" element={<CreatorPage />} />
+      
+      {/* Edit Creator Page */}
+      <Route path="/editar-pagina" element={
+        <PrivateRoute>
+          <EditCreatorPage />
+        </PrivateRoute>
+      } />
       
       {/* Protected Routes */}
       <Route path="/dashboard" element={
@@ -91,7 +97,7 @@ function App() {
       } />
       <Route path="/dashboard/minha-pagina" element={
         <PrivateRoute>
-          <MyPageFullDashboard />
+          <OptimizedMyPageDashboard />
         </PrivateRoute>
       } />
       <Route path="/dashboard/configuracoes" element={
