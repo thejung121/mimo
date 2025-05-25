@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -124,6 +125,11 @@ const Register = () => {
       console.log('=== CALLING REGISTER ===');
       const success = await register(name, email, password, username, document);
       console.log('=== REGISTER RESULT ===', success);
+      
+      if (success) {
+        console.log('=== REGISTRATION SUCCESSFUL - SHOULD REDIRECT ===');
+        // The redirect will happen automatically via useAuthRedirect hook
+      }
     } catch (error: any) {
       console.error("=== REGISTRATION ERROR ===", error);
       toast({

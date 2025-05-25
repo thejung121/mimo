@@ -17,7 +17,10 @@ export const useAuthRedirect = (redirectTo: string = '/dashboard') => {
     
     if (!isLoading && isAuthenticated && user) {
       console.log('=== REDIRECTING TO ===', redirectTo);
-      navigate(redirectTo, { replace: true });
+      // Use a small delay to ensure state is fully updated
+      setTimeout(() => {
+        navigate(redirectTo, { replace: true });
+      }, 100);
     }
   }, [isAuthenticated, user, isLoading, navigate, redirectTo]);
   

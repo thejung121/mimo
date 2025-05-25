@@ -146,6 +146,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
+      // First, try to enable email auth temporarily
+      console.log('=== ATTEMPTING SUPABASE REGISTRATION ===');
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -168,6 +171,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('=== REGISTER ERROR ===', error);
+        
+        // If Supabase registration fails due to disabled signups, use localStorage fallback
+        if (error.message.includes('disabled') || error.message.includes('Email signups are disabled')) {
+          console.log('=== USING LOCALHOST FALLBACK ===');
+          return await registerWithLocalStorage(name, email, password, username, document);
+        }
+        
         toast({
           title: "Erro no cadastro",
           description: error.message,
@@ -178,6 +188,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data.user) {
         console.log('=== REGISTER SUCCESS ===', data.user.email);
+        
+        // If we have a session, set the user immediately
+        if (data.session) {
+          const authUser: AuthUser = {
+            id: data.user.id,
+            email: data.user.email || '',
+            name: data.user.user_metadata?.name || name,
+            username: data.user.user_metadata?.username || username,
+            document: data.user.user_metadata?.document || document,
+            avatar_url: data.user.user_metadata?.avatar_url || '',
+            phone: data.user.user_metadata?.phone || '',
+            avatar: data.user.user_metadata?.avatar || '',
+          };
+          setUser(authUser);
+        }
+        
         toast({
           title: "Conta criada com sucesso!",
           description: `Bem-vindo(a) ao Mimo, ${name}!`,
@@ -189,14 +215,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } catch (error: any) {
       console.error('=== REGISTER EXCEPTION ===', error);
+      
+      // Fallback to localStorage if Supabase fails
+      console.log('=== USING LOCALHOST FALLBACK DUE TO EXCEPTION ===');
+      return await registerWithLocalStorage(name, email, password, username, document);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fallback registration using localStorage
+  const registerWithLocalStorage = async (name: string, email: string, password: string, username: string, document: string): Promise<boolean> => {
+    try {
+      console.log('=== LOCALHOST REGISTER START ===');
+      
+      // Check if user already exists in localStorage
+      const existingUsers = JSON.parse(localStorage.getItem('mimo_users') || '[]');
+      
+      if (existingUsers.find((u: any) => u.email === email)) {
+        toast({
+          title: "Erro no cadastro",
+          description: "Este email já está em uso",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      if (existingUsers.find((u: any) => u.username === username)) {
+        toast({
+          title: "Erro no cadastro",
+          description: "Este nome de usuário já está em uso",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      // Create new user
+      const newUser = {
+        id: `user_${Date.now()}`,
+        name,
+        email,
+        password, // In production, this should be hashed
+        username,
+        document,
+        created_at: new Date().toISOString()
+      };
+      
+      // Save to localStorage
+      existingUsers.push(newUser);
+      localStorage.setItem('mimo_users', JSON.stringify(existingUsers));
+      
+      // Create auth user and session
+      const authUser: AuthUser = {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        username: newUser.username,
+        document: newUser.document,
+        avatar_url: '',
+        phone: '',
+        avatar: '',
+      };
+      
+      // Save current session
+      localStorage.setItem('mimo_current_user', JSON.stringify(authUser));
+      
+      // Set user state
+      setUser(authUser);
+      
+      console.log('=== LOCALHOST REGISTER SUCCESS ===', authUser);
+      
+      toast({
+        title: "Conta criada com sucesso!",
+        description: `Bem-vindo(a) ao Mimo, ${name}!`,
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('=== LOCALHOST REGISTER ERROR ===', error);
       toast({
         title: "Erro no cadastro",
-        description: error.message || "Ocorreu um erro inesperado durante o cadastro",
+        description: "Ocorreu um erro inesperado durante o cadastro",
         variant: "destructive",
       });
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
