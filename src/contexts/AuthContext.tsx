@@ -31,13 +31,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
-  // Initialize auth state
   useEffect(() => {
-    console.log('=== INITIALIZING AUTH CONTEXT ===');
+    console.log('=== INITIALIZING AUTH ===');
     
-    // First set up the auth state listener to react to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('=== AUTH STATE CHANGE ===', event, session?.user?.id);
+      console.log('=== AUTH EVENT ===', event, session?.user?.email);
       
       if (session?.user) {
         const authUser: AuthUser = {
@@ -51,47 +49,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           avatar: session.user.user_metadata?.avatar || '',
         };
         
-        console.log('=== SETTING USER STATE ===', authUser);
+        console.log('=== SETTING USER ===', authUser);
         setUser(authUser);
-        localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(authUser));
       } else {
-        console.log('=== CLEARING USER STATE ===');
+        console.log('=== CLEARING USER ===');
         setUser(null);
-        localStorage.removeItem('LOCAL_STORAGE_KEY');
       }
       
       setIsLoading(false);
     });
 
-    // Then fetch the current session
     const getSession = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error fetching session:', error);
+          console.error('Session error:', error);
           setIsLoading(false);
           return;
         }
         
-        console.log('=== INITIAL SESSION CHECK ===', data.session?.user?.id);
-        
-        if (data?.session?.user) {
-          const authUser: AuthUser = {
-            id: data.session.user.id,
-            email: data.session.user.email || '',
-            name: data.session.user.user_metadata?.name || '',
-            username: data.session.user.user_metadata?.username || '',
-            document: data.session.user.user_metadata?.document || '',
-            avatar_url: data.session.user.user_metadata?.avatar_url || '',
-            phone: data.session.user.user_metadata?.phone || '',
-            avatar: data.session.user.user_metadata?.avatar || '',
-          };
-          
-          console.log('=== SETTING INITIAL USER ===', authUser);
-          setUser(authUser);
-          localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(authUser));
-        }
+        console.log('=== INITIAL SESSION ===', data.session?.user?.email);
         setIsLoading(false);
       } catch (error) {
         console.error('Error in getSession:', error);
@@ -106,7 +84,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // Login function
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -127,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
-        console.log('=== LOGIN SUCCESS ===', data.user.id);
+        console.log('=== LOGIN SUCCESS ===', data.user.email);
         
         toast({
           title: "Login realizado com sucesso!",
@@ -151,7 +128,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Logout function
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
@@ -168,7 +144,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         console.log('=== LOGOUT SUCCESS ===');
         setUser(null);
-        localStorage.removeItem('LOCAL_STORAGE_KEY');
         toast({
           title: "Logout realizado com sucesso",
           description: "Você saiu da sua conta com sucesso.",
@@ -186,37 +161,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Register function
   const register = async (name: string, email: string, password: string, username: string, document: string): Promise<boolean> => {
     setIsLoading(true);
-    console.log('=== REGISTER ATTEMPT ===', { name, email, username });
+    console.log('=== REGISTER START ===', { name, email, username });
     
     try {
-      // Check if username exists first
-      console.log('=== CHECKING USERNAME AVAILABILITY ===', username);
-      const { data: existingUserWithUsername, error: usernameCheckError } = await supabase
-        .from('creators')
-        .select('username')
-        .eq('username', username)
-        .maybeSingle();
-      
-      if (usernameCheckError) {
-        console.error('=== USERNAME CHECK ERROR ===', usernameCheckError.message);
-      }
-      
-      if (existingUserWithUsername) {
-        console.error('=== USERNAME EXISTS ===', username);
-        toast({
-          title: "Nome de usuário indisponível",
-          description: "Este nome de usuário já está sendo utilizado. Por favor, escolha outro.",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      console.log('=== USERNAME AVAILABLE, PROCEEDING WITH SIGNUP ===');
-      
-      // Proceed with registration
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -232,9 +181,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       console.log('=== SIGNUP RESPONSE ===', { 
-        user: data.user?.id, 
+        user: data.user?.email, 
         session: !!data.session,
-        confirmed: data.user?.email_confirmed_at,
         error: error?.message 
       });
 
@@ -249,24 +197,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data.user) {
-        console.log('=== USER CREATED ===', data.user.id);
+        console.log('=== USER CREATED ===', data.user.email);
         
-        // Check if user is immediately confirmed or has a session
-        if (data.user.email_confirmed_at || data.session) {
-          console.log('=== USER CONFIRMED - REGISTRATION SUCCESS ===');
-          toast({
-            title: "Conta criada com sucesso!",
-            description: `Bem-vindo(a) ao Mimo, ${name}!`,
-          });
-          return true;
-        } else {
-          console.log('=== USER NEEDS CONFIRMATION ===');
-          toast({
-            title: "Verifique seu email",
-            description: "Enviamos um link de confirmação para seu email.",
-          });
-          return false;
-        }
+        toast({
+          title: "Conta criada com sucesso!",
+          description: `Bem-vindo(a) ao Mimo, ${name}!`,
+        });
+        return true;
       } else {
         console.error('=== NO USER RETURNED ===');
         toast({
@@ -286,11 +223,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     } finally {
       setIsLoading(false);
-      console.log('=== REGISTRATION PROCESS FINISHED ===');
+      console.log('=== REGISTRATION FINISHED ===');
     }
   };
 
-  // Add updateUserProfile function
   const updateUserProfile = async (userData: { 
     name?: string; 
     document?: string; 
@@ -313,17 +249,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
 
-      // Update local user state
       setUser(currentUser => {
         if (!currentUser) return null;
-        const updatedUser = {
+        return {
           ...currentUser,
           ...userData
         };
-        
-        localStorage.setItem('LOCAL_STORAGE_KEY', JSON.stringify(updatedUser));
-        
-        return updatedUser;
       });
       
       toast({

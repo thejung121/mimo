@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,7 +15,6 @@ const Register = () => {
   const [startRegistration, setStartRegistration] = useState(false);
   const [showForm, setShowForm] = useState(false);
   
-  // Form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -27,11 +27,10 @@ const Register = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Monitor authentication status and redirect when user is authenticated
   useEffect(() => {
     console.log('=== REGISTER PAGE AUTH CHECK ===', { isAuthenticated, userId: user?.id });
     if (isAuthenticated && user) {
-      console.log('=== USER IS AUTHENTICATED, REDIRECTING ===');
+      console.log('=== REDIRECTING TO DASHBOARD ===');
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
@@ -41,7 +40,6 @@ const Register = () => {
     setTimeout(() => setShowForm(true), 500);
   };
   
-  // Function to format CPF/CNPJ as user types
   const formatDocument = (value: string) => {
     const digits = value.replace(/\D/g, '');
     
@@ -143,8 +141,11 @@ const Register = () => {
       console.log('=== REGISTER RESULT ===', success);
       
       if (success) {
-        console.log('=== REGISTRATION SUCCESSFUL ===');
-        // The useEffect will handle the redirect when isAuthenticated becomes true
+        console.log('=== REGISTRATION SUCCESSFUL - REDIRECTING ===');
+        // Force immediate redirect on success
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 1000);
       } else {
         console.log('=== REGISTRATION FAILED ===');
       }
