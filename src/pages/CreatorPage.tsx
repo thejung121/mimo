@@ -160,8 +160,12 @@ const CreatorPage = () => {
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               console.error('Failed to load image:', previewMedia.url);
-                              e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const nextElement = target.nextElementSibling as HTMLElement;
+                              if (nextElement) {
+                                nextElement.style.display = 'flex';
+                              }
                             }}
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
