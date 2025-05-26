@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -34,11 +33,12 @@ const OptimizedMyPageDashboard = () => {
     }
   }, [user?.username, toast]);
 
-  const handleToggleVisibility = useCallback(async (packageId: string, currentlyHidden: boolean) => {
-    setToggleLoading(packageId);
+  const handleToggleVisibility = useCallback(async (packageId: string | number, currentlyHidden: boolean) => {
+    const pkgId = String(packageId);
+    setToggleLoading(pkgId);
     
     try {
-      await toggleVisibility(packageId, !currentlyHidden);
+      await toggleVisibility(pkgId, !currentlyHidden);
     } catch (error) {
       console.error("Error toggling package visibility:", error);
     } finally {
@@ -47,44 +47,47 @@ const OptimizedMyPageDashboard = () => {
   }, [toggleVisibility]);
 
   const packagesList = useMemo(() => {
-    return packages.map(pkg => (
-      <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
-        <div>
-          <h3 className="font-medium flex items-center">
-            {pkg.title}
-            {pkg.highlighted && (
-              <span className="ml-2 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
-                Destacado
-              </span>
-            )}
-            {pkg.isHidden && (
-              <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">
-                Oculto
-              </span>
-            )}
-          </h3>
-          <p className="text-sm text-muted-foreground">R$ {pkg.price}</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <Switch 
-              id={`package-visible-${pkg.id}`}
-              checked={!pkg.isHidden}
-              disabled={toggleLoading === pkg.id}
-              onCheckedChange={() => handleToggleVisibility(pkg.id, pkg.isHidden)}
-            />
-            <Label htmlFor={`package-visible-${pkg.id}`}>
-              {pkg.isHidden ? 'Oculto' : 'Visível'}
-            </Label>
+    return packages.map(pkg => {
+      const pkgId = String(pkg.id);
+      return (
+        <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
+          <div>
+            <h3 className="font-medium flex items-center">
+              {pkg.title}
+              {pkg.highlighted && (
+                <span className="ml-2 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
+                  Destacado
+                </span>
+              )}
+              {pkg.isHidden && (
+                <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">
+                  Oculto
+                </span>
+              )}
+            </h3>
+            <p className="text-sm text-muted-foreground">R$ {pkg.price}</p>
           </div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to={`/dashboard/pacotes/editar/${pkg.id}`}>
-              <Edit className="h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id={`package-visible-${pkg.id}`}
+                checked={!pkg.isHidden}
+                disabled={toggleLoading === pkgId}
+                onCheckedChange={() => handleToggleVisibility(pkg.id, pkg.isHidden)}
+              />
+              <Label htmlFor={`package-visible-${pkg.id}`}>
+                {pkg.isHidden ? 'Oculto' : 'Visível'}
+              </Label>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={`/dashboard/pacotes/editar/${pkg.id}`}>
+                <Edit className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
-    ));
+      );
+    });
   }, [packages, toggleLoading, handleToggleVisibility]);
 
   const quickActions = useMemo(() => (

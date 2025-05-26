@@ -21,21 +21,23 @@ const PackagesPage = () => {
   const navigate = useNavigate();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const editPackage = (id: string) => {
+  const editPackage = (id: string | number) => {
     navigate(`/dashboard/pacotes/editar/${id}`);
   };
 
-  const handleDeletePackage = async (id: string) => {
+  const handleDeletePackage = async (id: string | number) => {
     if (window.confirm("Tem certeza que deseja excluir esta recompensa?")) {
-      setActionLoading(id);
-      await deletePackage(id);
+      const pkgId = String(id);
+      setActionLoading(pkgId);
+      await deletePackage(pkgId);
       setActionLoading(null);
     }
   };
 
-  const handleToggleVisibility = async (id: string, currentlyHidden: boolean) => {
-    setActionLoading(id);
-    await toggleVisibility(id, !currentlyHidden);
+  const handleToggleVisibility = async (id: string | number, currentlyHidden: boolean) => {
+    const pkgId = String(id);
+    setActionLoading(pkgId);
+    await toggleVisibility(pkgId, !currentlyHidden);
     setActionLoading(null);
   };
 
@@ -78,16 +80,19 @@ const PackagesPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {packages.map((pkg) => (
-              <PackageCard 
-                key={pkg.id} 
-                package={pkg}
-                onToggle={() => handleToggleVisibility(pkg.id, pkg.isHidden)}
-                onEdit={() => editPackage(pkg.id)}
-                onDelete={() => handleDeletePackage(pkg.id)}
-                isLoading={actionLoading === pkg.id}
-              />
-            ))}
+            {packages.map((pkg) => {
+              const pkgId = String(pkg.id);
+              return (
+                <PackageCard 
+                  key={pkg.id} 
+                  package={pkg}
+                  onToggle={() => handleToggleVisibility(pkg.id, pkg.isHidden)}
+                  onEdit={() => editPackage(pkg.id)}
+                  onDelete={() => handleDeletePackage(pkg.id)}
+                  isLoading={actionLoading === pkgId}
+                />
+              );
+            })}
           </div>
         )}
       </div>
