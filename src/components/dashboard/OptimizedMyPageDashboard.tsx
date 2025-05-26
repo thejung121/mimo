@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -8,13 +9,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useMimoPackages } from '@/hooks/useMimoPackages';
+import { usePackageManagement } from '@/hooks/usePackageManagement';
 
 const OptimizedMyPageDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { mimoPackages, setMimoPackages, loading } = useMimoPackages();
-  const [packageSaving, setPackageSaving] = useState(false);
+  const { packages, loading, toggleVisibility } = usePackageManagement();
+  const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
   const copyShareLink = useCallback(() => {
     if (user?.username) {
@@ -33,40 +34,20 @@ const OptimizedMyPageDashboard = () => {
     }
   }, [user?.username, toast]);
 
-  const togglePackageVisibility = useCallback(async (id: number | string) => {
-    setPackageSaving(true);
+  const handleToggleVisibility = useCallback(async (packageId: string, currentlyHidden: boolean) => {
+    setToggleLoading(packageId);
     
     try {
-      const updatedPackages = mimoPackages.map(pkg => {
-        if (String(pkg.id) === String(id)) {
-          return { ...pkg, isHidden: !pkg.isHidden };
-        }
-        return pkg;
-      });
-      
-      setMimoPackages(updatedPackages);
-      
-      // Save to localStorage
-      localStorage.setItem('mimo_packages', JSON.stringify(updatedPackages));
-
-      toast({
-        title: "Configuração salva",
-        description: "Visibilidade da recompensa atualizada com sucesso.",
-      });
+      await toggleVisibility(packageId, !currentlyHidden);
     } catch (error) {
       console.error("Error toggling package visibility:", error);
-      toast({
-        title: "Erro",
-        description: "Erro ao atualizar visibilidade da recompensa",
-        variant: "destructive"
-      });
     } finally {
-      setPackageSaving(false);
+      setToggleLoading(null);
     }
-  }, [mimoPackages, setMimoPackages, toast]);
+  }, [toggleVisibility]);
 
   const packagesList = useMemo(() => {
-    return mimoPackages.map(pkg => (
+    return packages.map(pkg => (
       <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
         <div>
           <h3 className="font-medium flex items-center">
@@ -74,6 +55,11 @@ const OptimizedMyPageDashboard = () => {
             {pkg.highlighted && (
               <span className="ml-2 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
                 Destacado
+              </span>
+            )}
+            {pkg.isHidden && (
+              <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">
+                Oculto
               </span>
             )}
           </h3>
@@ -84,8 +70,8 @@ const OptimizedMyPageDashboard = () => {
             <Switch 
               id={`package-visible-${pkg.id}`}
               checked={!pkg.isHidden}
-              disabled={packageSaving}
-              onCheckedChange={() => togglePackageVisibility(pkg.id)}
+              disabled={toggleLoading === pkg.id}
+              onCheckedChange={() => handleToggleVisibility(pkg.id, pkg.isHidden)}
             />
             <Label htmlFor={`package-visible-${pkg.id}`}>
               {pkg.isHidden ? 'Oculto' : 'Visível'}
@@ -99,7 +85,7 @@ const OptimizedMyPageDashboard = () => {
         </div>
       </div>
     ));
-  }, [mimoPackages, packageSaving, togglePackageVisibility]);
+  }, [packages, toggleLoading, handleToggleVisibility]);
 
   const quickActions = useMemo(() => (
     <div className="flex flex-wrap gap-3">
@@ -170,7 +156,7 @@ const OptimizedMyPageDashboard = () => {
                   <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
                   <p>Carregando recompensas...</p>
                 </div>
-              ) : mimoPackages.length === 0 ? (
+              ) : packages.length === 0 ? (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground mb-4">Você ainda não criou nenhuma recompensa</p>
                   <Button asChild>

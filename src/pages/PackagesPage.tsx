@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,74 +7,36 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMimoPackages } from '@/hooks/useMimoPackages';
-import { useToast } from '@/components/ui/use-toast';
-import { saveMimoPackages } from '@/services/creator/packageService';
+import { usePackageManagement } from '@/hooks/usePackageManagement';
+import { useState } from 'react';
 
 const PackagesPage = () => {
   const {
     packages,
-    setPackages,
-    handleDeletePackage,
     loading,
-    refreshPackages
-  } = useMimoPackages();
+    deletePackage,
+    toggleVisibility
+  } = usePackageManagement();
   
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [packagesState, setPackagesState] = useState(packages.map(pkg => ({
-    ...pkg,
-    isActive: pkg.isHidden !== true
-  })));
-  
-  // Update local state when packages changes
-  useEffect(() => {
-    setPackagesState(packages.map(pkg => ({
-      ...pkg,
-      isActive: pkg.isHidden !== true
-    })));
-  }, [packages]);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Initial data loading
-  useEffect(() => {
-    refreshPackages();
-  }, []);
-
-  const togglePackageStatus = (id: number | string) => {
-    // Update local state
-    const updatedPackagesState = packagesState.map(pkg => {
-      if (String(pkg.id) === String(id)) {
-        return { ...pkg, isActive: !pkg.isActive };
-      }
-      return pkg;
-    });
-    setPackagesState(updatedPackagesState);
-    
-    // Update global state with isHidden property
-    const updatedGlobalPackages = packages.map(pkg => {
-      if (String(pkg.id) === String(id)) {
-        return { ...pkg, isHidden: !updatedPackagesState.find(p => String(p.id) === String(id))?.isActive };
-      }
-      return pkg;
-    });
-    
-    setPackages(updatedGlobalPackages);
-    saveMimoPackages(updatedGlobalPackages);
-    
-    toast({
-      title: "Configuração salva",
-      description: "Visibilidade da recompensa atualizada com sucesso.",
-    });
-  };
-
-  const editPackage = (id: number | string) => {
+  const editPackage = (id: string) => {
     navigate(`/dashboard/pacotes/editar/${id}`);
   };
 
-  const handleDeletePackageWithConfirmation = (id: number | string) => {
+  const handleDeletePackage = async (id: string) => {
     if (window.confirm("Tem certeza que deseja excluir esta recompensa?")) {
-      handleDeletePackage(id);
+      setActionLoading(id);
+      await deletePackage(id);
+      setActionLoading(null);
     }
+  };
+
+  const handleToggleVisibility = async (id: string, currentlyHidden: boolean) => {
+    setActionLoading(id);
+    await toggleVisibility(id, !currentlyHidden);
+    setActionLoading(null);
   };
 
   if (loading) {
@@ -103,7 +65,7 @@ const PackagesPage = () => {
           </Button>
         </div>
         
-        {packagesState.length === 0 ? (
+        {packages.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-lg font-medium mb-2">Nenhuma recompensa encontrada</h2>
             <p className="text-muted-foreground mb-6">Você ainda não criou nenhuma recompensa para seus fãs</p>
@@ -116,13 +78,14 @@ const PackagesPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {packagesState.map((pkg) => (
+            {packages.map((pkg) => (
               <PackageCard 
                 key={pkg.id} 
                 package={pkg}
-                onToggle={() => togglePackageStatus(pkg.id!)}
-                onEdit={() => editPackage(pkg.id!)}
-                onDelete={() => handleDeletePackageWithConfirmation(pkg.id!)}
+                onToggle={() => handleToggleVisibility(pkg.id, pkg.isHidden)}
+                onEdit={() => editPackage(pkg.id)}
+                onDelete={() => handleDeletePackage(pkg.id)}
+                isLoading={actionLoading === pkg.id}
               />
             ))}
           </div>
@@ -137,13 +100,15 @@ interface PackageCardProps {
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  isLoading: boolean;
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({
   package: pkg,
   onToggle,
   onEdit,
-  onDelete
+  onDelete,
+  isLoading
 }) => {
   return (
     <Card className={`border-l-4 ${pkg.highlighted ? 'border-l-primary' : 'border-l-muted'}`}>
@@ -154,8 +119,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
             {pkg.highlighted && (
               <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded">Destacado</span>
             )}
-            {!pkg.isActive && (
-              <span className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded">Inativo</span>
+            {pkg.isHidden && (
+              <span className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded">Oculto</span>
             )}
           </div>
           
@@ -182,20 +147,21 @@ const PackageCard: React.FC<PackageCardProps> = ({
           <div className="flex items-center space-x-2">
             <Switch 
               id={`package-status-${pkg.id}`}
-              checked={pkg.isActive}
+              checked={!pkg.isHidden}
+              disabled={isLoading}
               onCheckedChange={onToggle}
             />
             <Label htmlFor={`package-status-${pkg.id}`} className="cursor-pointer">
-              {pkg.isActive ? 'Ativo' : 'Inativo'}
+              {pkg.isHidden ? 'Oculto' : 'Visível'}
             </Label>
           </div>
           
           <div className="flex items-center">
-            <Button variant="ghost" size="sm" onClick={onEdit}>
+            <Button variant="ghost" size="sm" onClick={onEdit} disabled={isLoading}>
               <Edit className="h-4 w-4" />
               <span className="sr-only md:not-sr-only md:ml-2">Editar</span>
             </Button>
-            <Button variant="ghost" size="sm" className="text-destructive" onClick={onDelete}>
+            <Button variant="ghost" size="sm" className="text-destructive" onClick={onDelete} disabled={isLoading}>
               <Trash2 className="h-4 w-4" />
               <span className="sr-only md:not-sr-only md:ml-2">Excluir</span>
             </Button>
