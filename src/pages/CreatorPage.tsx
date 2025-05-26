@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Heart, CheckCircle2, CheckCircle, ArrowRight, Instagram, Twitter, Twitch, Globe, Lock } from 'lucide-react';
+import { Heart, CheckCircle2, CheckCircle, ArrowRight, Instagram, Twitter, Twitch, Globe, Lock, Play, Image as ImageIcon } from 'lucide-react';
 import PurchaseFlow from "@/components/PurchaseFlow";
 import LoadingState from '@/components/creator/LoadingState';
 import NotFoundState from '@/components/creator/NotFoundState';
@@ -75,7 +75,7 @@ const CreatorPage = () => {
   ) || [];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900 text-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       {/* Admin banner if this is the user's own page */}
       {isOwnPage && <AdminBanner />}
       
@@ -136,82 +136,148 @@ const CreatorPage = () => {
       
       {/* Packages Section */}
       <div className="flex-grow px-4 pb-8">
-        <div className="max-w-md mx-auto space-y-6">
+        <div className="max-w-md mx-auto space-y-4">
           {mimoPackages && mimoPackages.length > 0 ? (
-            mimoPackages.map((pkg) => (
-              <div 
-                key={pkg.id} 
-                className="bg-slate-800 rounded-lg overflow-hidden"
-              >
-                {/* Package Preview Image */}
-                <div className="flex">
-                  {pkg.media && pkg.media.length > 0 && pkg.media.some(m => m.isPreview) ? (
-                    <div className="w-1/3">
-                      <img 
-                        src={pkg.media.find(m => m.isPreview)?.url || pkg.media[0]?.url || '/placeholder.svg'} 
-                        alt={pkg.title}
-                        className="w-full h-full object-cover" 
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-1/3 h-32 bg-slate-700 flex items-center justify-center">
-                      <span className="text-slate-500">Sem prévia</span>
-                    </div>
-                  )}
-                  
-                  <div className="w-2/3 p-3">
-                    <div className="flex items-start justify-between">
-                      <h3 className="text-lg font-bold">{pkg.title}</h3>
+            mimoPackages.map((pkg) => {
+              // Find preview image or use first media item
+              const previewMedia = pkg.media?.find(m => m.isPreview) || pkg.media?.[0];
+              const imageCount = pkg.media?.filter(m => m.type === 'image').length || 0;
+              const videoCount = pkg.media?.filter(m => m.type === 'video').length || 0;
+              
+              return (
+                <div 
+                  key={pkg.id} 
+                  className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-xl overflow-hidden shadow-xl border border-slate-600/30 hover:shadow-2xl transition-all duration-300"
+                >
+                  {/* Package Header with Image */}
+                  <div className="relative">
+                    <div className="h-40 overflow-hidden bg-slate-700">
+                      {previewMedia ? (
+                        <div className="relative w-full h-full">
+                          <img 
+                            src={previewMedia.url} 
+                            alt={pkg.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.error('Failed to load image:', previewMedia.url);
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            {previewMedia.type === 'video' ? (
+                              <Play className="w-12 h-12 text-white" fill="currentColor" />
+                            ) : (
+                              <ImageIcon className="w-12 h-12 text-white" />
+                            )}
+                          </div>
+                          {/* Content Stats Overlay */}
+                          <div className="absolute top-3 right-3 flex gap-2 text-xs">
+                            {imageCount > 0 && (
+                              <span className="bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
+                                <ImageIcon className="w-3 h-3" />
+                                {imageCount}
+                              </span>
+                            )}
+                            {videoCount > 0 && (
+                              <span className="bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
+                                <Play className="w-3 h-3" />
+                                {videoCount}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 to-slate-600">
+                          <div className="text-center">
+                            <ImageIcon className="w-12 h-12 text-slate-400 mx-auto mb-2" />
+                            <span className="text-slate-400 text-sm">Sem prévia disponível</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     
-                    <p className="text-xs text-slate-400 mt-1 mb-2">
-                      {pkg.features?.[0] || 'Conteúdo exclusivo e personalizado'}
-                    </p>
+                    {/* Highlight Badge */}
+                    {pkg.highlighted && (
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-gradient-to-r from-[#F54040] to-[#E03030] text-white text-xs px-3 py-1 rounded-full font-medium shadow-lg">
+                          ⭐ Destaque
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Package Content */}
+                  <div className="p-4 space-y-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-1">{pkg.title}</h3>
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        {pkg.features?.[0] || 'Conteúdo exclusivo e personalizado'}
+                      </p>
+                    </div>
                     
                     {/* Features */}
-                    <div className="space-y-1">
-                      {pkg.features?.slice(0, 4).map((feature, idx) => (
-                        <div key={idx} className="flex items-center text-xs">
-                          <CheckCircle className="w-3 h-3 text-red-500 mr-2" />
-                          <span>{feature}</span>
+                    {pkg.features && pkg.features.length > 1 && (
+                      <div className="space-y-1">
+                        {pkg.features.slice(1, 4).map((feature, idx) => (
+                          <div key={idx} className="flex items-start text-sm text-slate-300">
+                            <CheckCircle className="w-4 h-4 text-[#F54040] mr-2 mt-0.5 flex-shrink-0" />
+                            <span>{feature}</span>
+                          </div>
+                        ))}
+                        {pkg.features.length > 4 && (
+                          <div className="text-xs text-slate-400 pl-6">
+                            +{pkg.features.length - 4} recursos adicionais
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Price and Action Section */}
+                  <div className="bg-slate-800/50 backdrop-blur-sm border-t border-slate-600/30 px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-[#F54040] font-bold text-lg">
+                          R$ {pkg.price.toFixed(2)}
                         </div>
-                      ))}
+                        <div className="text-slate-400 text-xs">
+                          Acesso Vitalício
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => handleSelectPackage(pkg)}
+                        className="bg-gradient-to-r from-[#F54040] to-[#E03030] hover:from-[#E03030] hover:to-[#D02020] text-white rounded-lg px-6 py-2.5 flex items-center font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                      >
+                        Acessar Agora
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </button>
                     </div>
                   </div>
                 </div>
-                
-                {/* Price and Action Button */}
-                <div className="bg-slate-800 px-3 py-2 flex items-center justify-between">
-                  <div className="text-blue-400 font-medium">
-                    R$ {pkg.price.toFixed(2)} - Acesso Vitalício
-                  </div>
-                  <button 
-                    onClick={() => handleSelectPackage(pkg)}
-                    className="bg-[#F54040] hover:bg-[#F54040]/90 text-white rounded-full px-4 py-1 flex items-center text-sm"
-                  >
-                    Acessar Agora
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           ) : (
-            <div className="text-center p-6 bg-slate-800/50 rounded-lg">
-              <p className="text-slate-400">
-                Ainda não há pacotes disponíveis.
-              </p>
+            <div className="text-center p-8 bg-slate-800/50 rounded-xl border border-slate-600/30">
+              <div className="mb-4">
+                <ImageIcon className="w-16 h-16 text-slate-500 mx-auto mb-3" />
+                <h3 className="text-lg font-medium text-slate-300 mb-2">Nenhum conteúdo disponível</h3>
+                <p className="text-slate-400 text-sm">
+                  Este criador ainda não publicou nenhuma recompensa.
+                </p>
+              </div>
             </div>
           )}
 
           {/* Mimo section using CustomMimoInput component */}
-          <div className="mt-8 pt-4 border-t border-slate-800">
-            <div className="text-center mb-4">
-              <h2 className="font-medium flex items-center justify-center text-white">
-                <Heart className="text-[#F54040] w-5 h-5 mr-2" fill="currentColor" />
+          <div className="mt-8 pt-6 border-t border-slate-700">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold flex items-center justify-center text-white mb-2">
+                <Heart className="text-[#F54040] w-6 h-6 mr-2" fill="currentColor" />
                 Manda um Mimo
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                Você manda um mimo e ganha uma recompensa quente e exclusiva
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Envie um mimo personalizado e ganhe uma recompensa exclusiva
               </p>
             </div>
             
@@ -222,7 +288,7 @@ const CreatorPage = () => {
             />
           </div>
           
-          <div className="text-center text-xs text-slate-500 mt-8">
+          <div className="text-center text-xs text-slate-500 mt-8 pb-4">
             Feito com amor pela Mimo ❤️
           </div>
         </div>
