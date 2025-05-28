@@ -20,11 +20,17 @@ export const usePackageManagement = () => {
 
   // Carregar recompensas do usuário
   const loadPackages = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setPackages([]);
+      setLoading(false);
+      return;
+    }
     
     setLoading(true);
     try {
+      console.log('Loading packages for user:', user.id);
       const userPackages = await getMyPackages();
+      console.log('Loaded packages:', userPackages);
       setPackages(userPackages);
     } catch (error) {
       console.error('Error loading packages:', error);
@@ -33,6 +39,7 @@ export const usePackageManagement = () => {
         description: 'Não foi possível carregar suas recompensas.',
         variant: 'destructive'
       });
+      setPackages([]);
     } finally {
       setLoading(false);
     }
@@ -160,6 +167,9 @@ export const usePackageManagement = () => {
   useEffect(() => {
     if (user?.id) {
       loadPackages();
+    } else {
+      setPackages([]);
+      setLoading(false);
     }
   }, [user?.id]);
 

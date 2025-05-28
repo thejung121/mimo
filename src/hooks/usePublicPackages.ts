@@ -16,7 +16,9 @@ export const usePublicPackages = (username?: string) => {
 
     setLoading(true);
     try {
+      console.log('Loading public packages for username:', username);
       const publicPackages = await getPublicPackagesByUsername(username);
+      console.log('Loaded public packages:', publicPackages);
       setPackages(publicPackages);
     } catch (error) {
       console.error('Error loading public packages:', error);

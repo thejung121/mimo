@@ -39,7 +39,7 @@ export const createPackage = async (packageData: Omit<MimoPackage, 'id'>, creato
     }
 
     // Adicionar mídia
-    if (packageData.media.length > 0) {
+    if (packageData.media && packageData.media.length > 0) {
       const mediaData = packageData.media.map(media => ({
         package_id: data.id,
         type: media.type,
@@ -134,9 +134,19 @@ export const deletePackage = async (packageId: string): Promise<boolean> => {
   }
 };
 
-// Buscar recompensas do criador logado
+// Buscar recompensas do criador logado APENAS
 export const getMyPackages = async (): Promise<MimoPackage[]> => {
   try {
+    // Verificar se o usuário está autenticado
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.log('No authenticated user found');
+      return [];
+    }
+
+    console.log('Fetching packages for authenticated user:', user.id);
+
     const { data: packages, error } = await supabase
       .from('packages')
       .select(`
@@ -148,6 +158,7 @@ export const getMyPackages = async (): Promise<MimoPackage[]> => {
         package_features(feature),
         package_media(id, type, url, caption, is_preview)
       `)
+      .eq('creator_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -155,6 +166,7 @@ export const getMyPackages = async (): Promise<MimoPackage[]> => {
       return [];
     }
 
+    console.log('Raw packages from Supabase:', packages);
     return formatPackagesFromSupabase(packages || []);
   } catch (error) {
     console.error('Error in getMyPackages:', error);
