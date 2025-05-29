@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -52,6 +53,24 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  /* Prevent horizontal scroll globally */
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  /* Ensure all containers respect viewport width */
+  #root {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 }
 
@@ -82,6 +101,37 @@
   
   .mimo-gradient {
     @apply bg-gradient-to-r from-[#F54040] to-[#E03030];
+  }
+
+  /* Force all elements to respect max width */
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Fix for tables and wide content */
+  table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  /* Ensure images don't break layout */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Text truncation utilities for mobile */
+  .text-truncate-mobile {
+    @apply truncate;
+  }
+
+  /* Container that prevents overflow */
+  .container-safe {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
 }
 
@@ -150,5 +200,45 @@
   
   .delay-500 {
     animation-delay: 500ms;
+  }
+
+  /* Mobile-specific utilities */
+  .w-screen-safe {
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .overflow-x-hidden-safe {
+    overflow-x: hidden !important;
+  }
+}
+
+/* Media queries for better mobile handling */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .mimo-button {
+    @apply py-2 px-4 text-sm;
+  }
+
+  /* Ensure dropdowns don't overflow */
+  [data-radix-popper-content-wrapper] {
+    max-width: calc(100vw - 20px) !important;
+  }
+}
+
+/* Fix for specific mobile viewport issues */
+@media (max-width: 480px) {
+  * {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .truncate {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 }

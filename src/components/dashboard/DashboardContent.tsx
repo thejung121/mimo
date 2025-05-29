@@ -50,83 +50,91 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   };
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8 max-w-full overflow-hidden">
-      <TabsList className="mb-4 grid grid-cols-3 w-full">
-        <TabsTrigger value="mimos" className="text-sm sm:text-base">Mimos</TabsTrigger>
-        <TabsTrigger value="withdrawals" className="text-sm sm:text-base">Saques</TabsTrigger>
-        <TabsTrigger value="page" className="text-sm sm:text-base">Minha Página</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="mimos" className="space-y-4">
-        <MimosTab 
-          transactions={transactions} 
-          pendingRewards={pendingRewards}
-          onViewMimo={onViewMimo}
-        />
-      </TabsContent>
-      
-      <TabsContent value="withdrawals" className="space-y-4">
-        <WithdrawalsTab 
-          withdrawals={withdrawals}
-          onOpenWithdrawalDialog={onOpenWithdrawalDialog}
-        />
-      </TabsContent>
-      
-      <TabsContent value="page">
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-3">
-            <Button 
-              className="flex items-center gap-2" 
-              variant="outline"
-              onClick={copyShareLink}
-            >
-              <Copy className="h-4 w-4" />
-              Copiar Link de Divulgação
-            </Button>
-            {user?.username ? (
+    <div className="w-full max-w-full min-w-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-full overflow-hidden">
+        <TabsList className="mb-4 grid grid-cols-3 w-full max-w-full">
+          <TabsTrigger value="mimos" className="text-xs sm:text-sm truncate">Mimos</TabsTrigger>
+          <TabsTrigger value="withdrawals" className="text-xs sm:text-sm truncate">Saques</TabsTrigger>
+          <TabsTrigger value="page" className="text-xs sm:text-sm truncate">Minha Página</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="mimos" className="space-y-4 w-full max-w-full min-w-0">
+          <MimosTab 
+            transactions={transactions} 
+            pendingRewards={pendingRewards}
+            onViewMimo={onViewMimo}
+          />
+        </TabsContent>
+        
+        <TabsContent value="withdrawals" className="space-y-4 w-full max-w-full min-w-0">
+          <WithdrawalsTab 
+            withdrawals={withdrawals}
+            onOpenWithdrawalDialog={onOpenWithdrawalDialog}
+          />
+        </TabsContent>
+        
+        <TabsContent value="page" className="w-full max-w-full min-w-0">
+          <div className="space-y-4 w-full">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
               <Button 
-                className="flex items-center gap-2" 
+                className="flex items-center gap-2 text-xs sm:text-sm" 
                 variant="outline"
-                asChild
+                onClick={copyShareLink}
+                size="sm"
               >
-                <Link to={`/criador/${user.username}`} target="_blank">
-                  <ExternalLink className="h-4 w-4" />
-                  Ver Página Atualizada
+                <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="truncate">Copiar Link</span>
+              </Button>
+              {user?.username ? (
+                <Button 
+                  className="flex items-center gap-2 text-xs sm:text-sm" 
+                  variant="outline"
+                  asChild
+                  size="sm"
+                >
+                  <Link to={`/criador/${user.username}`} target="_blank">
+                    <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="truncate">Ver Página</span>
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  className="flex items-center gap-2 text-xs sm:text-sm"
+                  variant="outline"
+                  disabled
+                  size="sm"
+                  title="Configure seu nome de usuário no perfil"
+                >
+                  <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="truncate">Ver Página</span>
+                </Button>
+              )}
+              <Button 
+                className="flex items-center gap-2 mimo-button text-xs sm:text-sm" 
+                asChild
+                size="sm"
+              >
+                <Link to="/dashboard/minha-pagina">
+                  <span className="truncate">Gerenciar Página</span>
                 </Link>
               </Button>
-            ) : (
-              <Button
-                className="flex items-center gap-2"
-                variant="outline"
-                disabled
-                title="Configure seu nome de usuário no perfil"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Ver Página Atualizada
-              </Button>
-            )}
-            <Button 
-              className="flex items-center gap-2 mimo-button" 
-              asChild
-            >
-              <Link to="/dashboard/minha-pagina">
-                Gerenciar Minha Página
-              </Link>
-            </Button>
-          </div>
+            </div>
 
-          <div className="w-full overflow-x-hidden border rounded-lg">
-            {user?.username ? (
-              <PagePreview username={user.username} />
-            ) : (
-              <div className="p-8 text-center">
-                <p>Configure um nome de usuário para visualizar sua página</p>
-              </div>
-            )}
+            <div className="w-full max-w-full overflow-hidden border rounded-lg">
+              {user?.username ? (
+                <div className="w-full overflow-x-auto">
+                  <PagePreview username={user.username} />
+                </div>
+              ) : (
+                <div className="p-6 sm:p-8 text-center">
+                  <p className="text-sm">Configure um nome de usuário para visualizar sua página</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </TabsContent>
-    </Tabs>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
