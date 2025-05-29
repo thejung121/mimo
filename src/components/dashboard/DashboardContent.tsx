@@ -114,7 +114,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                 asChild
                 size="sm"
               >
-                <Link to="/dashboard/minha-pagina">
+                <Link to="/editar-pagina">
                   <span className="truncate">Gerenciar Página</span>
                 </Link>
               </Button>

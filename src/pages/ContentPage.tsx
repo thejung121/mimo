@@ -10,6 +10,12 @@ import { Link } from 'react-router-dom';
 const ContentPage = () => {
   const { packages, loading, deletePackage } = usePackageManagement();
 
+  const handleDeletePackage = async (id: string | number) => {
+    if (window.confirm("Tem certeza que deseja excluir esta recompensa?")) {
+      await deletePackage(String(id));
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -76,7 +82,7 @@ const ContentPage = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => deletePackage(pkg.id)}
+                        onClick={() => handleDeletePackage(pkg.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                         <span className="hidden sm:inline ml-2">Excluir</span>

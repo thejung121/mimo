@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -65,7 +66,7 @@ const OptimizedMyPageDashboard = () => {
                 </span>
               )}
             </h3>
-            <p className="text-sm text-muted-foreground">R$ {pkg.price}</p>
+            <p className="text-sm text-muted-foreground">R$ {pkg.price.toFixed(2)}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">
@@ -73,7 +74,7 @@ const OptimizedMyPageDashboard = () => {
                 id={`package-visible-${pkg.id}`}
                 checked={!pkg.isHidden}
                 disabled={toggleLoading === pkgId}
-                onCheckedChange={() => handleToggleVisibility(pkg.id, pkg.isHidden)}
+                onCheckedChange={() => handleToggleVisibility(pkg.id, pkg.isHidden || false)}
               />
               <Label htmlFor={`package-visible-${pkg.id}`}>
                 {pkg.isHidden ? 'Oculto' : 'Visível'}

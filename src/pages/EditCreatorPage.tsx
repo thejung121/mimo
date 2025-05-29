@@ -1,11 +1,10 @@
 
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import NavBar from '@/components/NavBar';
-import Footer from '@/components/Footer';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from "@/components/ui/button";
 import { useCreatorEditor } from '@/hooks/useCreatorEditor';
-import { Save, Eye } from 'lucide-react';
+import { Save, Eye, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { updateCreatorProfile } from '@/services/supabase/creatorService';
@@ -80,46 +79,52 @@ const EditCreatorPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <NavBar />
-      
-      <main className="flex-grow py-8 bg-background">
-        <div className="mimo-container">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Editar Página</h1>
-            <div className="flex items-center gap-3">
-              {user?.username || creator.username ? (
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  asChild
-                >
-                  <Link to={`/criador/${user?.username || creator.username}`} target="_blank">
-                    <Eye className="h-4 w-4" />
-                    Ver Minha Página
-                  </Link>
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  disabled
-                  title="Configure seu nome de usuário no perfil"
-                >
-                  <Eye className="h-4 w-4" />
-                  Ver Minha Página
-                </Button>
-              )}
-              <Button 
-                className="mimo-button" 
-                onClick={handleSaveAll}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Salvar Alterações
-              </Button>
-            </div>
+    <DashboardLayout>
+      <div className="space-y-4 sm:space-y-6 w-full max-w-full min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">Editar Página</h1>
+            <p className="text-sm sm:text-base text-muted-foreground truncate">
+              Configure sua página de criador
+            </p>
           </div>
-          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            {user?.username || creator.username ? (
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 w-full sm:w-auto justify-center"
+                asChild
+                size="sm"
+              >
+                <Link to={`/criador/${user?.username || creator.username}`} target="_blank">
+                  <Eye className="h-4 w-4" />
+                  <span>Ver Minha Página</span>
+                </Link>
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 w-full sm:w-auto justify-center"
+                size="sm"
+                disabled
+                title="Configure seu nome de usuário no perfil"
+              >
+                <Eye className="h-4 w-4" />
+                <span>Ver Minha Página</span>
+              </Button>
+            )}
+            <Button 
+              className="mimo-button w-full sm:w-auto flex items-center gap-2 justify-center" 
+              onClick={handleSaveAll}
+              size="sm"
+            >
+              <Save className="h-4 w-4" />
+              <span>Salvar Alterações</span>
+            </Button>
+          </div>
+        </div>
+        
+        <div className="w-full max-w-full min-w-0">
           <UnifiedEditorSection 
             creator={creator}
             mimoPackages={mimoPackages}
@@ -143,22 +148,22 @@ const EditCreatorPage = () => {
             onEditPackage={handleEditPackage}
             setShowNewPackageForm={setShowNewPackageForm}
           />
-          
-          <div className="mt-8 pt-4 border-t flex justify-center">
+        </div>
+        
+        <div className="w-full border-t pt-4 sm:pt-6">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button 
-              className="mimo-button w-full max-w-md" 
+              className="mimo-button w-full sm:w-auto max-w-md flex items-center gap-2 justify-center" 
               onClick={handleSaveAll}
               size="lg"
             >
-              <Save className="h-4 w-4 mr-2" />
-              Salvar Todas as Alterações
+              <Save className="h-4 w-4" />
+              <span>Salvar Todas as Alterações</span>
             </Button>
           </div>
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
