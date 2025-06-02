@@ -60,11 +60,6 @@ const UnifiedEditorSection = (props: UnifiedEditorSectionProps) => {
 
   console.log('UnifiedEditorSection - mimoPackages:', mimoPackages);
 
-  // Create a wrapper function to convert field-value calls to change events
-  const handleCreatorFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    onCreatorChange(e.target.name, e.target.value);
-  };
-
   return (
     <div className="space-y-6 w-full">
       <Tabs defaultValue="profile" className="w-full">
@@ -78,7 +73,9 @@ const UnifiedEditorSection = (props: UnifiedEditorSectionProps) => {
         <TabsContent value="profile" className="space-y-6 mt-6">
           <BasicInfoSection 
             creator={creator}
-            onChange={handleCreatorFieldChange}
+            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+              onCreatorChange(e.target.name, e.target.value)
+            }
           />
           
           <CoverImageSection 

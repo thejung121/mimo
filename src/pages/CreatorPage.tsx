@@ -29,6 +29,10 @@ const CreatorPage = () => {
     setPurchaseFlowOpen
   } = useCreatorPage();
 
+  console.log('CreatorPage - Loading:', isLoading);
+  console.log('CreatorPage - Creator:', creator);
+  console.log('CreatorPage - Packages:', mimoPackages);
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -36,6 +40,11 @@ const CreatorPage = () => {
   if (!creator) {
     return <NotFoundState />;
   }
+
+  // Filter social links to only include supported types for CreatorProfile
+  const supportedSocialLinks = (creator.socialLinks || []).filter(link => 
+    ['instagram', 'twitter', 'youtube', 'website'].includes(link.type)
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,7 +60,7 @@ const CreatorPage = () => {
         avatar={creator.avatar}
         cover={creator.cover}
         description={creator.description}
-        socialLinks={creator.socialLinks || []}
+        socialLinks={supportedSocialLinks}
       />
       
       <CreatorNavBar />

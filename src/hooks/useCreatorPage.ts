@@ -22,7 +22,10 @@ export const useCreatorPage = () => {
   
   useEffect(() => {
     const fetchCreator = async () => {
-      if (!username) return;
+      if (!username) {
+        setIsLoading(false);
+        return;
+      }
       
       try {
         setIsLoading(true);
@@ -88,7 +91,7 @@ export const useCreatorPage = () => {
               console.log("No packages found for this creator or all are hidden");
               // Try fallback for current user
               const currentUsername = user?.username;
-              if (currentUsername === username) {
+              if (currentUsername === username && user?.id) {
                 console.log("Attempting direct load for current user");
                 // Try localStorage directly for current user's packages
                 const localStorageKey = `mimo:packages:${user.id}`;
@@ -124,6 +127,7 @@ export const useCreatorPage = () => {
         }
       } catch (error) {
         console.error("Error in fetchCreator:", error);
+        setCreator(null);
       } finally {
         setIsLoading(false);
       }
