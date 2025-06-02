@@ -159,7 +159,7 @@ export const useCreatorEditor = () => {
       
       if (newPackage.id && newPackage.id !== '') {
         // Update existing package
-        success = await updatePackage(newPackage.id, packageToSave);
+        success = await updatePackage(String(newPackage.id), packageToSave);
       } else {
         // Create new package
         success = await createPackage(packageToSave);
