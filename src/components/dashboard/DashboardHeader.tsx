@@ -23,8 +23,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick }) => {
     logout();
   };
 
-  // Get the correct username from user object
-  const username = user?.username;
+  // Get the correct username from user object or user_metadata
+  const username = user?.username || user?.user_metadata?.username;
+
+  console.log('DashboardHeader - user:', user);
+  console.log('DashboardHeader - username:', username);
 
   return (
     <header className="bg-white border-b px-4 py-3 flex items-center justify-between w-full">
