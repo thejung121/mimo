@@ -51,7 +51,6 @@ const CreatorPage = () => {
         avatar={creator.avatar}
         cover={creator.cover}
         description={creator.description}
-        socialLinks={creator.socialLinks}
       />
       
       <CreatorNavBar />

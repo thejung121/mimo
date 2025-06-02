@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMimoPackages } from '@/hooks/useMimoPackages';
+import { usePackageManagement } from '@/hooks/usePackageManagement';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,9 +10,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import MediaUploader from '@/components/MediaUploader';
 import MediaItemDisplay from '@/components/MediaItemDisplay';
 import { useToast } from '@/components/ui/use-toast';
-import { saveMimoPackages } from '@/services/creator/packageService';
 import { MimoPackage, MediaItem } from '@/types/creator';
-import { emptyPackage } from '@/hooks/mimo-packages/packageData';
 
 const PackageFormPage = () => {
   const { id } = useParams();
@@ -21,25 +20,34 @@ const PackageFormPage = () => {
   
   const {
     packages,
-    setPackages,
-    handleAddFeature,
-    handleFeatureChange,
-    handleRemoveFeature,
-    handleAddMedia,
-    handleRemoveMedia,
-    handleTogglePreview,
-    handlePackageChange,
-    newPackage,
-    setNewPackage
-  } = useMimoPackages();
+    loading,
+    createPackage,
+    updatePackage: updateExistingPackage
+  } = usePackageManagement();
+
+  const [packageData, setPackageData] = useState<Omit<MimoPackage, 'id'>>({
+    title: '',
+    price: 0,
+    features: [''],
+    highlighted: false,
+    isHidden: false,
+    media: []
+  });
 
   // If we're editing, load the package data
   useEffect(() => {
-    if (isEditing && id) {
+    if (isEditing && id && packages.length > 0) {
       const packageToEdit = packages.find(p => String(p.id) === id);
       
       if (packageToEdit) {
-        setNewPackage({...packageToEdit});
+        setPackageData({
+          title: packageToEdit.title,
+          price: packageToEdit.price,
+          features: packageToEdit.features,
+          highlighted: packageToEdit.highlighted,
+          isHidden: packageToEdit.isHidden,
+          media: packageToEdit.media
+        });
       } else {
         // Package not found, redirect back to packages page
         toast({
@@ -50,11 +58,11 @@ const PackageFormPage = () => {
         navigate('/dashboard/pacotes');
       }
     }
-  }, [isEditing, id, packages, navigate, toast, setNewPackage]);
+  }, [isEditing, id, packages, navigate, toast]);
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     // Basic validations
-    if (!newPackage.title.trim()) {
+    if (!packageData.title.trim()) {
       toast({
         title: "Título obrigatório",
         description: "Por favor, insira um título para o pacote.",
@@ -63,7 +71,7 @@ const PackageFormPage = () => {
       return;
     }
 
-    if (newPackage.price <= 0) {
+    if (packageData.price <= 0) {
       toast({
         title: "Preço inválido",
         description: "Por favor, insira um preço válido maior que zero.",
@@ -73,7 +81,7 @@ const PackageFormPage = () => {
     }
 
     // Filter empty features
-    const filteredFeatures = newPackage.features.filter(feature => feature.trim());
+    const filteredFeatures = packageData.features.filter(feature => feature.trim());
     if (filteredFeatures.length === 0) {
       toast({
         title: "Características obrigatórias",
@@ -83,33 +91,79 @@ const PackageFormPage = () => {
       return;
     }
 
-    // Create a new package with a unique ID or use existing ID if editing
-    const packageId = isEditing && id ? id : Math.max(0, ...packages.map(p => typeof p.id === 'number' ? p.id : 0)) + 1;
-    
     const packageToSave = {
-      ...newPackage,
-      id: packageId,
+      ...packageData,
       features: filteredFeatures
     };
 
-    // Remove existing package with same ID if it exists (should only happen when editing)
-    const filteredPackages = packages.filter(p => String(p.id) !== String(packageId));
+    let success = false;
     
-    // Update the packages list
-    const updatedPackages = [...filteredPackages, packageToSave];
-    setPackages(updatedPackages);
-    
-    // Save to localStorage
-    saveMimoPackages(updatedPackages);
+    if (isEditing && id) {
+      success = await updateExistingPackage(id, packageToSave);
+    } else {
+      success = await createPackage(packageToSave);
+    }
 
-    // Navigate back to packages page
-    navigate('/dashboard/pacotes');
-    
-    toast({
-      title: isEditing ? "Pacote atualizado" : "Pacote criado",
-      description: `O pacote foi ${isEditing ? 'atualizado' : 'criado'} com sucesso.`
-    });
+    if (success) {
+      navigate('/dashboard/pacotes');
+    }
   };
+
+  const addFeature = () => {
+    setPackageData(prev => ({
+      ...prev,
+      features: [...prev.features, '']
+    }));
+  };
+
+  const updateFeature = (index: number, value: string) => {
+    setPackageData(prev => ({
+      ...prev,
+      features: prev.features.map((feature, i) => i === index ? value : feature)
+    }));
+  };
+
+  const removeFeature = (index: number) => {
+    if (packageData.features.length > 1) {
+      setPackageData(prev => ({
+        ...prev,
+        features: prev.features.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const addMedia = (media: MediaItem) => {
+    setPackageData(prev => ({
+      ...prev,
+      media: [...prev.media, media]
+    }));
+  };
+
+  const removeMedia = (mediaId: number | string) => {
+    setPackageData(prev => ({
+      ...prev,
+      media: prev.media.filter(m => m.id !== mediaId)
+    }));
+  };
+
+  const togglePreview = (mediaId: number | string) => {
+    setPackageData(prev => ({
+      ...prev,
+      media: prev.media.map(m => 
+        m.id === mediaId ? { ...m, isPreview: !m.isPreview } : m
+      )
+    }));
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6 flex items-center justify-center" style={{minHeight: '400px'}}>
+          <p>Carregando...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -130,9 +184,8 @@ const PackageFormPage = () => {
                     Título do pacote
                   </label>
                   <Input
-                    name="title"
-                    value={newPackage.title}
-                    onChange={(e) => handlePackageChange('title', e.target.value)}
+                    value={packageData.title}
+                    onChange={(e) => setPackageData(prev => ({...prev, title: e.target.value}))}
                     placeholder="ex: Mimo Básico"
                     className="mimo-input"
                   />
@@ -144,9 +197,8 @@ const PackageFormPage = () => {
                   </label>
                   <Input
                     type="number"
-                    name="price"
-                    value={newPackage.price}
-                    onChange={(e) => handlePackageChange('price', Number(e.target.value))}
+                    value={packageData.price}
+                    onChange={(e) => setPackageData(prev => ({...prev, price: Number(e.target.value)}))}
                     className="mimo-input"
                     min={1}
                   />
@@ -162,10 +214,7 @@ const PackageFormPage = () => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setNewPackage(prev => ({
-                      ...prev, 
-                      features: [...prev.features, '']
-                    }))}
+                    onClick={addFeature}
                     className="flex items-center gap-1"
                   >
                     <Plus className="h-3 w-3" />
@@ -173,28 +222,21 @@ const PackageFormPage = () => {
                   </Button>
                 </div>
                 
-                {newPackage.features.map((feature, index) => (
+                {packageData.features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Input
                       value={feature}
-                      onChange={(e) => {
-                        const newFeatures = [...newPackage.features];
-                        newFeatures[index] = e.target.value;
-                        setNewPackage(prev => ({...prev, features: newFeatures}));
-                      }}
+                      onChange={(e) => updateFeature(index, e.target.value)}
                       placeholder="ex: Foto exclusiva"
                       className="mimo-input"
                     />
                     
-                    {newPackage.features.length > 1 && (
+                    {packageData.features.length > 1 && (
                       <Button 
                         type="button"
                         variant="ghost" 
                         size="sm"
-                        onClick={() => {
-                          const newFeatures = newPackage.features.filter((_, i) => i !== index);
-                          setNewPackage(prev => ({...prev, features: newFeatures}));
-                        }}
+                        onClick={() => removeFeature(index)}
                         className="text-destructive hover:text-destructive/90"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -208,9 +250,8 @@ const PackageFormPage = () => {
                 <input
                   type="checkbox"
                   id="highlighted"
-                  name="highlighted"
-                  checked={newPackage.highlighted}
-                  onChange={(e) => handlePackageChange('highlighted', e.target.checked)}
+                  checked={packageData.highlighted}
+                  onChange={(e) => setPackageData(prev => ({...prev, highlighted: e.target.checked}))}
                   className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
                 <label htmlFor="highlighted" className="text-sm">
@@ -230,28 +271,16 @@ const PackageFormPage = () => {
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {newPackage.media.map((media) => (
+                {packageData.media.map((media) => (
                   <MediaItemDisplay 
                     key={media.id}
                     media={media}
-                    onTogglePreview={() => {
-                      const newMedia = newPackage.media.map(m => 
-                        m.id === media.id ? {...m, isPreview: !m.isPreview} : m);
-                      setNewPackage(prev => ({...prev, media: newMedia}));
-                    }}
-                    onRemove={() => {
-                      const newMedia = newPackage.media.filter(m => m.id !== media.id);
-                      setNewPackage(prev => ({...prev, media: newMedia}));
-                    }}
+                    onTogglePreview={() => togglePreview(media.id)}
+                    onRemove={() => removeMedia(media.id)}
                   />
                 ))}
                 
-                <MediaUploader onMediaAdd={(media) => {
-                  setNewPackage(prev => ({
-                    ...prev, 
-                    media: [...prev.media, media]
-                  }));
-                }} />
+                <MediaUploader onMediaAdd={addMedia} />
               </div>
             </CardContent>
           </Card>

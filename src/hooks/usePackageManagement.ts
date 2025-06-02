@@ -69,9 +69,11 @@ export const usePackageManagement = () => {
 
     setSaving(true);
     try {
+      console.log('Creating package:', packageData);
       const packageId = await createPackage(packageData, user.id);
       
       if (packageId) {
+        console.log('Package created with ID:', packageId);
         await loadPackages(); // Recarregar lista
         toast({
           title: 'Recompensa criada!',
@@ -94,8 +96,8 @@ export const usePackageManagement = () => {
       localStorage.setItem(`mimo:packages:${user.id}`, JSON.stringify(updatedPackages));
       
       toast({
-        title: 'Recompensa salva localmente',
-        description: 'A recompensa foi salva no dispositivo.',
+        title: 'Recompensa criada localmente',
+        description: 'A recompensa foi salva no dispositivo e será sincronizada quando possível.',
       });
       return true;
     } finally {
@@ -107,6 +109,7 @@ export const usePackageManagement = () => {
   const updateExistingPackage = async (packageId: string, packageData: Partial<MimoPackage>): Promise<boolean> => {
     setSaving(true);
     try {
+      console.log('Updating package:', packageId, packageData);
       const success = await updatePackage(packageId, packageData);
       
       if (success) {
@@ -143,6 +146,7 @@ export const usePackageManagement = () => {
   const deleteExistingPackage = async (packageId: string): Promise<boolean> => {
     setSaving(true);
     try {
+      console.log('Deleting package:', packageId);
       const success = await deletePackage(packageId);
       
       if (success) {
@@ -176,6 +180,7 @@ export const usePackageManagement = () => {
   // Alternar visibilidade
   const toggleVisibility = async (packageId: string, isHidden: boolean): Promise<boolean> => {
     try {
+      console.log('Toggling visibility for package:', packageId, 'hidden:', isHidden);
       const success = await togglePackageVisibility(packageId, isHidden);
       
       if (success) {
