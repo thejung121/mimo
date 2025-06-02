@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Instagram, Twitter, Youtube, Globe, Heart } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Globe, Heart, CheckCircle2, Image, Video } from 'lucide-react';
 
 interface SocialLink {
   type: 'instagram' | 'twitter' | 'youtube' | 'website';
@@ -32,49 +32,75 @@ const CreatorProfile = ({ name, avatar, cover, description, socialLinks }: Creat
     }
   };
 
+  // Dados fictícios para as estatísticas
+  const videoCount = 12;
+  const imageCount = 48;
+  const subscriberCount = 525;
+
   return (
-    <div className="mimo-card">
-      <div className="relative">
+    <div className="bg-slate-900 text-white">
+      {/* Cover Image */}
+      <div className="w-full h-48 overflow-hidden">
         <img 
           src={cover} 
-          alt={`Capa de ${name}`} 
-          className="mimo-cover"
+          alt="" 
+          className="w-full h-full object-cover"
         />
-        <div className="absolute -bottom-12 left-6">
-          <img 
-            src={avatar} 
-            alt={name} 
-            className="mimo-avatar"
-          />
-        </div>
       </div>
-      
-      <div className="pt-16 pb-6 px-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h2 className="text-2xl font-bold">{name}</h2>
+
+      {/* Profile Info */}
+      <div className="relative px-5 pt-16 pb-6 text-center">
+        {/* Avatar */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 -top-12">
+          <div className="rounded-full border-4 border-slate-900 overflow-hidden bg-slate-800 w-24 h-24">
+            <img 
+              src={avatar} 
+              alt={name} 
+              className="w-full h-full object-cover"
+            />
           </div>
-          <div className="flex space-x-2">
+        </div>
+
+        <h1 className="text-xl font-bold flex items-center justify-center">
+          {name}
+          <CheckCircle2 className="w-4 h-4 text-blue-500 ml-1" />
+        </h1>
+        
+        <p className="text-slate-400 text-sm mt-1 mb-3">
+          {description}
+        </p>
+
+        {/* Stats */}
+        <div className="flex justify-center gap-6 text-sm border-b border-slate-800 pb-4 mb-4">
+          <div>
+            <span className="font-bold">{videoCount}</span> Vídeos
+          </div>
+          <div>
+            <span className="font-bold">{imageCount}</span> Fotos
+          </div>
+          <div>
+            <span className="font-bold">{subscriberCount}</span> assinantes
+          </div>
+        </div>
+        
+        <h2 className="text-center mb-4">Explore meus conteúdos</h2>
+
+        {/* Social Links */}
+        {socialLinks.length > 0 && (
+          <div className="flex justify-center gap-2 mb-4">
             {socialLinks.map((link, index) => (
               <a 
                 key={index}
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-full bg-muted hover:bg-accent text-foreground/70 hover:text-accent-foreground transition-colors"
+                className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-white transition-colors"
               >
                 {getSocialIcon(link.type)}
               </a>
             ))}
           </div>
-        </div>
-        
-        <p className="text-foreground/80 mb-6">{description}</p>
-        
-        <Button className="mimo-button flex items-center space-x-2">
-          <Heart className="h-4 w-4" />
-          <span>Enviar um Mimo</span>
-        </Button>
+        )}
       </div>
     </div>
   );

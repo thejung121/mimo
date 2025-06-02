@@ -41,7 +41,7 @@ const CreatorPage = () => {
     return <NotFoundState />;
   }
 
-  // Filter social links to only include supported types for CreatorProfile and cast to correct type
+  // Filter social links to only include supported types for CreatorProfile
   const supportedSocialLinks = (creator.socialLinks || [])
     .filter(link => ['instagram', 'twitter', 'youtube', 'website'].includes(link.type))
     .map(link => ({
@@ -50,13 +50,8 @@ const CreatorPage = () => {
     }));
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-900">
       {isOwnPage && <AdminBanner />}
-      
-      <CreatorHero 
-        creator={creator} 
-        onMimoClick={scrollToMimoSection} 
-      />
       
       <CreatorProfile 
         name={creator.name}
@@ -66,9 +61,7 @@ const CreatorPage = () => {
         socialLinks={supportedSocialLinks}
       />
       
-      <CreatorNavBar />
-      
-      <main className="py-8" id="mimo-section">
+      <main className="bg-slate-900" id="mimo-section">
         <MimoTabContent 
           creator={creator}
           suggestedPrices={suggestedPrices}
@@ -76,8 +69,6 @@ const CreatorPage = () => {
           onCustomAmount={handleCustomAmount}
         />
       </main>
-      
-      <CreatorFooter />
       
       {headerVisible && (
         <CreatorStickyHeader 
