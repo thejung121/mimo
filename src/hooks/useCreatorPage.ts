@@ -28,7 +28,7 @@ export const useCreatorPage = () => {
         setIsLoading(true);
         console.log("Fetching creator with username:", username);
         
-        // Get creator profile from Supabase
+        // Get creator profile from Supabase first
         let creatorData = await getCreatorByUsername(username);
         
         // If not found in Supabase, try to get from localStorage (useful for development)
@@ -36,7 +36,8 @@ export const useCreatorPage = () => {
           console.log("Creator not found in Supabase, trying localStorage...");
           
           // Check if this is the current user's profile
-          if (user?.username === username) {
+          const currentUsername = user?.username || user?.user_metadata?.username;
+          if (currentUsername === username) {
             // If so, we can get the data from localStorage using the "mimo:creator:" prefix
             const storedCreator = localStorage.getItem(`mimo:creator:${user.id}`);
             if (storedCreator) {
@@ -86,7 +87,8 @@ export const useCreatorPage = () => {
             } else {
               console.log("No packages found for this creator or all are hidden");
               // Try fallback for current user
-              if (user?.username === username) {
+              const currentUsername = user?.username || user?.user_metadata?.username;
+              if (currentUsername === username) {
                 console.log("Attempting direct load for current user");
                 // Try localStorage directly for current user's packages
                 const localStorageKey = `mimo:packages:${user.id}`;
@@ -174,7 +176,8 @@ export const useCreatorPage = () => {
     }
   };
   
-  const isOwnPage = user?.username === username;
+  const currentUsername = user?.username || user?.user_metadata?.username;
+  const isOwnPage = currentUsername === username;
   
   return {
     creator,

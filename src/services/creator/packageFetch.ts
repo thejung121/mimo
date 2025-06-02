@@ -20,7 +20,8 @@ export const getMimoPackages = async (): Promise<MimoPackage[]> => {
     const { data: supabasePackages, error } = await supabase
       .from('packages')
       .select('*, package_features(feature), package_media(id, url, type, caption, is_preview)')
-      .eq('creator_id', user.id);
+      .eq('creator_id', user.id)
+      .order('created_at', { ascending: false });
     
     if (error) {
       console.error("Error fetching packages from Supabase:", error);
@@ -85,7 +86,8 @@ export const getPackagesByUsername = async (username: string | null | undefined)
       
       // Try to check if this is the current user
       const currentUser = getCurrentUser();
-      if (currentUser?.username === username) {
+      if (currentUser?.username === username || 
+          (currentUser?.user_metadata?.username === username)) {
         console.log("Username matches current user, fetching packages directly");
         return getMimoPackages();
       }
@@ -95,11 +97,14 @@ export const getPackagesByUsername = async (username: string | null | undefined)
     
     console.log(`Found creator ID ${creatorData.id} for username ${username}`);
     
-    // Get packages for this creator
+    // Get visible packages for this creator
     const { data: packages, error: packagesError } = await supabase
       .from('packages')
       .select('*, package_features(feature), package_media(id, url, type, caption, is_preview)')
-      .eq('creator_id', creatorData.id);
+      .eq('creator_id', creatorData.id)
+      .eq('is_hidden', false)
+      .order('highlighted', { ascending: false })
+      .order('created_at', { ascending: false });
     
     if (packagesError) {
       console.error(`Error fetching packages for username ${username}:`, packagesError);
@@ -125,7 +130,7 @@ export const getPackagesByUsername = async (username: string | null | undefined)
       })) : []
     }));
     
-    console.log(`Loaded ${formattedPackages.length} packages for username ${username}`);
+    console.log(`Loaded ${formattedPackages.length} visible packages for username ${username}`);
     return formattedPackages;
   } catch (e) {
     console.error(`Error in getPackagesByUsername for ${username}:`, e);

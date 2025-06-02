@@ -32,14 +32,32 @@ export const usePackageManagement = () => {
       const userPackages = await getMyPackages();
       console.log('Loaded packages:', userPackages);
       setPackages(userPackages);
+      
+      // Salvar backup no localStorage
+      localStorage.setItem(`mimo:packages:${user.id}`, JSON.stringify(userPackages));
     } catch (error) {
       console.error('Error loading packages:', error);
+      
+      // Tentar carregar do localStorage como fallback
+      try {
+        const localPackages = localStorage.getItem(`mimo:packages:${user.id}`);
+        if (localPackages) {
+          const parsedPackages = JSON.parse(localPackages);
+          setPackages(parsedPackages);
+          console.log('Loaded packages from localStorage:', parsedPackages);
+        } else {
+          setPackages([]);
+        }
+      } catch (localError) {
+        console.error('Error loading from localStorage:', localError);
+        setPackages([]);
+      }
+      
       toast({
         title: 'Erro ao carregar recompensas',
-        description: 'Não foi possível carregar suas recompensas.',
+        description: 'Carregando dados salvos localmente.',
         variant: 'destructive'
       });
-      setPackages([]);
     } finally {
       setLoading(false);
     }
@@ -65,12 +83,21 @@ export const usePackageManagement = () => {
       }
     } catch (error) {
       console.error('Error creating package:', error);
+      
+      // Salvar localmente como fallback
+      const newPackage = {
+        ...packageData,
+        id: `local_${Date.now()}`,
+      };
+      const updatedPackages = [...packages, newPackage];
+      setPackages(updatedPackages);
+      localStorage.setItem(`mimo:packages:${user.id}`, JSON.stringify(updatedPackages));
+      
       toast({
-        title: 'Erro ao criar recompensa',
-        description: 'Não foi possível criar a recompensa.',
-        variant: 'destructive'
+        title: 'Recompensa salva localmente',
+        description: 'A recompensa foi salva no dispositivo.',
       });
-      return false;
+      return true;
     } finally {
       setSaving(false);
     }
@@ -94,12 +121,19 @@ export const usePackageManagement = () => {
       }
     } catch (error) {
       console.error('Error updating package:', error);
+      
+      // Atualizar localmente como fallback
+      const updatedPackages = packages.map(pkg => 
+        String(pkg.id) === String(packageId) ? { ...pkg, ...packageData } : pkg
+      );
+      setPackages(updatedPackages);
+      localStorage.setItem(`mimo:packages:${user.id}`, JSON.stringify(updatedPackages));
+      
       toast({
-        title: 'Erro ao atualizar recompensa',
-        description: 'Não foi possível salvar as alterações.',
-        variant: 'destructive'
+        title: 'Recompensa atualizada localmente',
+        description: 'As alterações foram salvas no dispositivo.',
       });
-      return false;
+      return true;
     } finally {
       setSaving(false);
     }
@@ -123,12 +157,17 @@ export const usePackageManagement = () => {
       }
     } catch (error) {
       console.error('Error deleting package:', error);
+      
+      // Remover localmente como fallback
+      const updatedPackages = packages.filter(pkg => String(pkg.id) !== String(packageId));
+      setPackages(updatedPackages);
+      localStorage.setItem(`mimo:packages:${user.id}`, JSON.stringify(updatedPackages));
+      
       toast({
-        title: 'Erro ao remover recompensa',
-        description: 'Não foi possível remover a recompensa.',
-        variant: 'destructive'
+        title: 'Recompensa removida localmente',
+        description: 'A recompensa foi removida do dispositivo.',
       });
-      return false;
+      return true;
     } finally {
       setSaving(false);
     }
@@ -141,9 +180,11 @@ export const usePackageManagement = () => {
       
       if (success) {
         // Atualizar estado local
-        setPackages(prev => prev.map(pkg => 
-          pkg.id === packageId ? { ...pkg, isHidden } : pkg
-        ));
+        const updatedPackages = packages.map(pkg => 
+          String(pkg.id) === String(packageId) ? { ...pkg, isHidden } : pkg
+        );
+        setPackages(updatedPackages);
+        localStorage.setItem(`mimo:packages:${user.id}`, JSON.stringify(updatedPackages));
         
         toast({
           title: 'Visibilidade atualizada!',
@@ -155,12 +196,19 @@ export const usePackageManagement = () => {
       }
     } catch (error) {
       console.error('Error toggling visibility:', error);
+      
+      // Atualizar localmente como fallback
+      const updatedPackages = packages.map(pkg => 
+        String(pkg.id) === String(packageId) ? { ...pkg, isHidden } : pkg
+      );
+      setPackages(updatedPackages);
+      localStorage.setItem(`mimo:packages:${user.id}`, JSON.stringify(updatedPackages));
+      
       toast({
-        title: 'Erro ao alterar visibilidade',
-        description: 'Não foi possível alterar a visibilidade da recompensa.',
-        variant: 'destructive'
+        title: 'Visibilidade atualizada localmente',
+        description: `Recompensa ${isHidden ? 'ocultada' : 'tornada visível'} no dispositivo.`
       });
-      return false;
+      return true;
     }
   };
 

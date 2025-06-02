@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Creator, MimoPackage } from '@/types/creator';
 import { getCreatorData } from '@/services/creator/profileService';
@@ -27,9 +28,8 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
           setCreator(creatorData);
           setError(null);
           
-          // Load the current user's packages directly from localStorage
+          // Load the current user's packages directly from localStorage/Supabase
           try {
-            // This will get all packages for the current user
             const packages = await getMimoPackages();
             console.log('Loaded packages for preview:', packages);
             
@@ -58,7 +58,7 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
 
   if (isLoading) {
     return (
-      <div className="w-full h-[300px] flex flex-col items-center justify-center">
+      <div className="w-full h-[300px] flex flex-col items-center justify-center bg-slate-900 text-white rounded-md">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
         <p>Carregando prévia...</p>
       </div>
@@ -67,8 +67,8 @@ const PagePreview: React.FC<PagePreviewProps> = ({ username }) => {
 
   if (error || !creator) {
     return (
-      <div className="w-full h-[300px] flex items-center justify-center">
-        <p className="text-red-500">Erro ao carregar prévia: {error || 'Dados do criador não encontrados'}</p>
+      <div className="w-full h-[300px] flex items-center justify-center bg-slate-900 text-white rounded-md">
+        <p className="text-red-400">Erro ao carregar prévia: {error || 'Dados do criador não encontrados'}</p>
       </div>
     );
   }
