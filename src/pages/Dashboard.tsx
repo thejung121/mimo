@@ -45,6 +45,8 @@ const Dashboard = () => {
     handleUpdateProfile
   } = useDashboard();
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [userProfile, setUserProfile] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -93,7 +95,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6">
-        <DashboardHeader onOpenProfileDialog={() => setProfileDialogOpen(true)} />
+        <DashboardHeader onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         
         <StatCards 
           totalAmount={totalAmount} 

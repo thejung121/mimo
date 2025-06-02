@@ -8,9 +8,9 @@ import MimoTabContent from '@/components/MimoTabContent';
 import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import PurchaseFlow from '@/components/PurchaseFlow';
 import CreatorFooter from '@/components/CreatorFooter';
-import { LoadingState } from '@/components/creator/LoadingState';
-import { NotFoundState } from '@/components/creator/NotFoundState';
-import { AdminBanner } from '@/components/creator/AdminBanner';
+import LoadingState from '@/components/creator/LoadingState';
+import NotFoundState from '@/components/creator/NotFoundState';
+import AdminBanner from '@/components/creator/AdminBanner';
 
 const CreatorPage = () => {
   const {
@@ -46,13 +46,19 @@ const CreatorPage = () => {
         onMimoClick={scrollToMimoSection} 
       />
       
-      <CreatorProfile creator={creator} />
+      <CreatorProfile 
+        name={creator.name}
+        avatar={creator.avatar}
+        cover={creator.cover}
+        description={creator.description}
+        socialLinks={creator.socialLinks}
+      />
       
       <CreatorNavBar />
       
-      <main className="py-8">
+      <main className="py-8" id="mimo-section">
         <MimoTabContent 
-          packages={mimoPackages}
+          creator={creator}
           suggestedPrices={suggestedPrices}
           onSelectPackage={handleSelectPackage}
           onCustomAmount={handleCustomAmount}
@@ -63,13 +69,16 @@ const CreatorPage = () => {
       
       {headerVisible && (
         <CreatorStickyHeader 
-          creator={creator} 
+          visible={headerVisible}
+          avatar={creator.avatar}
+          name={creator.name}
+          username={creator.username}
           onMimoClick={scrollToMimoSection} 
         />
       )}
       
       <PurchaseFlow
-        isOpen={purchaseFlowOpen}
+        open={purchaseFlowOpen}
         onClose={() => setPurchaseFlowOpen(false)}
         package={selectedPackage}
         customAmount={customAmount}
