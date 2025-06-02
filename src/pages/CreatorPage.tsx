@@ -77,13 +77,17 @@ const CreatorPage = () => {
         />
       )}
       
-      <PurchaseFlow
-        open={purchaseFlowOpen}
-        onClose={() => setPurchaseFlowOpen(false)}
-        package={selectedPackage}
-        customAmount={customAmount}
-        creator={creator}
-      />
+      {selectedPackage && (
+        <PurchaseFlow
+          open={purchaseFlowOpen}
+          onClose={() => setPurchaseFlowOpen(false)}
+          packageId={selectedPackage.id.toString()}
+          packageTitle={selectedPackage.title}
+          packagePrice={selectedPackage.price}
+          creatorId={creator.id || creator.username}
+          creatorName={creator.name}
+        />
+      )}
     </div>
   );
 };
