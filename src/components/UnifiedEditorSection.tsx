@@ -73,7 +73,7 @@ const UnifiedEditorSection = (props: UnifiedEditorSectionProps) => {
         <TabsContent value="profile" className="space-y-6 mt-6">
           <BasicInfoSection 
             creator={creator}
-            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+            onCreatorChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
               onCreatorChange(e.target.name, e.target.value)
             }
           />

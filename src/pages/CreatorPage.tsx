@@ -41,10 +41,13 @@ const CreatorPage = () => {
     return <NotFoundState />;
   }
 
-  // Filter social links to only include supported types for CreatorProfile
-  const supportedSocialLinks = (creator.socialLinks || []).filter(link => 
-    ['instagram', 'twitter', 'youtube', 'website'].includes(link.type)
-  );
+  // Filter social links to only include supported types for CreatorProfile and cast to correct type
+  const supportedSocialLinks = (creator.socialLinks || [])
+    .filter(link => ['instagram', 'twitter', 'youtube', 'website'].includes(link.type))
+    .map(link => ({
+      type: link.type as 'instagram' | 'twitter' | 'youtube' | 'website',
+      url: link.url
+    }));
 
   return (
     <div className="min-h-screen bg-background">
