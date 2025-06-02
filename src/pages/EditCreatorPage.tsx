@@ -78,6 +78,19 @@ const EditCreatorPage = () => {
     }
   };
 
+  // Create a wrapper function that converts field/value to the expected signature
+  const handleCreatorFieldChange = (field: string, value: string) => {
+    // Create a synthetic event-like object that matches what handleCreatorChange expects
+    const syntheticEvent = {
+      target: {
+        name: field,
+        value: value
+      }
+    } as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
+    
+    handleCreatorChange(syntheticEvent);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 w-full max-w-full min-w-0">
@@ -132,7 +145,7 @@ const EditCreatorPage = () => {
             avatarPreview={avatarPreview}
             showNewPackageForm={showNewPackageForm}
             newPackage={newPackage}
-            onCreatorChange={handleCreatorChange}
+            onCreatorChange={handleCreatorFieldChange}
             onSocialLinkChange={handleSocialLinkChange}
             onCoverChange={handleCoverChange}
             onAvatarChange={handleAvatarChange}
