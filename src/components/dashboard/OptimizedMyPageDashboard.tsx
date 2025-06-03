@@ -17,8 +17,8 @@ const OptimizedMyPageDashboard = () => {
   const { packages, loading, toggleVisibility } = usePackageManagement();
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
-  // Get the most current username - force refresh to get latest value
-  const currentUsername = user?.username || user?.user_metadata?.username;
+  // Get the current username
+  const currentUsername = user?.username;
 
   console.log('OptimizedMyPageDashboard - user:', user);
   console.log('OptimizedMyPageDashboard - currentUsername:', currentUsername);

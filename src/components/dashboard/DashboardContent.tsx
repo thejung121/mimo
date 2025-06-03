@@ -32,8 +32,8 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // Get the most current username
-  const currentUsername = user?.username || user?.user_metadata?.username;
+  // Get the current username
+  const currentUsername = user?.username;
   
   const copyShareLink = () => {
     if (currentUsername) {
