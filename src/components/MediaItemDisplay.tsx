@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2, Eye, Image, Video, AudioLines } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,9 @@ interface MediaItemDisplayProps {
 
 // Using React.memo to prevent unnecessary re-renders
 const MediaItemDisplay = memo(({ media, onTogglePreview, onRemove }: MediaItemDisplayProps) => {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   // Get the placeholder component based on media type
   const renderPlaceholder = () => {
     switch (media.type) {
@@ -25,6 +28,16 @@ const MediaItemDisplay = memo(({ media, onTogglePreview, onRemove }: MediaItemDi
     }
   };
 
+  const handleImageError = () => {
+    console.error('Image failed to load:', media.url);
+    setImageError(true);
+  };
+
+  const handleImageLoad = () => {
+    console.log('Image loaded successfully:', media.url);
+    setImageLoaded(true);
+  };
+
   return (
     <div 
       className={cn(
@@ -32,18 +45,21 @@ const MediaItemDisplay = memo(({ media, onTogglePreview, onRemove }: MediaItemDi
         media.isPreview ? "border-mimo-primary" : "border-border"
       )}
     >
-      {media.type === 'image' ? (
-        <div className="w-full h-24 bg-muted">
+      {media.type === 'image' && !imageError ? (
+        <div className={cn("w-full h-24 bg-muted flex items-center justify-center", imageLoaded ? "" : "animate-pulse")}>
           <img 
             src={media.url} 
             alt={media.caption || `Imagem ${media.id}`}
-            className="w-full h-24 object-cover"
-            loading="lazy" // Add lazy loading for images
-            onError={(e) => {
-              // On image load error, show a placeholder
-              e.currentTarget.src = '/placeholder.svg';
-            }}
+            className={cn("w-full h-24 object-cover transition-opacity", imageLoaded ? "opacity-100" : "opacity-0")}
+            loading="lazy"
+            onError={handleImageError}
+            onLoad={handleImageLoad}
           />
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Image className="h-8 w-8 text-muted-foreground animate-pulse" />
+            </div>
+          )}
         </div>
       ) : (
         <div className="w-full h-24 bg-muted flex items-center justify-center">

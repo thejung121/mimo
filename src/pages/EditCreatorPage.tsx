@@ -4,11 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from "@/components/ui/button";
 import { useCreatorEditor } from '@/hooks/useCreatorEditor';
-import { Save, Eye, ArrowLeft } from 'lucide-react';
+import { Save, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { updateCreatorProfile } from '@/services/supabase/creatorService';
-import { saveCreatorData, saveMimoPackages } from '@/services/creator';
+import { saveMimoPackages } from '@/services/creator';
 import UnifiedEditorSection from '@/components/UnifiedEditorSection';
 
 const EditCreatorPage = () => {
@@ -42,30 +41,31 @@ const EditCreatorPage = () => {
     setShowNewPackageForm
   } = useCreatorEditor();
 
-  // Force a re-render by getting fresh user data each render
-  const currentUsername = React.useMemo(() => {
-    // Get from multiple sources to ensure we have the most current username
-    const authUsername = user?.username;
-    const storedUser = localStorage.getItem('mimo:user');
-    let localUsername = null;
+  // Get current username with proper fallbacks
+  const getCurrentUsername = () => {
+    if (user?.username) {
+      console.log('EditCreatorPage - Using auth username:', user.username);
+      return user.username;
+    }
     
+    const storedUser = localStorage.getItem('mimo:user');
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        localUsername = parsedUser.username;
+        if (parsedUser.username) {
+          console.log('EditCreatorPage - Using localStorage username:', parsedUser.username);
+          return parsedUser.username;
+        }
       } catch (e) {
         console.error('Error parsing stored user:', e);
       }
     }
     
-    // Prefer the most recent username
-    const finalUsername = authUsername || localUsername;
-    console.log('EditCreatorPage - Final username:', finalUsername);
-    console.log('EditCreatorPage - Auth username:', authUsername);
-    console.log('EditCreatorPage - Local username:', localUsername);
-    
-    return finalUsername;
-  }, [user, user?.username]);
+    console.log('EditCreatorPage - No username found');
+    return null;
+  };
+
+  const currentUsername = getCurrentUsername();
 
   const handleSaveAll = async () => {
     try {
@@ -79,9 +79,10 @@ const EditCreatorPage = () => {
           description: "Todas as suas alterações foram salvas.",
         });
         
-        if (currentUsername) {
+        const username = getCurrentUsername();
+        if (username) {
           setTimeout(() => {
-            navigate(`/criador/${currentUsername}`);
+            navigate(`/criador/${username}`);
           }, 100);
         } else {
           navigate('/dashboard');
@@ -133,7 +134,7 @@ const EditCreatorPage = () => {
                 asChild
                 size="sm"
               >
-                <Link to={`/criador/${currentUsername}`} target="_blank" key={currentUsername}>
+                <Link to={`/criador/${currentUsername}`} target="_blank">
                   <Eye className="h-4 w-4" />
                   <span>Ver Minha Página</span>
                 </Link>

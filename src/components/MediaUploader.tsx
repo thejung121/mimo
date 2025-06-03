@@ -51,21 +51,22 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       const url = URL.createObjectURL(file);
       const newId = Date.now() + Math.floor(Math.random() * 1000);
       
-      console.log('MediaUploader - Created blob URL:', url, 'for file:', file.name);
+      console.log('MediaUploader - Created blob URL:', url, 'for file:', file.name, 'type:', type);
       
       return {
         id: newId,
         type,
         url,
         caption: caption || undefined,
-        isPreview: false
+        isPreview: false,
+        file // Keep reference to original file for debugging
       };
     });
     
     // Simulate upload progress
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 10;
+      progress += 20;
       setUploadProgress(progress);
       
       if (progress >= 100) {
@@ -74,7 +75,13 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
         // Add all processed files
         processedFiles.forEach(file => {
           console.log('MediaUploader - Adding media:', file);
-          onMediaAdd(file);
+          onMediaAdd({
+            id: file.id,
+            type: file.type,
+            url: file.url,
+            caption: file.caption,
+            isPreview: file.isPreview
+          });
         });
         
         setUploading(false);
@@ -87,7 +94,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
           description: `${files.length > 1 ? "As mídias foram adicionadas" : "A mídia foi adicionada"} com sucesso ao seu pacote.`,
         });
       }
-    }, 200);
+    }, 100);
   };
 
   const handleAddFromUrl = () => {

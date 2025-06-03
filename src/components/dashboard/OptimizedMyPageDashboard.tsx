@@ -17,34 +17,36 @@ const OptimizedMyPageDashboard = () => {
   const { packages, loading, toggleVisibility } = usePackageManagement();
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
-  // Force a re-render by getting fresh user data each render
-  const currentUsername = React.useMemo(() => {
-    // Get from multiple sources to ensure we have the most current username
-    const authUsername = user?.username;
-    const storedUser = localStorage.getItem('mimo:user');
-    let localUsername = null;
+  // Get current username with proper fallbacks
+  const getCurrentUsername = () => {
+    if (user?.username) {
+      console.log('OptimizedMyPageDashboard - Using auth username:', user.username);
+      return user.username;
+    }
     
+    const storedUser = localStorage.getItem('mimo:user');
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        localUsername = parsedUser.username;
+        if (parsedUser.username) {
+          console.log('OptimizedMyPageDashboard - Using localStorage username:', parsedUser.username);
+          return parsedUser.username;
+        }
       } catch (e) {
         console.error('Error parsing stored user:', e);
       }
     }
     
-    // Prefer the most recent username
-    const finalUsername = authUsername || localUsername;
-    console.log('OptimizedMyPageDashboard - Final username:', finalUsername);
-    console.log('OptimizedMyPageDashboard - Auth username:', authUsername);
-    console.log('OptimizedMyPageDashboard - Local username:', localUsername);
-    
-    return finalUsername;
-  }, [user, user?.username]);
+    console.log('OptimizedMyPageDashboard - No username found');
+    return null;
+  };
+
+  const currentUsername = getCurrentUsername();
 
   const copyShareLink = useCallback(() => {
-    if (currentUsername) {
-      const shareLink = `${window.location.origin}/criador/${currentUsername}`;
+    const username = getCurrentUsername();
+    if (username) {
+      const shareLink = `${window.location.origin}/criador/${username}`;
       navigator.clipboard.writeText(shareLink);
       console.log('Copying link:', shareLink);
       toast({
@@ -58,7 +60,7 @@ const OptimizedMyPageDashboard = () => {
         variant: "destructive"
       });
     }
-  }, [currentUsername, toast]);
+  }, [toast]);
 
   const handleToggleVisibility = useCallback(async (packageId: string | number, currentlyHidden: boolean) => {
     const pkgId = String(packageId);
@@ -76,15 +78,15 @@ const OptimizedMyPageDashboard = () => {
   const packagesList = useMemo(() => {
     return packages.map(pkg => {
       const pkgId = String(pkg.id);
-      // Get preview image from media - fixed image handling
-      const previewImage = pkg.media?.find(m => m.isPreview)?.url || 
+      // Get preview image from media with better fallback handling
+      const previewImage = pkg.media?.find(m => m.isPreview && m.type === 'image')?.url || 
                           pkg.media?.find(m => m.type === 'image')?.url || 
                           '/placeholder.svg';
       
       return (
         <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted">
+            <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
               <img 
                 src={previewImage} 
                 alt={pkg.title}
@@ -92,6 +94,9 @@ const OptimizedMyPageDashboard = () => {
                 onError={(e) => {
                   console.error('Image failed to load:', previewImage);
                   e.currentTarget.src = '/placeholder.svg';
+                }}
+                onLoad={() => {
+                  console.log('Image loaded successfully:', previewImage);
                 }}
               />
             </div>
@@ -151,7 +156,7 @@ const OptimizedMyPageDashboard = () => {
           variant="outline"
           asChild
         >
-          <Link to={`/criador/${currentUsername}`} target="_blank" key={currentUsername}>
+          <Link to={`/criador/${currentUsername}`} target="_blank">
             <ExternalLink className="h-4 w-4" />
             Ver Página Atualizada
           </Link>
