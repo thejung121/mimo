@@ -17,8 +17,11 @@ const OptimizedMyPageDashboard = () => {
   const { packages, loading, toggleVisibility } = usePackageManagement();
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
-  // Get the most current username
-  const currentUsername = user?.username;
+  // Get the most current username - force refresh to get latest value
+  const currentUsername = user?.username || user?.user_metadata?.username;
+
+  console.log('OptimizedMyPageDashboard - user:', user);
+  console.log('OptimizedMyPageDashboard - currentUsername:', currentUsername);
 
   const copyShareLink = useCallback(() => {
     if (currentUsername) {
@@ -53,23 +56,40 @@ const OptimizedMyPageDashboard = () => {
   const packagesList = useMemo(() => {
     return packages.map(pkg => {
       const pkgId = String(pkg.id);
+      // Get preview image from media
+      const previewImage = pkg.media?.find(m => m.isPreview)?.url || 
+                          pkg.media?.[0]?.url || 
+                          '/placeholder.svg';
+      
       return (
         <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
-          <div>
-            <h3 className="font-medium flex items-center">
-              {pkg.title}
-              {pkg.highlighted && (
-                <span className="ml-2 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
-                  Destacado
-                </span>
-              )}
-              {pkg.isHidden && (
-                <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">
-                  Oculto
-                </span>
-              )}
-            </h3>
-            <p className="text-sm text-muted-foreground">R$ {pkg.price.toFixed(2)}</p>
+          <div className="flex items-center gap-3">
+            <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted">
+              <img 
+                src={previewImage} 
+                alt={pkg.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = '/placeholder.svg';
+                }}
+              />
+            </div>
+            <div>
+              <h3 className="font-medium flex items-center">
+                {pkg.title}
+                {pkg.highlighted && (
+                  <span className="ml-2 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
+                    Destacado
+                  </span>
+                )}
+                {pkg.isHidden && (
+                  <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">
+                    Oculto
+                  </span>
+                )}
+              </h3>
+              <p className="text-sm text-muted-foreground">R$ {pkg.price.toFixed(2)}</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">

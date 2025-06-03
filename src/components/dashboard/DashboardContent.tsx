@@ -32,9 +32,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
   
+  // Get the most current username
+  const currentUsername = user?.username || user?.user_metadata?.username;
+  
   const copyShareLink = () => {
-    if (user?.username) {
-      const shareLink = `${window.location.origin}/criador/${user.username}`;
+    if (currentUsername) {
+      const shareLink = `${window.location.origin}/criador/${currentUsername}`;
       navigator.clipboard.writeText(shareLink);
       toast({
         title: "Link copiado!",
@@ -85,14 +88,14 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                 <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="truncate">Copiar Link</span>
               </Button>
-              {user?.username ? (
+              {currentUsername ? (
                 <Button 
                   className="flex items-center gap-2 text-xs sm:text-sm" 
                   variant="outline"
                   asChild
                   size="sm"
                 >
-                  <Link to={`/criador/${user.username}`} target="_blank">
+                  <Link to={`/criador/${currentUsername}`} target="_blank">
                     <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="truncate">Ver Página</span>
                   </Link>
@@ -121,9 +124,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             </div>
 
             <div className="w-full max-w-full overflow-hidden border rounded-lg">
-              {user?.username ? (
+              {currentUsername ? (
                 <div className="w-full overflow-x-auto">
-                  <PagePreview username={user.username} />
+                  <PagePreview username={currentUsername} />
                 </div>
               ) : (
                 <div className="p-6 sm:p-8 text-center">
