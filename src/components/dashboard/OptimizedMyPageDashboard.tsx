@@ -17,9 +17,12 @@ const OptimizedMyPageDashboard = () => {
   const { packages, loading, toggleVisibility } = usePackageManagement();
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
+  // Get the most current username
+  const currentUsername = user?.username;
+
   const copyShareLink = useCallback(() => {
-    if (user?.username) {
-      const shareLink = `${window.location.origin}/criador/${user.username}`;
+    if (currentUsername) {
+      const shareLink = `${window.location.origin}/criador/${currentUsername}`;
       navigator.clipboard.writeText(shareLink);
       toast({
         title: "Link copiado!",
@@ -32,7 +35,7 @@ const OptimizedMyPageDashboard = () => {
         variant: "destructive"
       });
     }
-  }, [user?.username, toast]);
+  }, [currentUsername, toast]);
 
   const handleToggleVisibility = useCallback(async (packageId: string | number, currentlyHidden: boolean) => {
     const pkgId = String(packageId);
@@ -101,13 +104,13 @@ const OptimizedMyPageDashboard = () => {
         <Copy className="h-4 w-4" />
         Copiar Link de Divulgação
       </Button>
-      {user?.username ? (
+      {currentUsername ? (
         <Button 
           className="flex items-center gap-2" 
           variant="outline"
           asChild
         >
-          <Link to={`/criador/${user.username}`} target="_blank">
+          <Link to={`/criador/${currentUsername}`} target="_blank">
             <ExternalLink className="h-4 w-4" />
             Ver Página Atualizada
           </Link>
@@ -133,7 +136,7 @@ const OptimizedMyPageDashboard = () => {
         </Link>
       </Button>
     </div>
-  ), [user?.username, copyShareLink]);
+  ), [currentUsername, copyShareLink]);
 
   return (
     <DashboardLayout>

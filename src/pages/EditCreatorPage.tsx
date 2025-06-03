@@ -42,6 +42,9 @@ const EditCreatorPage = () => {
     setShowNewPackageForm
   } = useCreatorEditor();
 
+  // Get the current username
+  const currentUsername = user?.username;
+
   const handleSaveAll = async () => {
     try {
       const profileSaved = await handleSaveProfile();
@@ -54,10 +57,9 @@ const EditCreatorPage = () => {
           description: "Todas as suas alterações foram salvas.",
         });
         
-        const username = user?.username || creator.username;
-        if (username) {
+        if (currentUsername) {
           setTimeout(() => {
-            navigate(`/criador/${username}`);
+            navigate(`/criador/${currentUsername}`);
           }, 100);
         } else {
           navigate('/dashboard');
@@ -102,14 +104,14 @@ const EditCreatorPage = () => {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            {user?.username || creator.username ? (
+            {currentUsername ? (
               <Button 
                 variant="outline" 
                 className="flex items-center gap-2 w-full sm:w-auto justify-center"
                 asChild
                 size="sm"
               >
-                <Link to={`/criador/${user?.username || creator.username}`} target="_blank">
+                <Link to={`/criador/${currentUsername}`} target="_blank">
                   <Eye className="h-4 w-4" />
                   <span>Ver Minha Página</span>
                 </Link>

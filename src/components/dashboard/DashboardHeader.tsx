@@ -24,10 +24,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick }) => {
   };
 
   // Get the correct username from user object
-  const username = user?.username;
+  const currentUsername = user?.username;
 
   console.log('DashboardHeader - user:', user);
-  console.log('DashboardHeader - username:', username);
+  console.log('DashboardHeader - currentUsername:', currentUsername);
 
   return (
     <header className="bg-white border-b px-4 py-3 flex items-center justify-between w-full">
@@ -53,9 +53,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick }) => {
             <DropdownMenuItem asChild>
               <Link to="/dashboard/perfil">Perfil</Link>
             </DropdownMenuItem>
-            {username && (
+            {currentUsername && (
               <DropdownMenuItem asChild>
-                <Link to={`/criador/${username}`} target="_blank">
+                <Link to={`/criador/${currentUsername}`} target="_blank">
                   Ver Minha Página
                 </Link>
               </DropdownMenuItem>

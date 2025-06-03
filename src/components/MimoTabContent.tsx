@@ -43,6 +43,10 @@ const MimoTabContent = ({
     }
   };
 
+  const handleSuggestedPriceClick = (price: number) => {
+    setCustomAmount(price.toString());
+  };
+
   const getPreviewImage = (pkg: MimoPackage) => {
     // First try to find a preview image
     const previewMedia = pkg.media?.find(m => m.isPreview);
@@ -51,6 +55,10 @@ const MimoTabContent = ({
     // If no preview, use the first image
     const firstImage = pkg.media?.find(m => m.type === 'image');
     if (firstImage) return firstImage.url;
+    
+    // If no images at all, try to get any media
+    const anyMedia = pkg.media?.[0];
+    if (anyMedia) return anyMedia.url;
     
     // Fallback to placeholder
     return '/placeholder.svg';
@@ -64,25 +72,25 @@ const MimoTabContent = ({
             packages.map((pkg) => (
               <div 
                 key={pkg.id} 
-                className="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700"
+                className="bg-slate-800 rounded-2xl overflow-hidden shadow-xl border border-slate-700/50"
               >
                 {/* Package Header with Image */}
                 <div className="relative">
-                  <div className="h-48 bg-slate-700 overflow-hidden">
+                  <div className="h-56 bg-gradient-to-br from-slate-700 to-slate-800 overflow-hidden">
                     <img 
                       src={getPreviewImage(pkg)} 
                       alt={pkg.title}
                       className="w-full h-full object-cover" 
                     />
                   </div>
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1">
-                    <div className="flex gap-3 text-xs text-white">
+                  <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2">
+                    <div className="flex gap-4 text-sm text-white">
                       <div className="flex items-center">
-                        <Image className="w-3 h-3 mr-1" />
+                        <Image className="w-4 h-4 mr-1" />
                         {pkg.media?.filter(m => m.type === 'image').length || 0}
                       </div>
                       <div className="flex items-center">
-                        <Video className="w-3 h-3 mr-1" />
+                        <Video className="w-4 h-4 mr-1" />
                         {pkg.media?.filter(m => m.type === 'video').length || 0}
                       </div>
                     </div>
@@ -90,40 +98,40 @@ const MimoTabContent = ({
                 </div>
                 
                 {/* Package Content */}
-                <div className="p-4">
-                  <h3 className="text-xl font-bold mb-2">{pkg.title}</h3>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold mb-3">{pkg.title}</h3>
                   
                   {/* Features */}
-                  <div className="space-y-2 mb-4">
+                  <div className="space-y-2 mb-6">
                     {pkg.features?.slice(0, 3).map((feature, idx) => (
                       <div key={idx} className="flex items-center text-sm text-slate-300">
-                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" />
                         <span>{feature}</span>
                       </div>
                     ))}
                   </div>
                   
                   {/* Price and Action */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-700">
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-700">
                     <div>
-                      <div className="text-2xl font-bold text-blue-400">
+                      <div className="text-3xl font-bold text-blue-400">
                         R$ {pkg.price.toFixed(2)}
                       </div>
-                      <div className="text-xs text-slate-400">Acesso Vitalício</div>
+                      <div className="text-sm text-slate-400">Acesso Vitalício</div>
                     </div>
                     <button 
-                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 py-2 flex items-center text-sm font-medium transition-colors"
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-full px-8 py-3 flex items-center text-sm font-bold transition-all transform hover:scale-105 shadow-lg"
                       onClick={() => onSelectPackage(pkg)}
                     >
                       Acessar
-                      <ArrowRight className="w-4 h-4 ml-1" />
+                      <ArrowRight className="w-4 h-4 ml-2" />
                     </button>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center p-6 bg-slate-800/50 rounded-lg">
+            <div className="text-center p-8 bg-slate-800/50 rounded-2xl border border-slate-700/50">
               <p className="text-slate-400">
                 Este criador ainda não configurou nenhuma recompensa visível.
               </p>
@@ -142,27 +150,26 @@ const MimoTabContent = ({
               </p>
             </div>
             
-            {/* Preset amounts */}
-            <div className="space-y-3 mb-4">
+            {/* Preset amounts as quick select buttons */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
               {suggestedPrices.map((price, index) => (
                 <button
                   key={price}
-                  onClick={() => onCustomAmount(price)}
-                  className={`w-full rounded-full border py-3 flex items-center justify-center gap-2 transition-all ${
-                    index === 2 
-                      ? "bg-blue-600 border-blue-600 text-white" 
-                      : "bg-transparent border-blue-400 text-blue-400 hover:bg-blue-600 hover:border-blue-600 hover:text-white"
+                  onClick={() => handleSuggestedPriceClick(price)}
+                  className={`py-3 px-4 rounded-lg border transition-all text-sm font-medium ${
+                    customAmount === price.toString()
+                      ? "bg-red-500 border-red-500 text-white" 
+                      : "bg-transparent border-slate-600 text-slate-300 hover:bg-red-500/20 hover:border-red-500/50"
                   }`}
                 >
-                  <Heart className="w-5 h-5" fill={index === 2 ? "currentColor" : "none"} />
-                  Mimar com R$ {price.toFixed(2)}
+                  R$ {price.toFixed(2)}
                 </button>
               ))}
             </div>
             
             {/* Custom amount input */}
             <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
-              <label className="block text-sm font-medium mb-2">Valor personalizado:</label>
+              <label className="block text-sm font-medium mb-3">Valor personalizado:</label>
               <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">R$</span>
