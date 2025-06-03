@@ -17,16 +17,36 @@ const OptimizedMyPageDashboard = () => {
   const { packages, loading, toggleVisibility } = usePackageManagement();
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
-  // Get the current username
-  const currentUsername = user?.username;
-
-  console.log('OptimizedMyPageDashboard - user:', user);
-  console.log('OptimizedMyPageDashboard - currentUsername:', currentUsername);
+  // Force a re-render by getting fresh user data each render
+  const currentUsername = React.useMemo(() => {
+    // Get from multiple sources to ensure we have the most current username
+    const authUsername = user?.username;
+    const storedUser = localStorage.getItem('mimo:user');
+    let localUsername = null;
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        localUsername = parsedUser.username;
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+      }
+    }
+    
+    // Prefer the most recent username
+    const finalUsername = authUsername || localUsername;
+    console.log('OptimizedMyPageDashboard - Final username:', finalUsername);
+    console.log('OptimizedMyPageDashboard - Auth username:', authUsername);
+    console.log('OptimizedMyPageDashboard - Local username:', localUsername);
+    
+    return finalUsername;
+  }, [user, user?.username]);
 
   const copyShareLink = useCallback(() => {
     if (currentUsername) {
       const shareLink = `${window.location.origin}/criador/${currentUsername}`;
       navigator.clipboard.writeText(shareLink);
+      console.log('Copying link:', shareLink);
       toast({
         title: "Link copiado!",
         description: "Link de divulgação copiado para a área de transferência.",
@@ -56,9 +76,9 @@ const OptimizedMyPageDashboard = () => {
   const packagesList = useMemo(() => {
     return packages.map(pkg => {
       const pkgId = String(pkg.id);
-      // Get preview image from media
+      // Get preview image from media - fixed image handling
       const previewImage = pkg.media?.find(m => m.isPreview)?.url || 
-                          pkg.media?.[0]?.url || 
+                          pkg.media?.find(m => m.type === 'image')?.url || 
                           '/placeholder.svg';
       
       return (
@@ -70,6 +90,7 @@ const OptimizedMyPageDashboard = () => {
                 alt={pkg.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
+                  console.error('Image failed to load:', previewImage);
                   e.currentTarget.src = '/placeholder.svg';
                 }}
               />
@@ -130,7 +151,7 @@ const OptimizedMyPageDashboard = () => {
           variant="outline"
           asChild
         >
-          <Link to={`/criador/${currentUsername}`} target="_blank">
+          <Link to={`/criador/${currentUsername}`} target="_blank" key={currentUsername}>
             <ExternalLink className="h-4 w-4" />
             Ver Página Atualizada
           </Link>

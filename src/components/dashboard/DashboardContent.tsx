@@ -32,13 +32,36 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // Get the current username
-  const currentUsername = user?.username;
+  // Force a re-render by getting fresh user data each render
+  const currentUsername = React.useMemo(() => {
+    // Get from multiple sources to ensure we have the most current username
+    const authUsername = user?.username;
+    const storedUser = localStorage.getItem('mimo:user');
+    let localUsername = null;
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        localUsername = parsedUser.username;
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+      }
+    }
+    
+    // Prefer the most recent username
+    const finalUsername = authUsername || localUsername;
+    console.log('DashboardContent - Final username:', finalUsername);
+    console.log('DashboardContent - Auth username:', authUsername);
+    console.log('DashboardContent - Local username:', localUsername);
+    
+    return finalUsername;
+  }, [user, user?.username]);
   
   const copyShareLink = () => {
     if (currentUsername) {
       const shareLink = `${window.location.origin}/criador/${currentUsername}`;
       navigator.clipboard.writeText(shareLink);
+      console.log('Copying link:', shareLink);
       toast({
         title: "Link copiado!",
         description: "Link de divulgação copiado para a área de transferência.",
@@ -95,7 +118,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   asChild
                   size="sm"
                 >
-                  <Link to={`/criador/${currentUsername}`} target="_blank">
+                  <Link to={`/criador/${currentUsername}`} target="_blank" key={currentUsername}>
                     <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="truncate">Ver Página</span>
                   </Link>
@@ -126,7 +149,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             <div className="w-full max-w-full overflow-hidden border rounded-lg">
               {currentUsername ? (
                 <div className="w-full overflow-x-auto">
-                  <PagePreview username={currentUsername} />
+                  <PagePreview username={currentUsername} key={currentUsername} />
                 </div>
               ) : (
                 <div className="p-6 sm:p-8 text-center">

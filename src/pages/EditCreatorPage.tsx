@@ -42,8 +42,30 @@ const EditCreatorPage = () => {
     setShowNewPackageForm
   } = useCreatorEditor();
 
-  // Get the current username
-  const currentUsername = user?.username;
+  // Force a re-render by getting fresh user data each render
+  const currentUsername = React.useMemo(() => {
+    // Get from multiple sources to ensure we have the most current username
+    const authUsername = user?.username;
+    const storedUser = localStorage.getItem('mimo:user');
+    let localUsername = null;
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        localUsername = parsedUser.username;
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+      }
+    }
+    
+    // Prefer the most recent username
+    const finalUsername = authUsername || localUsername;
+    console.log('EditCreatorPage - Final username:', finalUsername);
+    console.log('EditCreatorPage - Auth username:', authUsername);
+    console.log('EditCreatorPage - Local username:', localUsername);
+    
+    return finalUsername;
+  }, [user, user?.username]);
 
   const handleSaveAll = async () => {
     try {
@@ -111,7 +133,7 @@ const EditCreatorPage = () => {
                 asChild
                 size="sm"
               >
-                <Link to={`/criador/${currentUsername}`} target="_blank">
+                <Link to={`/criador/${currentUsername}`} target="_blank" key={currentUsername}>
                   <Eye className="h-4 w-4" />
                   <span>Ver Minha Página</span>
                 </Link>

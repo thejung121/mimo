@@ -42,30 +42,39 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       return;
     }
     
+    console.log('MediaUploader - Starting file upload for', files.length, 'files');
     setUploading(true);
+    
+    // Process files immediately to create blob URLs
+    const processedFiles = Array.from(files).map((file) => {
+      const type = determineMediaType(file);
+      const url = URL.createObjectURL(file);
+      const newId = Date.now() + Math.floor(Math.random() * 1000);
+      
+      console.log('MediaUploader - Created blob URL:', url, 'for file:', file.name);
+      
+      return {
+        id: newId,
+        type,
+        url,
+        caption: caption || undefined,
+        isPreview: false
+      };
+    });
     
     // Simulate upload progress
     let progress = 0;
     const interval = setInterval(() => {
-      progress += 5;
+      progress += 10;
       setUploadProgress(progress);
       
       if (progress >= 100) {
         clearInterval(interval);
         
-        // Process each file
-        Array.from(files).forEach((file) => {
-          const type = determineMediaType(file);
-          const url = URL.createObjectURL(file);
-          const newId = Date.now() + Math.floor(Math.random() * 1000);
-          
-          onMediaAdd({
-            id: newId,
-            type,
-            url,
-            caption: caption || undefined,
-            isPreview: false
-          });
+        // Add all processed files
+        processedFiles.forEach(file => {
+          console.log('MediaUploader - Adding media:', file);
+          onMediaAdd(file);
         });
         
         setUploading(false);
@@ -78,7 +87,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
           description: `${files.length > 1 ? "As mídias foram adicionadas" : "A mídia foi adicionada"} com sucesso ao seu pacote.`,
         });
       }
-    }, 100);
+    }, 200);
   };
 
   const handleAddFromUrl = () => {
@@ -95,7 +104,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       // Validar URL (verificação básica)
       new URL(uploadUrl);
       
-      // Determine media type from URL extension
+      // Determine media type from URL extension or use selected type
       let type: 'image' | 'video' | 'audio' = mediaType;
       if (/\.(mp4|webm|ogg|mov)$/i.test(uploadUrl)) {
         type = 'video';
@@ -108,13 +117,16 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       // Gerar um ID único para a nova mídia
       const newId = Date.now();
       
-      onMediaAdd({
+      const newMedia = {
         id: newId,
         type,
         url: uploadUrl,
         caption: caption || undefined,
         isPreview: false
-      });
+      };
+      
+      console.log('MediaUploader - Adding media from URL:', newMedia);
+      onMediaAdd(newMedia);
       
       setOpen(false);
       setUploadUrl('');
