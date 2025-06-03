@@ -5,7 +5,6 @@ import CreatorHero from '@/components/CreatorHero';
 import CreatorProfile from '@/components/CreatorProfile';
 import CreatorNavBar from '@/components/CreatorNavBar';
 import MimoTabContent from '@/components/MimoTabContent';
-import CreatorStickyHeader from '@/components/CreatorStickyHeader';
 import PurchaseFlow from '@/components/PurchaseFlow';
 import CreatorFooter from '@/components/CreatorFooter';
 import LoadingState from '@/components/creator/LoadingState';
@@ -17,7 +16,6 @@ const CreatorPage = () => {
     creator,
     mimoPackages,
     isLoading,
-    headerVisible,
     isOwnPage,
     selectedPackage,
     purchaseFlowOpen,
@@ -25,7 +23,6 @@ const CreatorPage = () => {
     customAmount,
     handleSelectPackage,
     handleCustomAmount,
-    scrollToMimoSection,
     setPurchaseFlowOpen
   } = useCreatorPage();
 
@@ -69,16 +66,6 @@ const CreatorPage = () => {
           onCustomAmount={handleCustomAmount}
         />
       </main>
-      
-      {headerVisible && (
-        <CreatorStickyHeader 
-          visible={headerVisible}
-          avatar={creator.avatar}
-          name={creator.name}
-          username={creator.username}
-          onMimoClick={scrollToMimoSection} 
-        />
-      )}
       
       {selectedPackage && (
         <PurchaseFlow

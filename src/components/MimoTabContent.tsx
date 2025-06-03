@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MimoPackage } from '@/types/creator';
 import { Loader2, Heart, Image, Video, CheckCircle, ArrowRight } from 'lucide-react';
 import { usePublicPackages } from '@/hooks/usePublicPackages';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface MimoTabContentProps {
   creator: any;
@@ -18,6 +20,7 @@ const MimoTabContent = ({
   onCustomAmount 
 }: MimoTabContentProps) => {
   const { packages, loading } = usePublicPackages(creator?.username);
+  const [customAmount, setCustomAmount] = useState('');
   
   if (loading) {
     return (
@@ -31,6 +34,27 @@ const MimoTabContent = ({
   }
   
   const hasPackages = packages && packages.length > 0;
+
+  const handleCustomSubmit = () => {
+    const amount = parseFloat(customAmount);
+    if (!isNaN(amount) && amount > 0) {
+      onCustomAmount(amount);
+      setCustomAmount('');
+    }
+  };
+
+  const getPreviewImage = (pkg: MimoPackage) => {
+    // First try to find a preview image
+    const previewMedia = pkg.media?.find(m => m.isPreview);
+    if (previewMedia) return previewMedia.url;
+    
+    // If no preview, use the first image
+    const firstImage = pkg.media?.find(m => m.type === 'image');
+    if (firstImage) return firstImage.url;
+    
+    // Fallback to placeholder
+    return '/placeholder.svg';
+  };
   
   return (
     <div className="bg-slate-900 text-white min-h-screen">
@@ -40,67 +64,61 @@ const MimoTabContent = ({
             packages.map((pkg) => (
               <div 
                 key={pkg.id} 
-                className="bg-slate-800 rounded-lg overflow-hidden"
+                className="bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700"
               >
-                {/* Package Preview Image */}
-                <div className="flex">
-                  {pkg.media && pkg.media.length > 0 && pkg.media.some(m => m.isPreview) ? (
-                    <div className="w-1/3">
-                      <img 
-                        src={pkg.media.find(m => m.isPreview)?.url || pkg.media[0]?.url || '/placeholder.svg'} 
-                        alt={pkg.title}
-                        className="w-full h-full object-cover" 
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-1/3 h-32 bg-slate-700 flex items-center justify-center">
-                      <Image className="w-8 h-8 text-slate-500" />
-                    </div>
-                  )}
-                  
-                  <div className="w-2/3 p-3">
-                    <div className="flex items-start justify-between">
-                      <h3 className="text-lg font-bold">{pkg.title}</h3>
-                      <div className="flex gap-1 text-xs text-slate-400">
-                        <div className="flex items-center">
-                          <Image className="w-3 h-3 mr-1" />
-                          {pkg.media?.filter(m => m.type === 'image').length || 0} fotos
-                        </div>
-                        <div className="flex items-center ml-2">
-                          <Video className="w-3 h-3 mr-1" />
-                          {pkg.media?.filter(m => m.type === 'video').length || 0} vídeos
-                        </div>
+                {/* Package Header with Image */}
+                <div className="relative">
+                  <div className="h-48 bg-slate-700 overflow-hidden">
+                    <img 
+                      src={getPreviewImage(pkg)} 
+                      alt={pkg.title}
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
+                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1">
+                    <div className="flex gap-3 text-xs text-white">
+                      <div className="flex items-center">
+                        <Image className="w-3 h-3 mr-1" />
+                        {pkg.media?.filter(m => m.type === 'image').length || 0}
                       </div>
-                    </div>
-                    
-                    <p className="text-xs text-slate-400 mt-1 mb-2">
-                      {pkg.features?.[0] || 'Conteúdo exclusivo e personalizado'}
-                    </p>
-                    
-                    {/* Features */}
-                    <div className="space-y-1">
-                      {pkg.features?.slice(0, 4).map((feature, idx) => (
-                        <div key={idx} className="flex items-center text-xs">
-                          <CheckCircle className="w-3 h-3 text-red-500 mr-2" />
-                          <span>{feature}</span>
-                        </div>
-                      ))}
+                      <div className="flex items-center">
+                        <Video className="w-3 h-3 mr-1" />
+                        {pkg.media?.filter(m => m.type === 'video').length || 0}
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                {/* Price and Action Button */}
-                <div className="bg-slate-800 px-3 py-2 flex items-center justify-between">
-                  <div className="text-blue-400 font-medium">
-                    R$ {pkg.price.toFixed(2)} - Acesso Vitalício
+                {/* Package Content */}
+                <div className="p-4">
+                  <h3 className="text-xl font-bold mb-2">{pkg.title}</h3>
+                  
+                  {/* Features */}
+                  <div className="space-y-2 mb-4">
+                    {pkg.features?.slice(0, 3).map((feature, idx) => (
+                      <div key={idx} className="flex items-center text-sm text-slate-300">
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
                   </div>
-                  <button 
-                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4 py-1 flex items-center text-sm"
-                    onClick={() => onSelectPackage(pkg)}
-                  >
-                    Acessar Agora
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </button>
+                  
+                  {/* Price and Action */}
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-700">
+                    <div>
+                      <div className="text-2xl font-bold text-blue-400">
+                        R$ {pkg.price.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-slate-400">Acesso Vitalício</div>
+                    </div>
+                    <button 
+                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 py-2 flex items-center text-sm font-medium transition-colors"
+                      onClick={() => onSelectPackage(pkg)}
+                    >
+                      Acessar
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -113,30 +131,61 @@ const MimoTabContent = ({
           )}
           
           {/* Mimo section */}
-          <div className="mt-8 pt-4 border-t border-slate-800">
-            <div className="text-center mb-4">
-              <h2 className="font-medium flex items-center justify-center">
-                <Heart className="text-red-500 w-5 h-5 mr-2" fill="currentColor" />
+          <div className="mt-8 pt-6 border-t border-slate-700">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold flex items-center justify-center mb-2">
+                <Heart className="text-red-500 w-6 h-6 mr-2" fill="currentColor" />
                 Manda um Mimo
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-sm text-slate-400">
                 Você manda um mimo e ganha uma recompensa quente e exclusiva
               </p>
             </div>
             
-            <div className="space-y-3">
-              {suggestedPrices.map((price) => (
+            {/* Preset amounts */}
+            <div className="space-y-3 mb-4">
+              {suggestedPrices.map((price, index) => (
                 <button
                   key={price}
                   onClick={() => onCustomAmount(price)}
-                  className={`w-full rounded-full border border-blue-400 py-2 flex items-center justify-center gap-2 ${
-                    price === 50 ? "bg-blue-600 border-blue-600" : "bg-transparent"
+                  className={`w-full rounded-full border py-3 flex items-center justify-center gap-2 transition-all ${
+                    index === 2 
+                      ? "bg-blue-600 border-blue-600 text-white" 
+                      : "bg-transparent border-blue-400 text-blue-400 hover:bg-blue-600 hover:border-blue-600 hover:text-white"
                   }`}
                 >
-                  <Heart className="w-5 h-5" fill={price === 50 ? "currentColor" : "none"} />
+                  <Heart className="w-5 h-5" fill={index === 2 ? "currentColor" : "none"} />
                   Mimar com R$ {price.toFixed(2)}
                 </button>
               ))}
+            </div>
+            
+            {/* Custom amount input */}
+            <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+              <label className="block text-sm font-medium mb-2">Valor personalizado:</label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">R$</span>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    placeholder="0,00"
+                    className="pl-8 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCustomSubmit()}
+                  />
+                </div>
+                <Button
+                  onClick={handleCustomSubmit}
+                  disabled={!customAmount || parseFloat(customAmount) <= 0}
+                  className="bg-red-500 hover:bg-red-600 text-white px-6"
+                >
+                  <Heart className="w-4 h-4 mr-1" />
+                  Enviar
+                </Button>
+              </div>
             </div>
           </div>
           

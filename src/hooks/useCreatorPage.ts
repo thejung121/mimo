@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCreatorByUsername } from '@/services/supabase/creatorService';
 import { Creator, MimoPackage } from '@/types/creator';
@@ -10,14 +10,12 @@ export const useCreatorPage = () => {
   const [creator, setCreator] = useState<Creator | null>(null);
   const [mimoPackages, setMimoPackages] = useState<MimoPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [headerVisible, setHeaderVisible] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<MimoPackage | null>(null);
   const [purchaseFlowOpen, setPurchaseFlowOpen] = useState(false);
   const [suggestedPrices] = useState<number[]>([7, 15, 50]);
   const [customAmount, setCustomAmount] = useState<number | null>(null);
   
   const { username } = useParams<{ username: string }>();
-  const mimoSectionRef = useRef<HTMLElement | null>(null);
   const { user } = useAuth();
   
   useEffect(() => {
@@ -134,21 +132,6 @@ export const useCreatorPage = () => {
     };
     
     fetchCreator();
-    
-    // Setup scroll listener for sticky header
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setHeaderVisible(true);
-      } else {
-        setHeaderVisible(false);
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
   }, [username, user]);
   
   const handleSelectPackage = (pkg: MimoPackage) => {
@@ -173,13 +156,6 @@ export const useCreatorPage = () => {
     setPurchaseFlowOpen(true);
   };
   
-  const scrollToMimoSection = () => {
-    const mimoSection = document.getElementById('mimo-section');
-    if (mimoSection) {
-      mimoSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-  
   const currentUsername = user?.username;
   const isOwnPage = currentUsername === username;
   
@@ -187,7 +163,6 @@ export const useCreatorPage = () => {
     creator,
     mimoPackages,
     isLoading,
-    headerVisible,
     isOwnPage,
     selectedPackage,
     purchaseFlowOpen,
@@ -195,7 +170,6 @@ export const useCreatorPage = () => {
     customAmount,
     handleSelectPackage,
     handleCustomAmount,
-    scrollToMimoSection,
     setPurchaseFlowOpen
   };
 };
