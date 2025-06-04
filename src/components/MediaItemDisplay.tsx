@@ -38,6 +38,12 @@ const MediaItemDisplay = memo(({ media, onTogglePreview, onRemove }: MediaItemDi
     setImageLoaded(true);
   };
 
+  // Check if the URL is a base64 data URL or regular URL
+  const isValidImageUrl = media.type === 'image' && 
+    (media.url.startsWith('data:image/') || 
+     media.url.startsWith('http') || 
+     media.url.startsWith('/'));
+
   return (
     <div 
       className={cn(
@@ -45,8 +51,8 @@ const MediaItemDisplay = memo(({ media, onTogglePreview, onRemove }: MediaItemDi
         media.isPreview ? "border-mimo-primary" : "border-border"
       )}
     >
-      {media.type === 'image' && !imageError ? (
-        <div className={cn("w-full h-24 bg-muted flex items-center justify-center", imageLoaded ? "" : "animate-pulse")}>
+      {isValidImageUrl && !imageError ? (
+        <div className={cn("w-full h-24 bg-muted flex items-center justify-center relative", imageLoaded ? "" : "animate-pulse")}>
           <img 
             src={media.url} 
             alt={media.caption || `Imagem ${media.id}`}

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MimosTab from './MimosTab';
 import WithdrawalsTab from './WithdrawalsTab';
@@ -32,36 +32,19 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // Get current username with proper fallbacks and force updates
-  const getCurrentUsername = () => {
+  // Use memoized username to ensure it updates when auth context changes
+  const currentUsername = useMemo(() => {
+    // Always prioritize the auth context username as it's the most current
     if (user?.username) {
       console.log('DashboardContent - Using auth username:', user.username);
       return user.username;
     }
-    
-    const storedUser = localStorage.getItem('mimo:user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.username) {
-          console.log('DashboardContent - Using localStorage username:', parsedUser.username);
-          return parsedUser.username;
-        }
-      } catch (e) {
-        console.error('Error parsing stored user:', e);
-      }
-    }
-    
-    console.log('DashboardContent - No username found');
     return null;
-  };
-
-  const currentUsername = getCurrentUsername();
+  }, [user?.username]); // Only depend on user.username to force updates
   
   const copyShareLink = () => {
-    const username = getCurrentUsername();
-    if (username) {
-      const shareLink = `${window.location.origin}/criador/${username}`;
+    if (currentUsername) {
+      const shareLink = `${window.location.origin}/criador/${currentUsername}`;
       navigator.clipboard.writeText(shareLink);
       console.log('Copying link:', shareLink);
       toast({

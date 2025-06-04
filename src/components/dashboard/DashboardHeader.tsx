@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Bell, User, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,31 +23,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick }) => {
     logout();
   };
 
-  // Get current username with proper fallbacks
-  const getCurrentUsername = () => {
+  // Use memoized username to ensure it updates when auth context changes
+  const currentUsername = useMemo(() => {
+    // Always prioritize the auth context username as it's the most current
     if (user?.username) {
       console.log('DashboardHeader - Using auth username:', user.username);
       return user.username;
     }
-    
-    const storedUser = localStorage.getItem('mimo:user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.username) {
-          console.log('DashboardHeader - Using localStorage username:', parsedUser.username);
-          return parsedUser.username;
-        }
-      } catch (e) {
-        console.error('Error parsing stored user:', e);
-      }
-    }
-    
-    console.log('DashboardHeader - No username found');
     return null;
-  };
-
-  const currentUsername = getCurrentUsername();
+  }, [user?.username]); // Only depend on user.username to force updates
 
   return (
     <header className="bg-white border-b px-4 py-3 flex items-center justify-between w-full">

@@ -17,36 +17,19 @@ const OptimizedMyPageDashboard = () => {
   const { packages, loading, toggleVisibility } = usePackageManagement();
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
-  // Get current username with proper fallbacks
-  const getCurrentUsername = () => {
+  // Use memoized username to ensure it updates when auth context changes
+  const currentUsername = useMemo(() => {
+    // Always prioritize the auth context username as it's the most current
     if (user?.username) {
       console.log('OptimizedMyPageDashboard - Using auth username:', user.username);
       return user.username;
     }
-    
-    const storedUser = localStorage.getItem('mimo:user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.username) {
-          console.log('OptimizedMyPageDashboard - Using localStorage username:', parsedUser.username);
-          return parsedUser.username;
-        }
-      } catch (e) {
-        console.error('Error parsing stored user:', e);
-      }
-    }
-    
-    console.log('OptimizedMyPageDashboard - No username found');
     return null;
-  };
-
-  const currentUsername = getCurrentUsername();
+  }, [user?.username]); // Only depend on user.username to force updates
 
   const copyShareLink = useCallback(() => {
-    const username = getCurrentUsername();
-    if (username) {
-      const shareLink = `${window.location.origin}/criador/${username}`;
+    if (currentUsername) {
+      const shareLink = `${window.location.origin}/criador/${currentUsername}`;
       navigator.clipboard.writeText(shareLink);
       console.log('Copying link:', shareLink);
       toast({
@@ -60,7 +43,7 @@ const OptimizedMyPageDashboard = () => {
         variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [currentUsername, toast]);
 
   const handleToggleVisibility = useCallback(async (packageId: string | number, currentlyHidden: boolean) => {
     const pkgId = String(packageId);

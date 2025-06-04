@@ -37,7 +37,17 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
     return 'image';
   };
 
-  const handleUploadFile = (files: FileList) => {
+  // Convert file to base64 for persistent storage
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handleUploadFile = async (files: FileList) => {
     if (!files || files.length === 0) {
       return;
     }
@@ -45,56 +55,70 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
     console.log('MediaUploader - Starting file upload for', files.length, 'files');
     setUploading(true);
     
-    // Process files immediately to create blob URLs
-    const processedFiles = Array.from(files).map((file) => {
-      const type = determineMediaType(file);
-      const url = URL.createObjectURL(file);
-      const newId = Date.now() + Math.floor(Math.random() * 1000);
+    try {
+      // Process files and convert to base64 for persistent storage
+      const processedFiles = await Promise.all(
+        Array.from(files).map(async (file) => {
+          const type = determineMediaType(file);
+          // Convert to base64 instead of blob URL for persistence
+          const base64Url = await fileToBase64(file);
+          const newId = Date.now() + Math.floor(Math.random() * 1000);
+          
+          console.log('MediaUploader - Created base64 URL for file:', file.name, 'type:', type);
+          
+          return {
+            id: newId,
+            type,
+            url: base64Url, // Use base64 instead of blob URL
+            caption: caption || undefined,
+            isPreview: false,
+            file // Keep reference to original file for debugging
+          };
+        })
+      );
       
-      console.log('MediaUploader - Created blob URL:', url, 'for file:', file.name, 'type:', type);
-      
-      return {
-        id: newId,
-        type,
-        url,
-        caption: caption || undefined,
-        isPreview: false,
-        file // Keep reference to original file for debugging
-      };
-    });
-    
-    // Simulate upload progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 20;
-      setUploadProgress(progress);
-      
-      if (progress >= 100) {
-        clearInterval(interval);
+      // Simulate upload progress
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 20;
+        setUploadProgress(progress);
         
-        // Add all processed files
-        processedFiles.forEach(file => {
-          console.log('MediaUploader - Adding media:', file);
-          onMediaAdd({
-            id: file.id,
-            type: file.type,
-            url: file.url,
-            caption: file.caption,
-            isPreview: file.isPreview
+        if (progress >= 100) {
+          clearInterval(interval);
+          
+          // Add all processed files
+          processedFiles.forEach(file => {
+            console.log('MediaUploader - Adding media:', file);
+            onMediaAdd({
+              id: file.id,
+              type: file.type,
+              url: file.url,
+              caption: file.caption,
+              isPreview: file.isPreview
+            });
           });
-        });
-        
-        setUploading(false);
-        setUploadProgress(0);
-        setCaption('');
-        setOpen(false);
-        
-        toast({
-          title: files.length > 1 ? `${files.length} mídias adicionadas` : "Mídia adicionada",
-          description: `${files.length > 1 ? "As mídias foram adicionadas" : "A mídia foi adicionada"} com sucesso ao seu pacote.`,
-        });
-      }
-    }, 100);
+          
+          setUploading(false);
+          setUploadProgress(0);
+          setCaption('');
+          setOpen(false);
+          
+          toast({
+            title: files.length > 1 ? `${files.length} mídias adicionadas` : "Mídia adicionada",
+            description: `${files.length > 1 ? "As mídias foram adicionadas" : "A mídia foi adicionada"} com sucesso ao seu pacote.`,
+          });
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Error processing files:', error);
+      setUploading(false);
+      setUploadProgress(0);
+      toast({
+        title: "Erro no upload",
+        description: "Ocorreu um erro ao processar os arquivos.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleAddFromUrl = () => {
