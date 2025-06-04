@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell, User, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,6 +11,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import MimoLogo from '@/components/MimoLogo';
+import { useUsernameSync } from '@/hooks/useUsernameSync';
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -18,13 +19,32 @@ interface DashboardHeaderProps {
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
+  const syncedUsername = useUsernameSync();
+  const [currentUsername, setCurrentUsername] = useState(syncedUsername);
+
+  // Listen for username updates
+  useEffect(() => {
+    const handleUsernameUpdate = (event: CustomEvent) => {
+      console.log('DashboardHeader - Username updated event received:', event.detail.username);
+      setCurrentUsername(event.detail.username);
+    };
+
+    window.addEventListener('usernameUpdated', handleUsernameUpdate as EventListener);
+    return () => {
+      window.removeEventListener('usernameUpdated', handleUsernameUpdate as EventListener);
+    };
+  }, []);
+
+  // Update currentUsername when syncedUsername changes
+  useEffect(() => {
+    if (syncedUsername) {
+      setCurrentUsername(syncedUsername);
+    }
+  }, [syncedUsername]);
 
   const handleLogout = () => {
     logout();
   };
-
-  // Get current username directly without problematic memoization
-  const currentUsername = user?.username;
 
   return (
     <header className="bg-white border-b px-4 py-3 flex items-center justify-between w-full">

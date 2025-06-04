@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from "@/components/ui/button";
@@ -8,12 +7,14 @@ import { Save, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { saveMimoPackages } from '@/services/creator';
+import { useUsernameSync } from '@/hooks/useUsernameSync';
 import UnifiedEditorSection from '@/components/UnifiedEditorSection';
 
 const EditCreatorPage = () => {
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const syncedUsername = useUsernameSync();
   
   const {
     creator,
@@ -41,35 +42,23 @@ const EditCreatorPage = () => {
     setShowNewPackageForm
   } = useCreatorEditor();
 
-  // Get current username with proper fallbacks
-  const getCurrentUsername = () => {
-    if (user?.username) {
-      console.log('EditCreatorPage - Using auth username:', user.username);
-      return user.username;
-    }
-    
-    const storedUser = localStorage.getItem('mimo:user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.username) {
-          console.log('EditCreatorPage - Using localStorage username:', parsedUser.username);
-          return parsedUser.username;
-        }
-      } catch (e) {
-        console.error('Error parsing stored user:', e);
-      }
-    }
-    
-    console.log('EditCreatorPage - No username found');
-    return null;
-  };
-
-  const currentUsername = getCurrentUsername();
-
   const handleSaveAll = async () => {
     try {
+      // Save profile and update username in auth context
       const profileSaved = await handleSaveProfile();
+      
+      if (profileSaved && creator.username && updateUserProfile) {
+        // Update username in auth context
+        await updateUserProfile({
+          name: creator.name,
+          username: creator.username
+        });
+        
+        // Dispatch username update event
+        window.dispatchEvent(new CustomEvent('usernameUpdated', { 
+          detail: { username: creator.username } 
+        }));
+      }
       
       if (profileSaved) {
         saveMimoPackages(mimoPackages);
@@ -79,10 +68,10 @@ const EditCreatorPage = () => {
           description: "Todas as suas alterações foram salvas.",
         });
         
-        const username = getCurrentUsername();
-        if (username) {
+        const currentUsername = creator.username || syncedUsername;
+        if (currentUsername) {
           setTimeout(() => {
-            navigate(`/criador/${username}`);
+            navigate(`/criador/${currentUsername}`);
           }, 100);
         } else {
           navigate('/dashboard');
@@ -115,6 +104,8 @@ const EditCreatorPage = () => {
     
     handleCreatorChange(syntheticEvent);
   };
+
+  const currentUsername = creator.username || syncedUsername;
 
   return (
     <DashboardLayout>

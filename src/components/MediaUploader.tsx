@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { FileImage } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import FileUploadTab from './media/FileUploadTab';
 import UrlTab from './media/UrlTab';
 
@@ -37,14 +38,40 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
     return 'image';
   };
 
-  // Convert file to base64 for persistent storage - avoid blob URLs
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
+  // Upload file to Supabase Storage (same logic as avatar/cover upload)
+  const uploadFileToSupabase = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `media/${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      
+      console.log('MediaUploader - Starting upload to media bucket:', fileName);
+      
+      // Upload to media bucket
+      const { data, error } = await supabase.storage
+        .from('media')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) {
+        console.error('MediaUploader - Error uploading to Supabase:', error);
+        return null;
+      }
+
+      console.log('MediaUploader - Upload successful:', data);
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('media')
+        .getPublicUrl(data.path);
+
+      console.log('MediaUploader - Public URL:', urlData.publicUrl);
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('MediaUploader - Upload error:', error);
+      return null;
+    }
   };
 
   const handleUploadFile = async (files: FileList) => {
@@ -56,20 +83,26 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
     setUploading(true);
     
     try {
-      // Process files and convert to base64 for persistent storage
+      // Process files and upload to Supabase (same as avatar/cover logic)
       const processedFiles = await Promise.all(
         Array.from(files).map(async (file) => {
           const type = determineMediaType(file);
-          // Convert to base64 to avoid blob URL corruption
-          const base64Url = await fileToBase64(file);
+          
+          // Upload to Supabase Storage
+          const uploadedUrl = await uploadFileToSupabase(file);
+          
+          if (!uploadedUrl) {
+            throw new Error(`Failed to upload ${file.name}`);
+          }
+          
           const newId = Date.now() + Math.floor(Math.random() * 1000);
           
-          console.log('MediaUploader - Created base64 URL for file:', file.name, 'type:', type);
+          console.log('MediaUploader - Created Supabase URL for file:', file.name, 'type:', type, 'url:', uploadedUrl);
           
           return {
             id: newId,
             type,
-            url: base64Url, // Use base64 instead of blob URL to prevent corruption
+            url: uploadedUrl, // Use Supabase URL
             caption: caption || undefined,
             isPreview: false
           };
@@ -87,7 +120,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
           
           // Add all processed files
           processedFiles.forEach(file => {
-            console.log('MediaUploader - Adding media with base64 URL:', file);
+            console.log('MediaUploader - Adding media with Supabase URL:', file);
             onMediaAdd({
               id: file.id,
               type: file.type,

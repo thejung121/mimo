@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MimosTab from './MimosTab';
 import WithdrawalsTab from './WithdrawalsTab';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Copy, ExternalLink } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useUsernameSync } from '@/hooks/useUsernameSync';
 
 interface DashboardContentProps {
   activeTab: string;
@@ -31,9 +32,28 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const syncedUsername = useUsernameSync();
+  const [currentUsername, setCurrentUsername] = useState(syncedUsername);
   
-  // Get current username directly without memoization that might not update
-  const currentUsername = user?.username;
+  // Listen for username updates
+  useEffect(() => {
+    const handleUsernameUpdate = (event: CustomEvent) => {
+      console.log('Username updated event received:', event.detail.username);
+      setCurrentUsername(event.detail.username);
+    };
+
+    window.addEventListener('usernameUpdated', handleUsernameUpdate as EventListener);
+    return () => {
+      window.removeEventListener('usernameUpdated', handleUsernameUpdate as EventListener);
+    };
+  }, []);
+
+  // Update currentUsername when syncedUsername changes
+  useEffect(() => {
+    if (syncedUsername) {
+      setCurrentUsername(syncedUsername);
+    }
+  }, [syncedUsername]);
   
   const copyShareLink = () => {
     if (currentUsername) {
