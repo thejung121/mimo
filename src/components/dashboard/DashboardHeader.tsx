@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Bell, User, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,15 +23,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick }) => {
     logout();
   };
 
-  // Use memoized username to ensure it updates when auth context changes
-  const currentUsername = useMemo(() => {
-    // Always prioritize the auth context username as it's the most current
-    if (user?.username) {
-      console.log('DashboardHeader - Using auth username:', user.username);
-      return user.username;
-    }
-    return null;
-  }, [user?.username]); // Only depend on user.username to force updates
+  // Get current username directly without problematic memoization
+  const currentUsername = user?.username;
 
   return (
     <header className="bg-white border-b px-4 py-3 flex items-center justify-between w-full">

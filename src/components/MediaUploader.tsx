@@ -37,7 +37,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
     return 'image';
   };
 
-  // Convert file to base64 for persistent storage
+  // Convert file to base64 for persistent storage - avoid blob URLs
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -60,7 +60,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       const processedFiles = await Promise.all(
         Array.from(files).map(async (file) => {
           const type = determineMediaType(file);
-          // Convert to base64 instead of blob URL for persistence
+          // Convert to base64 to avoid blob URL corruption
           const base64Url = await fileToBase64(file);
           const newId = Date.now() + Math.floor(Math.random() * 1000);
           
@@ -69,10 +69,9 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
           return {
             id: newId,
             type,
-            url: base64Url, // Use base64 instead of blob URL
+            url: base64Url, // Use base64 instead of blob URL to prevent corruption
             caption: caption || undefined,
-            isPreview: false,
-            file // Keep reference to original file for debugging
+            isPreview: false
           };
         })
       );
@@ -88,7 +87,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
           
           // Add all processed files
           processedFiles.forEach(file => {
-            console.log('MediaUploader - Adding media:', file);
+            console.log('MediaUploader - Adding media with base64 URL:', file);
             onMediaAdd({
               id: file.id,
               type: file.type,
@@ -151,7 +150,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       const newMedia = {
         id: newId,
         type,
-        url: uploadUrl,
+        url: uploadUrl, // External URLs are already persistent
         caption: caption || undefined,
         isPreview: false
       };

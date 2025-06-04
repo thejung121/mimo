@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MimosTab from './MimosTab';
 import WithdrawalsTab from './WithdrawalsTab';
@@ -32,26 +32,20 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // Use memoized username to ensure it updates when auth context changes
-  const currentUsername = useMemo(() => {
-    // Always prioritize the auth context username as it's the most current
-    if (user?.username) {
-      console.log('DashboardContent - Using auth username:', user.username);
-      return user.username;
-    }
-    return null;
-  }, [user?.username]); // Only depend on user.username to force updates
+  // Get current username directly without memoization that might not update
+  const currentUsername = user?.username;
   
   const copyShareLink = () => {
     if (currentUsername) {
       const shareLink = `${window.location.origin}/criador/${currentUsername}`;
       navigator.clipboard.writeText(shareLink);
-      console.log('Copying link:', shareLink);
+      console.log('Copying link with current username:', currentUsername, '- Link:', shareLink);
       toast({
         title: "Link copiado!",
         description: "Link de divulgação copiado para a área de transferência.",
       });
     } else {
+      console.log('No username found for copy link');
       toast({
         title: "Nome de usuário não definido",
         description: "Configure seu nome de usuário no perfil.",

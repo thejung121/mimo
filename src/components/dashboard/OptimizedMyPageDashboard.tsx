@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,26 +17,20 @@ const OptimizedMyPageDashboard = () => {
   const { packages, loading, toggleVisibility } = usePackageManagement();
   const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
-  // Use memoized username to ensure it updates when auth context changes
-  const currentUsername = useMemo(() => {
-    // Always prioritize the auth context username as it's the most current
-    if (user?.username) {
-      console.log('OptimizedMyPageDashboard - Using auth username:', user.username);
-      return user.username;
-    }
-    return null;
-  }, [user?.username]); // Only depend on user.username to force updates
+  // Get current username directly without problematic memoization
+  const currentUsername = user?.username;
 
   const copyShareLink = useCallback(() => {
     if (currentUsername) {
       const shareLink = `${window.location.origin}/criador/${currentUsername}`;
       navigator.clipboard.writeText(shareLink);
-      console.log('Copying link:', shareLink);
+      console.log('Copying link with current username:', currentUsername, '- Link:', shareLink);
       toast({
         title: "Link copiado!",
         description: "Link de divulgação copiado para a área de transferência.",
       });
     } else {
+      console.log('No username found for copy link');
       toast({
         title: "Nome de usuário não definido",
         description: "Configure seu nome de usuário no perfil.",
@@ -58,115 +52,6 @@ const OptimizedMyPageDashboard = () => {
     }
   }, [toggleVisibility]);
 
-  const packagesList = useMemo(() => {
-    return packages.map(pkg => {
-      const pkgId = String(pkg.id);
-      // Get preview image from media with better fallback handling
-      const previewImage = pkg.media?.find(m => m.isPreview && m.type === 'image')?.url || 
-                          pkg.media?.find(m => m.type === 'image')?.url || 
-                          '/placeholder.svg';
-      
-      return (
-        <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-              <img 
-                src={previewImage} 
-                alt={pkg.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  console.error('Image failed to load:', previewImage);
-                  e.currentTarget.src = '/placeholder.svg';
-                }}
-                onLoad={() => {
-                  console.log('Image loaded successfully:', previewImage);
-                }}
-              />
-            </div>
-            <div>
-              <h3 className="font-medium flex items-center">
-                {pkg.title}
-                {pkg.highlighted && (
-                  <span className="ml-2 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
-                    Destacado
-                  </span>
-                )}
-                {pkg.isHidden && (
-                  <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">
-                    Oculto
-                  </span>
-                )}
-              </h3>
-              <p className="text-sm text-muted-foreground">R$ {pkg.price.toFixed(2)}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id={`package-visible-${pkg.id}`}
-                checked={!pkg.isHidden}
-                disabled={toggleLoading === pkgId}
-                onCheckedChange={() => handleToggleVisibility(pkg.id, pkg.isHidden || false)}
-              />
-              <Label htmlFor={`package-visible-${pkg.id}`}>
-                {pkg.isHidden ? 'Oculto' : 'Visível'}
-              </Label>
-            </div>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to={`/dashboard/pacotes/editar/${pkg.id}`}>
-                <Edit className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      );
-    });
-  }, [packages, toggleLoading, handleToggleVisibility]);
-
-  const quickActions = useMemo(() => (
-    <div className="flex flex-wrap gap-3">
-      <Button 
-        className="flex items-center gap-2" 
-        variant="outline"
-        onClick={copyShareLink}
-      >
-        <Copy className="h-4 w-4" />
-        Copiar Link de Divulgação
-      </Button>
-      {currentUsername ? (
-        <Button 
-          className="flex items-center gap-2" 
-          variant="outline"
-          asChild
-        >
-          <Link to={`/criador/${currentUsername}`} target="_blank">
-            <ExternalLink className="h-4 w-4" />
-            Ver Página Atualizada
-          </Link>
-        </Button>
-      ) : (
-        <Button
-          className="flex items-center gap-2"
-          variant="outline"
-          disabled
-          title="Configure seu nome de usuário no perfil"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Ver Página Atualizada
-        </Button>
-      )}
-      <Button 
-        className="flex items-center gap-2 mimo-button" 
-        asChild
-      >
-        <Link to="/editar-pagina">
-          <Edit className="h-4 w-4" />
-          Editar Página
-        </Link>
-      </Button>
-    </div>
-  ), [currentUsername, copyShareLink]);
-
   return (
     <DashboardLayout>
       <div className="bg-background rounded-lg border shadow-sm p-4 sm:p-6">
@@ -178,7 +63,47 @@ const OptimizedMyPageDashboard = () => {
               <CardTitle>Ações Rápidas</CardTitle>
             </CardHeader>
             <CardContent>
-              {quickActions}
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  className="flex items-center gap-2" 
+                  variant="outline"
+                  onClick={copyShareLink}
+                >
+                  <Copy className="h-4 w-4" />
+                  Copiar Link de Divulgação
+                </Button>
+                {currentUsername ? (
+                  <Button 
+                    className="flex items-center gap-2" 
+                    variant="outline"
+                    asChild
+                  >
+                    <Link to={`/criador/${currentUsername}`} target="_blank">
+                      <ExternalLink className="h-4 w-4" />
+                      Ver Página Atualizada
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    className="flex items-center gap-2"
+                    variant="outline"
+                    disabled
+                    title="Configure seu nome de usuário no perfil"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Ver Página Atualizada
+                  </Button>
+                )}
+                <Button 
+                  className="flex items-center gap-2 mimo-button" 
+                  asChild
+                >
+                  <Link to="/editar-pagina">
+                    <Edit className="h-4 w-4" />
+                    Editar Página
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -201,7 +126,70 @@ const OptimizedMyPageDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {packagesList}
+                  {packages.map(pkg => {
+                    const pkgId = String(pkg.id);
+                    // Get preview image from media with better fallback handling - avoid blob URLs
+                    const previewImage = pkg.media?.find(m => m.isPreview && m.type === 'image')?.url || 
+                                        pkg.media?.find(m => m.type === 'image')?.url;
+                    
+                    // Only use the image if it's not a blob URL (which causes corruption)
+                    const imageUrl = previewImage && !previewImage.startsWith('blob:') ? previewImage : '/placeholder.svg';
+                    
+                    return (
+                      <div key={pkg.id} className="flex items-center justify-between border-b pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                            <img 
+                              src={imageUrl} 
+                              alt={pkg.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error('Image failed to load:', imageUrl);
+                                e.currentTarget.src = '/placeholder.svg';
+                              }}
+                              onLoad={() => {
+                                console.log('Image loaded successfully:', imageUrl);
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <h3 className="font-medium flex items-center">
+                              {pkg.title}
+                              {pkg.highlighted && (
+                                <span className="ml-2 bg-primary/10 text-primary text-xs px-1.5 py-0.5 rounded-full">
+                                  Destacado
+                                </span>
+                              )}
+                              {pkg.isHidden && (
+                                <span className="ml-2 bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded-full">
+                                  Oculto
+                                </span>
+                              )}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">R$ {pkg.price.toFixed(2)}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center space-x-2">
+                            <Switch 
+                              id={`package-visible-${pkg.id}`}
+                              checked={!pkg.isHidden}
+                              disabled={toggleLoading === pkgId}
+                              onCheckedChange={() => handleToggleVisibility(pkg.id, pkg.isHidden || false)}
+                            />
+                            <Label htmlFor={`package-visible-${pkg.id}`}>
+                              {pkg.isHidden ? 'Oculto' : 'Visível'}
+                            </Label>
+                          </div>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link to={`/dashboard/pacotes/editar/${pkg.id}`}>
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>

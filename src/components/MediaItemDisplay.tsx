@@ -38,8 +38,10 @@ const MediaItemDisplay = memo(({ media, onTogglePreview, onRemove }: MediaItemDi
     setImageLoaded(true);
   };
 
-  // Check if the URL is a base64 data URL or regular URL
+  // Check if the URL is valid - avoid blob URLs that cause corruption
   const isValidImageUrl = media.type === 'image' && 
+    media.url && 
+    !media.url.startsWith('blob:') && // Avoid blob URLs that get corrupted
     (media.url.startsWith('data:image/') || 
      media.url.startsWith('http') || 
      media.url.startsWith('/'));
