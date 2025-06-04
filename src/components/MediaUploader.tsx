@@ -38,7 +38,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
     return 'image';
   };
 
-  // Upload file to Supabase Storage (same logic as avatar/cover upload)
+  // Use the exact same upload logic as avatar/cover uploads
   const uploadFileToSupabase = async (file: File): Promise<string | null> => {
     try {
       const fileExt = file.name.split('.').pop();
@@ -46,7 +46,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       
       console.log('MediaUploader - Starting upload to media bucket:', fileName);
       
-      // Upload to media bucket
+      // Upload to media bucket (same as avatar/cover logic)
       const { data, error } = await supabase.storage
         .from('media')
         .upload(fileName, file, {
@@ -56,12 +56,17 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
 
       if (error) {
         console.error('MediaUploader - Error uploading to Supabase:', error);
+        toast({
+          title: `Erro ao fazer upload`,
+          description: error.message,
+          variant: "destructive"
+        });
         return null;
       }
 
       console.log('MediaUploader - Upload successful:', data);
 
-      // Get public URL
+      // Get public URL (same as avatar/cover logic)
       const { data: urlData } = supabase.storage
         .from('media')
         .getPublicUrl(data.path);
@@ -70,6 +75,11 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       return urlData.publicUrl;
     } catch (error) {
       console.error('MediaUploader - Upload error:', error);
+      toast({
+        title: "Erro no upload",
+        description: "Não foi possível fazer upload da imagem. Tente novamente.",
+        variant: "destructive"
+      });
       return null;
     }
   };
@@ -81,66 +91,64 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
     
     console.log('MediaUploader - Starting file upload for', files.length, 'files');
     setUploading(true);
+    setUploadProgress(0);
     
     try {
-      // Process files and upload to Supabase (same as avatar/cover logic)
-      const processedFiles = await Promise.all(
-        Array.from(files).map(async (file) => {
-          const type = determineMediaType(file);
-          
-          // Upload to Supabase Storage
-          const uploadedUrl = await uploadFileToSupabase(file);
-          
-          if (!uploadedUrl) {
-            throw new Error(`Failed to upload ${file.name}`);
-          }
-          
-          const newId = Date.now() + Math.floor(Math.random() * 1000);
-          
-          console.log('MediaUploader - Created Supabase URL for file:', file.name, 'type:', type, 'url:', uploadedUrl);
-          
-          return {
-            id: newId,
-            type,
-            url: uploadedUrl, // Use Supabase URL
-            caption: caption || undefined,
-            isPreview: false
-          };
-        })
-      );
+      // Process files sequentially to avoid overwhelming the system
+      const processedFiles = [];
       
-      // Simulate upload progress
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 20;
-        setUploadProgress(progress);
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const type = determineMediaType(file);
         
-        if (progress >= 100) {
-          clearInterval(interval);
-          
-          // Add all processed files
-          processedFiles.forEach(file => {
-            console.log('MediaUploader - Adding media with Supabase URL:', file);
-            onMediaAdd({
-              id: file.id,
-              type: file.type,
-              url: file.url,
-              caption: file.caption,
-              isPreview: file.isPreview
-            });
-          });
-          
-          setUploading(false);
-          setUploadProgress(0);
-          setCaption('');
-          setOpen(false);
-          
-          toast({
-            title: files.length > 1 ? `${files.length} mídias adicionadas` : "Mídia adicionada",
-            description: `${files.length > 1 ? "As mídias foram adicionadas" : "A mídia foi adicionada"} com sucesso ao seu pacote.`,
-          });
+        // Update progress
+        const progressPercent = ((i + 0.5) / files.length) * 100;
+        setUploadProgress(progressPercent);
+        
+        // Upload to Supabase Storage (same as avatar/cover)
+        const uploadedUrl = await uploadFileToSupabase(file);
+        
+        if (!uploadedUrl) {
+          throw new Error(`Failed to upload ${file.name}`);
         }
-      }, 100);
+        
+        const newId = Date.now() + Math.floor(Math.random() * 1000);
+        
+        console.log('MediaUploader - Successfully uploaded file:', file.name, 'type:', type, 'url:', uploadedUrl);
+        
+        processedFiles.push({
+          id: newId,
+          type,
+          url: uploadedUrl,
+          caption: caption || undefined,
+          isPreview: false
+        });
+      }
+      
+      // Final progress update
+      setUploadProgress(100);
+      
+      // Add all processed files
+      processedFiles.forEach(file => {
+        console.log('MediaUploader - Adding media with Supabase URL:', file);
+        onMediaAdd({
+          id: file.id,
+          type: file.type,
+          url: file.url,
+          caption: file.caption,
+          isPreview: file.isPreview
+        });
+      });
+      
+      setUploading(false);
+      setUploadProgress(0);
+      setCaption('');
+      setOpen(false);
+      
+      toast({
+        title: files.length > 1 ? `${files.length} mídias adicionadas` : "Mídia adicionada",
+        description: `${files.length > 1 ? "As mídias foram adicionadas" : "A mídia foi adicionada"} com sucesso ao seu pacote.`,
+      });
     } catch (error) {
       console.error('Error processing files:', error);
       setUploading(false);
@@ -183,7 +191,7 @@ const MediaUploader = ({ onMediaAdd }: MediaUploaderProps) => {
       const newMedia = {
         id: newId,
         type,
-        url: uploadUrl, // External URLs are already persistent
+        url: uploadUrl,
         caption: caption || undefined,
         isPreview: false
       };
