@@ -1,21 +1,17 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Loader2 } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Register = () => {
-  // Use the redirect hook to handle automatic redirects
-  useAuthRedirect('/dashboard');
-  
+  const navigate = useNavigate();
   const [startRegistration, setStartRegistration] = useState(false);
   const [showForm, setShowForm] = useState(false);
   
@@ -27,8 +23,15 @@ const Register = () => {
   const [document, setDocument] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const { toast } = useToast();
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleStartRegistration = () => {
     setStartRegistration(true);
@@ -127,8 +130,9 @@ const Register = () => {
       console.log('=== REGISTER RESULT ===', success);
       
       if (success) {
-        console.log('=== REGISTRATION SUCCESSFUL - SHOULD REDIRECT ===');
-        // The redirect will happen automatically via useAuthRedirect hook
+        console.log('=== REGISTRATION SUCCESSFUL - REDIRECTING ===');
+        // Force immediate redirect after successful registration
+        navigate('/dashboard', { replace: true });
       }
     } catch (error: any) {
       console.error("=== REGISTRATION ERROR ===", error);
