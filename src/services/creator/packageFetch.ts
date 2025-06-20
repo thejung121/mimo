@@ -38,14 +38,14 @@ export const getMimoPackages = async (): Promise<MimoPackage[]> => {
         title: pkg.title,
         price: Number(pkg.price),
         features: pkg.package_features ? pkg.package_features.map((f: any) => f.feature) : [],
-        highlighted: pkg.highlighted,
-        isHidden: pkg.is_hidden,
+        highlighted: pkg.highlighted || false,
+        isHidden: pkg.is_hidden || false,
         media: pkg.package_media ? pkg.package_media.map((m: any) => ({
           id: m.id, // Keep as string ID from Supabase
           url: m.url,
           type: m.type,
           caption: m.caption,
-          isPreview: m.is_preview
+          isPreview: m.is_preview || false
         })) : []
       }));
       
@@ -119,14 +119,14 @@ export const getPackagesByUsername = async (username: string | null | undefined)
       title: pkg.title,
       price: Number(pkg.price),
       features: pkg.package_features ? pkg.package_features.map((f: any) => f.feature) : [],
-      highlighted: pkg.highlighted,
-      isHidden: pkg.is_hidden,
+      highlighted: pkg.highlighted || false,
+      isHidden: pkg.is_hidden || false,
       media: pkg.package_media ? pkg.package_media.map((m: any) => ({
         id: m.id, // String ID from Supabase
         url: m.url,
         type: m.type,
         caption: m.caption,
-        isPreview: m.is_preview
+        isPreview: m.is_preview || false
       })) : []
     }));
     

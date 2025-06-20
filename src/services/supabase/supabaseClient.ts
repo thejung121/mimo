@@ -1,25 +1,13 @@
 
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/types/supabase';
+import type { Database } from '@/integrations/supabase/types';
 
-// Get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Use the production Supabase URL and key
+const supabaseUrl = "https://bqlxmbwkucukhmioxall.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxbHhtYndrdWN1a2htaW94YWxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0Mjk3NTUsImV4cCI6MjA2NjAwNTc1NX0.SIznvyEjP_0bjfuEvoYJIIgBxSUkUyk7RRXsSnIc9YI";
 
-// In development or when environment variables are not set,
-// use demo values to prevent the app from crashing
-export const useDemo = !supabaseUrl || !supabaseAnonKey;
+// Create Supabase client
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-if (useDemo) {
-  console.warn(
-    'Supabase environment variables are missing. Using demo mode with limited functionality. ' +
-    'Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env.local file.'
-  );
-}
-
-// Create Supabase client - use demo settings if needed
-// Make sure to use a valid URL format for the demo
-export const supabase = createClient<Database>(
-  useDemo ? 'https://example.supabase.co' : supabaseUrl,
-  useDemo ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlbW8iLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxMzA5ODU0MCwiZXhwIjoxOTI4Njc0NTQwfQ.magsCuCyBc1-NOQ6F_Vz2A' : supabaseAnonKey
-);
+// For backward compatibility
+export const useDemo = false;
