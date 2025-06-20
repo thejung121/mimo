@@ -28,8 +28,8 @@ export {
   saveBalance
 } from './financialService';
 
-// Combined save function
-export const saveAllData = async (creator: Creator, packages: MimoPackage[]): Promise<boolean> => {
+// Combined save function - fix signature to accept optional force parameter
+export const saveAllData = async (creator: Creator, packages?: MimoPackage[], force?: boolean): Promise<boolean> => {
   try {
     console.log('Saving all data to Supabase and local storage');
     
@@ -44,8 +44,10 @@ export const saveAllData = async (creator: Creator, packages: MimoPackage[]): Pr
     }
     
     // Also save to local storage regardless of Supabase result
-    saveCreatorData(creator);
-    saveMimoPackages(packages);
+    saveCreatorData(creator, force);
+    if (packages) {
+      saveMimoPackages(packages);
+    }
     
     console.log('Data saved successfully to local storage');
     return true;

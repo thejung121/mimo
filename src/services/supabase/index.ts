@@ -6,7 +6,13 @@ export { supabase, useDemo } from './supabaseClient';
 export { getCurrentUser } from './authService';
 
 // Creator service
-export { getCreatorByUsername, getCreatorPackages } from './creatorService';
+export { 
+  getCreatorByUsername, 
+  getCreatorPackages, 
+  getCurrentCreator, 
+  updateCreatorProfile,
+  createCreatorProfile 
+} from './creatorService';
 
 // Transaction service
 export { getCreatorTransactions, getAvailableBalance } from './transactionService';

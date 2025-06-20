@@ -18,6 +18,20 @@ export interface Creator {
   socialLinks: SocialLink[];
 }
 
+// Add CreatorData interface for backward compatibility
+export interface CreatorData {
+  id?: string;
+  name: string;
+  avatar: string;
+  cover: string;
+  description: string;
+  cover_title?: string;
+  cover_subtitle?: string;
+  about?: string;
+  pix_key?: string;
+  username: string;
+}
+
 export interface MediaItem {
   id: number;
   type: 'image' | 'video' | 'audio';
