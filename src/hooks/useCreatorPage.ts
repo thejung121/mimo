@@ -72,7 +72,22 @@ export const useCreatorPage = () => {
         
         if (creatorData) {
           console.log("Creator found:", creatorData);
-          setCreator(creatorData);
+          
+          // Transform CreatorData to Creator interface
+          const transformedCreator: Creator = {
+            id: creatorData.id,
+            name: creatorData.name,
+            username: creatorData.username,
+            avatar: creatorData.avatar || '/placeholder.svg',
+            cover: creatorData.cover || '/placeholder.svg',
+            description: creatorData.description || '',
+            coverTitle: creatorData.cover_title || '',
+            coverSubtitle: creatorData.cover_subtitle || '',
+            about: creatorData.about || '',
+            socialLinks: [] // Default empty array since CreatorData doesn't have socialLinks
+          };
+          
+          setCreator(transformedCreator);
           
           // Try to get packages from Supabase or localStorage
           try {

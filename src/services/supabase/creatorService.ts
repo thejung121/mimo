@@ -118,11 +118,28 @@ export const getCreatorPackages = async (creatorId: string) => {
 };
 
 // Create or update creator profile
-export const createCreatorProfile = async (creatorData: Partial<CreatorData>): Promise<boolean> => {
+export const createCreatorProfile = async (creatorData: CreatorData): Promise<boolean> => {
   try {
+    // Ensure required fields are present
+    if (!creatorData.name || !creatorData.username) {
+      console.error("Missing required fields: name and username");
+      return false;
+    }
+
     const { data, error } = await supabase
       .from('creators')
-      .upsert(creatorData)
+      .upsert({
+        id: creatorData.id,
+        name: creatorData.name,
+        username: creatorData.username,
+        avatar: creatorData.avatar || '/placeholder.svg',
+        cover: creatorData.cover || '/placeholder.svg',
+        description: creatorData.description || '',
+        cover_title: creatorData.cover_title,
+        cover_subtitle: creatorData.cover_subtitle,
+        about: creatorData.about,
+        pix_key: creatorData.pix_key
+      })
       .select()
       .single();
     
@@ -140,26 +157,30 @@ export const createCreatorProfile = async (creatorData: Partial<CreatorData>): P
 };
 
 // Update creator profile - fix signature to match expected usage
-export const updateCreatorProfile = async (creator: Creator | Partial<CreatorData>): Promise<boolean> => {
+export const updateCreatorProfile = async (creator: Creator): Promise<boolean> => {
   try {
-    // Handle both Creator and CreatorData interfaces
-    const updates = 'id' in creator && creator.id ? {
+    // Ensure required fields are present
+    if (!creator.name || !creator.username || !creator.id) {
+      console.error("Missing required fields: id, name, and username");
+      return false;
+    }
+
+    const updates = {
       id: creator.id,
       name: creator.name,
-      username: 'username' in creator ? creator.username : '',
+      username: creator.username,
       avatar: creator.avatar || '/placeholder.svg',
       cover: creator.cover || '/placeholder.svg',
       description: creator.description || '',
-      cover_title: 'coverTitle' in creator ? creator.coverTitle : creator.cover_title,
-      cover_subtitle: 'coverSubtitle' in creator ? creator.coverSubtitle : creator.cover_subtitle,
-      about: creator.about,
-      pix_key: 'pix_key' in creator ? creator.pix_key : null
-    } : creator;
+      cover_title: creator.coverTitle || null,
+      cover_subtitle: creator.coverSubtitle || null,
+      about: creator.about || null,
+      pix_key: null // Creator interface doesn't have pix_key, so set to null
+    };
 
     const { error } = await supabase
       .from('creators')
-      .upsert(updates)
-      .eq('id', creator.id || '');
+      .upsert(updates);
     
     if (error) {
       console.error("Error updating creator profile:", error);
