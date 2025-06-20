@@ -1,7 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser } from '@/types/auth';
-import { useToast } from '@/hooks/use-toast';
 
 // Function to get current authenticated user
 export const getCurrentUser = async () => {
@@ -15,125 +14,141 @@ export const getCurrentUser = async () => {
   return user;
 };
 
-// Hook for authentication operations
-export const useAuthService = () => {
-  const { toast } = useToast();
-  
-  const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      console.log('Starting login attempt for:', email);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) {
-        console.error('Login error from Supabase:', error);
-        toast({
-          title: "Falha na autenticação",
-          description: error.message,
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      console.log('Login successful:', data);
-      toast({
-        title: "Login realizado com sucesso!",
-        description: `Bem-vindo(a) de volta!`,
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error('Login error:', error);
-      toast({
-        title: "Erro ao fazer login",
-        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
-        variant: "destructive",
-      });
-      return false;
+// Login function
+export const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    console.log('Starting login attempt for:', email);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) {
+      console.error('Login error from Supabase:', error);
+      return {
+        success: false,
+        error: error.message
+      };
     }
-  };
-
-  const register = async (name: string, email: string, password: string, username: string, document?: string): Promise<boolean> => {
-    try {
-      console.log("Registering user with data:", { name, email, username, document });
-      
-      // Use regular signUp method with data parameter to store user metadata
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-            username,
-            document: document || '', // Store CPF/CNPJ in user metadata
-            avatar_url: ''
-          }
-        }
-      });
-      
-      if (error) {
-        console.error("Registration error from Supabase:", error);
-        toast({
-          title: "Erro ao criar conta",
-          description: error.message,
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      // Check if the user was created successfully
-      if (data.user) {
-        console.log("User created successfully:", data.user);
-        
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Bem-vindo(a) ao Mimo!",
-        });
-        
-        return true;
-      } else {
-        console.error("User creation failed - no user returned");
-        toast({
-          title: "Erro ao criar conta",
-          description: "Não foi possível criar sua conta. Por favor, tente novamente.",
-          variant: "destructive",
-        });
-        return false;
-      }
-    } catch (error: any) {
-      console.error('Registration error:', error);
-      toast({
-        title: "Erro ao criar conta",
-        description: "Ocorreu um erro inesperado. Por favor, tente novamente.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
-  return {
-    login,
-    register
-  };
-};
-
-export const logout = async () => {
-  const { error } = await supabase.auth.signOut();
-  
-  if (error) {
-    console.error('Error during logout:', error);
+    
+    console.log('Login successful:', data);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Login error:', error);
     return {
       success: false,
-      message: "Ocorreu um erro ao sair. Por favor, tente novamente.",
+      error: 'Ocorreu um erro inesperado. Por favor, tente novamente.'
     };
   }
-  
-  return {
-    success: true,
-    message: "Logout realizado com sucesso.",
-  };
+};
+
+// Register function
+export const register = async (
+  name: string, 
+  email: string, 
+  password: string, 
+  username: string, 
+  document?: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    console.log("Registering user with data:", { name, email, username, document });
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          username,
+          document: document || '',
+          avatar_url: '/placeholder.svg'
+        }
+      }
+    });
+    
+    if (error) {
+      console.error("Registration error from Supabase:", error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+    
+    if (data.user) {
+      console.log("User created successfully:", data.user);
+      return { success: true };
+    } else {
+      console.error("User creation failed - no user returned");
+      return {
+        success: false,
+        error: 'Não foi possível criar sua conta. Por favor, tente novamente.'
+      };
+    }
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    return {
+      success: false,
+      error: 'Ocorreu um erro inesperado. Por favor, tente novamente.'
+    };
+  }
+};
+
+// Logout function
+export const logout = async (): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Error during logout:', error);
+      return {
+        success: false,
+        error: "Ocorreu um erro ao sair. Por favor, tente novamente."
+      };
+    }
+    
+    return {
+      success: true
+    };
+  } catch (error: any) {
+    console.error('Logout error:', error);
+    return {
+      success: false,
+      error: 'Ocorreu um erro inesperado ao fazer logout.'
+    };
+  }
+};
+
+// Update user profile
+export const updateUserProfile = async (userData: {
+  name?: string;
+  username?: string;
+  document?: string;
+  phone?: string;
+  avatar_url?: string;
+}): Promise<{ success: boolean; error?: string }> => {
+  try {
+    console.log('Updating user profile:', userData);
+    
+    const { error } = await supabase.auth.updateUser({
+      data: userData
+    });
+
+    if (error) {
+      console.error('Error updating user profile:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Update profile error:', error);
+    return {
+      success: false,
+      error: 'Ocorreu um erro inesperado ao atualizar o perfil.'
+    };
+  }
 };
 
 // Convert Supabase user to our AuthUser type
@@ -145,9 +160,9 @@ export const convertSupabaseUser = (user: any): AuthUser | null => {
     name: user.user_metadata?.name || 'User',
     email: user.email || '',
     username: user.user_metadata?.username || '',
-    avatar: user.user_metadata?.avatar || '',
-    document: user.user_metadata?.document || '', // Add document field
-    avatar_url: user.user_metadata?.avatar_url || '',
+    avatar: user.user_metadata?.avatar_url || '/placeholder.svg',
+    document: user.user_metadata?.document || '',
+    avatar_url: user.user_metadata?.avatar_url || '/placeholder.svg',
     phone: user.user_metadata?.phone || ''
   };
 };
